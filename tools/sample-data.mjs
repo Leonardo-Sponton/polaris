@@ -193,7 +193,11 @@ function samples() {
     const c = isoMinute(created);
     out.push([`projects/${slug(proj)}/${step}/${stamp(created)}-${slug(title)}.md`, file({ type: "step-note", created: c, modified: c }, `# ${title}\n\n${rest}`)]);
   };
-  project(at(-15, 20, 0), "Granola at the fair", { flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "01-business-model" },
+  // Stage 6b: gate history, one project on hold, and to-dos on the current steps.
+  project(at(-15, 20, 0), "Granola at the fair", {
+    flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "01-business-model",
+    gates: [{ step: "00-integrating-environment", decision: "go", reason: "The food incubator rents the kitchen by the hour; enough to start.", date: day(-8) }],
+  },
     "Saturday fair first; a small shop later if it works.\n");
   stepNote("Granola at the fair", "00-integrating-environment", at(-14, 21, 0), "Incubator and accelerator",
     "## Incubator\n\nThe city's food incubator: kitchen space by the hour and help with the health rules.\n\n## Accelerator\n\nNone yet; too early. Look again after six months of sales.\n");
@@ -202,6 +206,17 @@ function samples() {
   stepNote("Granola at the fair", "01-business-model", at(-2, 21, 15), "Costs per jar",
     "Oats, honey, nuts and the jar. Bulk only pays off above 25 kg.\n\n- [ ] Ask two more suppliers\n- [ ] Price the labels\n");
   project(at(-1, 9, 0), "Study group app", { flow: "software", idea: ideaFile(at(-2, 22, 40), "Study group app for classmates"), step: "01-discovery" });
+  project(at(-30, 19, 0), "Used textbook swap", {
+    flow: "software", step: "02-lean-canvas", status: "on-hold",
+    gates: [
+      { step: "01-discovery", decision: "go", reason: "Classmates buy and sell books in the group chat every semester.", date: day(-25) },
+      { step: "02-lean-canvas", decision: "hold", reason: "Exams first; look again in December.", date: day(-12) },
+    ],
+  }, "A page where classmates list the books they no longer need.\n");
+  task(at(-5, 20, 0), "Ask two more oat suppliers for prices", { project: "granola-at-the-fair", step: "01-business-model", priority: 2 });
+  task(at(-2, 21, 20), "Price the jar labels", { project: "granola-at-the-fair", step: "01-business-model", when: day(2) });
+  task(at(-12, 18, 0), "Visit the food incubator", { project: "granola-at-the-fair", step: "00-integrating-environment", status: "done", done_at: `${day(-9)}T16:00` });
+  task(at(-1, 9, 40), "Interview three more classmates", { project: "study-group-app", step: "01-discovery", when: day(1) });
   stepNote("Study group app", "01-discovery", at(-1, 9, 30), "Talk to classmates",
     "## Interviews\n\n- Ana: uses the group chat, loses the files.\n- Bruno: prints the summaries.\n\n## Insights\n\nThe problem is finding things later, not writing them.\n");
 

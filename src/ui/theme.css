@@ -984,6 +984,7 @@ h3 {
 }
 /* Same for the other rows that open a menu when held. */
 .inbox-li,
+.project-li,
 .idea-li {
   user-select: none;
   -webkit-user-select: none;
@@ -2242,4 +2243,65 @@ label.contents {
 }
 .from-idea-assumptions .result.rejected {
   color: var(--err);
+}
+.step-todos {
+  color: var(--cyan);
+  white-space: nowrap;
+}
+.gate-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.gate-box > span {
+  flex: 1 1 220px;
+  line-height: 1.45;
+}
+.gates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.gates li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.gate-head {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.gate-date {
+  margin-left: auto;
+}
+.gate-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.gate-tag.go {
+  color: var(--ok);
+}
+.gate-tag.hold {
+  color: var(--h3);
+}
+.gate-tag.kill {
+  color: var(--err);
+}
+.gate-tag.recycle {
+  color: var(--cyan);
+}
+.gate-reason {
+  margin: 4px 0 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }

@@ -6,13 +6,19 @@ import { createIdea, toIdea } from "../src/data/ideas";
 import {
   createProject,
   createStepNote,
+  earlierSteps,
   extraSteps,
+  gatePatch,
+  gatesOf,
   loadProjects,
   loadStepNotes,
   missingStepSections,
   projectPathOf,
+  projectTasks,
   stepIdOf,
+  toProject,
 } from "../src/data/projects";
+import { toTask } from "../src/data/todo";
 
 describe("flows", () => {
   it("ships Business (6 steps from the Plano de Voo) and Software (8 steps)", () => {
@@ -83,5 +89,63 @@ describe("projects", () => {
     const step = flowOf("software").steps[2];
     expect(missingStepSections(step.sections, "# R\n\n## must HAVE\n")).toEqual(["User stories", "Should have", "Could have", "Won't have"]);
     expect(missingStepSections([], "")).toEqual([]);
+  });
+});
+
+describe("gates", () => {
+  const make = async (step?: string) => {
+    const notes = new Notes(new MemoryStorage());
+    const n = await createProject(notes, { title: "G", flow: "software" });
+    if (step) await notes.patchHeader(n.path, { step });
+    return { notes, path: n.path, p: async () => toProject(await notes.load(n.path)) };
+  };
+  const day = new Date(2026, 9, 20);
+
+  it("go moves to the next step and logs the gate; on the last step the project is done", async () => {
+    const g = await make();
+    await g.notes.patchHeader(g.path, gatePatch(await g.p(), "go", " 3 interviews ", undefined, day));
+    let p = await g.p();
+    expect(p.step.id).toBe("02-lean-canvas");
+    expect(p.status).toBe("active");
+    expect(p.gates).toEqual([{ step: "01-discovery", decision: "go", reason: "3 interviews", date: "2026-10-20" }]);
+
+    const last = flowOf("software").steps.at(-1)!.id;
+    await g.notes.patchHeader(g.path, { step: last });
+    await g.notes.patchHeader(g.path, gatePatch(await g.p(), "go", "", undefined, day));
+    p = await g.p();
+    expect(p).toMatchObject({ status: "done" });
+    expect(p.step.id).toBe(last);
+    expect(p.gates).toHaveLength(2);
+  });
+
+  it("hold pauses, kill needs a reason, recycle goes back to an earlier step only", async () => {
+    const g = await make("03-requirements");
+    const q = await g.p();
+    expect(gatePatch(q, "hold", "", undefined, day)).toMatchObject({ status: "on-hold" });
+    expect(() => gatePatch(q, "kill", "  ")).toThrow();
+    expect(gatePatch(q, "kill", "No market", undefined, day)).toMatchObject({ status: "killed" });
+    expect(() => gatePatch(q, "recycle", "x", "04-mvp-scope")).toThrow();
+    expect(() => gatePatch(q, "recycle", "x", "03-requirements")).toThrow();
+    await g.notes.patchHeader(g.path, gatePatch(await g.p(), "recycle", "Wrong users", "01-discovery", day));
+    const p = await g.p();
+    expect(p.step.id).toBe("01-discovery");
+    expect(p.gates[0]).toEqual({ step: "03-requirements", decision: "recycle", reason: "Wrong users", date: "2026-10-20", to: "01-discovery" });
+    expect(earlierSteps(p)).toEqual([]);
+  });
+
+  it("reads odd gate lists safely", () => {
+    expect(gatesOf({ gates: "x" })).toEqual([]);
+    expect(gatesOf({ gates: [null, { step: "a", decision: "odd" }] })).toEqual([{ step: "a", decision: "go", reason: "", date: "" }]);
+  });
+});
+
+describe("project tasks", () => {
+  it("reads project and step from a task and filters by them", () => {
+    const t = (data: Record<string, unknown>, i: number) =>
+      toTask({ path: `todo/${i}.md`, data: { type: "todo", ...data }, body: "# T\n" } as never);
+    const list = [t({ project: "a", step: "01-discovery" }, 1), t({ project: "a" }, 2), t({ step: "01-discovery" }, 3)];
+    expect(list.map(x => [x.project, x.step])).toEqual([["a", "01-discovery"], ["a", undefined], [undefined, undefined]]);
+    expect(projectTasks(list, "a").length).toBe(2);
+    expect(projectTasks(list, "a", "01-discovery").map(x => x.path)).toEqual(["todo/1.md"]);
   });
 });

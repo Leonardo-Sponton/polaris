@@ -1,9 +1,9 @@
-import { slugify, stamp } from "./dates";
+import { isoDate, slugify, stamp } from "./dates";
 import { flowOf, type Flow, type FlowId, type FlowStep } from "./flows";
 import { titleOf, type Data } from "./frontmatter";
 import { sectionsOf } from "./ideas";
 import type { Note, Notes } from "./notes";
-import { joinTitle } from "./todo";
+import { joinTitle, type Task } from "./todo";
 
 // Projects (SPEC 3.3, 5.5): one folder per project, projects/<slug>/project.md with the flow,
 // the current step and the gate history in the header, the title as "# Title" and free notes in
@@ -35,6 +35,8 @@ export interface Project {
   step: FlowStep;
   /** Path of the idea it came from, if any. */
   idea?: string;
+  /** Decisions taken at the end of steps, oldest first. */
+  gates: Gate[];
   created: string;
   modified: string;
 }
@@ -67,6 +69,7 @@ export function toProject(note: Note): Project {
     flow,
     step: flow.steps.find(s => s.id === d.step) ?? flow.steps[0],
     idea: idea && !idea.includes("/") ? `ideas/${idea}.md` : undefined,
+    gates: gatesOf(d),
     created: str(d.created),
     modified: str(d.modified ?? d.created),
   };
@@ -164,3 +167,84 @@ export function missingStepSections(sections: string[], body: string): string[] 
 
 /** Position of a step in the flow, from 1; 0 for a step not in the flow. */
 export const stepNumber = (flow: Flow, id: string) => flow.steps.findIndex(s => s.id === id) + 1;
+
+// ---- Gates (SPEC 5.5, Stage-Gate) ----
+
+export type Decision = "go" | "hold" | "kill" | "recycle";
+
+export const DECISIONS: { id: Decision; label: string; hint: string }[] = [
+  { id: "go", label: "Go", hint: "The step is done: move on to the next one." },
+  { id: "hold", label: "Hold", hint: "Pause the project; resume it later on the same step." },
+  { id: "kill", label: "Kill", hint: "Stop the project for good. Say why." },
+  { id: "recycle", label: "Recycle", hint: "Go back to an earlier step and redo it." },
+];
+
+export interface Gate {
+  /** The step the decision closed. */
+  step: string;
+  decision: Decision;
+  reason: string;
+  date: string;
+  /** Recycle: the step the project went back to. */
+  to?: string;
+}
+
+export function gatesOf(d: Data): Gate[] {
+  if (!Array.isArray(d.gates)) return [];
+  return d.gates
+    .filter((g): g is Record<string, unknown> => !!g && typeof g === "object")
+    .map(g => ({
+      step: str(g.step),
+      decision: pick(g.decision, DECISIONS, "go"),
+      reason: str(g.reason),
+      date: str(g.date),
+      ...(g.to ? { to: str(g.to) } : {}),
+    }));
+}
+
+/**
+ * The header change for a decision on the current step. Go moves to the next step (on the last
+ * step it finishes the project), hold pauses it, kill ends it (a reason is required), recycle goes
+ * back to an earlier step. Every decision is added to the gate history.
+ */
+export function gatePatch(p: Project, decision: Decision, reason: string, to?: string, now = new Date()): Data {
+  const why = reason.trim();
+  if (decision === "kill" && !why) throw new Error("Say why the project is killed.");
+  const at = p.flow.steps.indexOf(p.step);
+  const gate: Gate = { step: p.step.id, decision, reason: why, date: isoDate(now) };
+  const patch: Data = {};
+  switch (decision) {
+    case "go": {
+      const next = p.flow.steps[at + 1];
+      if (next) Object.assign(patch, { status: "active", step: next.id });
+      else patch.status = "done";
+      break;
+    }
+    case "hold":
+      patch.status = "on-hold";
+      break;
+    case "kill":
+      patch.status = "killed";
+      break;
+    case "recycle": {
+      const back = p.flow.steps.findIndex(s => s.id === to);
+      if (back < 0 || back >= at) throw new Error("Pick an earlier step to go back to.");
+      Object.assign(patch, { status: "active", step: to });
+      gate.to = to;
+      break;
+    }
+  }
+  const { to: _t, ...plain } = gate;
+  patch.gates = [...p.gates.map(g => ({ ...g })), gate.to ? gate : plain];
+  return patch;
+}
+
+/** Steps a recycle can go back to: the ones before the current step. */
+export const earlierSteps = (p: Project) => p.flow.steps.slice(0, p.flow.steps.indexOf(p.step));
+
+// ---- Project tasks ----
+
+/** Tasks of one project (or of one of its steps), in the order given. */
+export function projectTasks(tasks: Task[], slug: string, step?: string): Task[] {
+  return tasks.filter(t => t.project === slug && (step === undefined || t.step === step));
+}

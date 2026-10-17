@@ -8,6 +8,7 @@ import { parseQuickAdd } from "../../data/quickadd";
 import { describeRule, firstOnOrAfter, formatRule, parseRule, pinRule } from "../../data/recur";
 import { dayLabel, joinTitle, splitTitle, toTask } from "../../data/todo";
 import type { Note } from "../../data/notes";
+import type { Project } from "../../data/projects";
 import { reminderOf } from "../../data/reminders";
 import { useApp } from "../context";
 import { AskText } from "../Dialog";
@@ -22,6 +23,8 @@ import { ScheduleDialog } from "./Schedule";
 interface Props {
   path: string;
   lists: TodoList[];
+  /** For the Project and Step fields. */
+  projects: Project[];
   ensureList(id: string, name: string): Promise<string>;
   onBack(): void;
   /** Done / canceled / reopen go through the list, which handles repeats and undo. */
@@ -74,7 +77,7 @@ const PRIOS: [number | undefined, string][] = [
   [3, "Low"],
 ];
 
-function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Props & { file: NoteFile; note: Note }) {
+function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReopen }: Props & { file: NoteFile; note: Note }) {
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const [d, setD] = useState<Data>(note.data);
@@ -229,6 +232,8 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
             <option value={"\u0000new"}>New list…</option>
           </select>
 
+          <ProjectField task={t} projects={projects} patch={patch} />
+
           <span className="fl">Priority</span>
           <div className="segmented">
             {PRIOS.map(([p, label]) => (
@@ -302,6 +307,56 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Project and step (SPEC 5.5): a project task shows up under its step on the project page.
+ * Picking a project puts the task on the project's current step.
+ */
+function ProjectField({ task: t, projects, patch }: { task: ReturnType<typeof toTask>; projects: Project[]; patch(p: Data): void }) {
+  const p = projects.find(x => x.slug === t.project);
+  const choices = projects.filter(x => x === p || x.status === "active" || x.status === "on-hold");
+  return (
+    <>
+      <span className="fl">Project</span>
+      <select
+        className="field"
+        value={t.project ?? ""}
+        aria-label="Project"
+        onChange={e => {
+          const to = projects.find(x => x.slug === e.target.value);
+          patch(to ? { project: to.slug, step: to.step.id } : { project: undefined, step: undefined });
+        }}
+      >
+        <option value="">No project</option>
+        {t.project && !p && <option value={t.project}>{t.project} (not found)</option>}
+        {choices.map(x => (
+          <option key={x.slug} value={x.slug}>
+            {x.title || x.slug}
+          </option>
+        ))}
+      </select>
+      {p && (
+        <>
+          <span className="fl">Step</span>
+          <select
+            className="field"
+            value={t.step ?? ""}
+            aria-label="Step"
+            onChange={e => patch({ step: e.target.value || undefined })}
+          >
+            <option value="">No step</option>
+            {t.step && !p.flow.steps.some(s => s.id === t.step) && <option value={t.step}>{t.step}</option>}
+            {p.flow.steps.map((s, i) => (
+              <option key={s.id} value={s.id}>
+                {i + 1}. {s.name}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
+    </>
   );
 }
 

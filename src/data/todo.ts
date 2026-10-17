@@ -21,6 +21,9 @@ export interface Task {
   repeat?: string;
   list?: string;
   priority?: 1 | 2 | 3;
+  /** Project folder name (projects/<project>) and the flow step the task belongs to. */
+  project?: string;
+  step?: string;
   created: string;
   doneAt?: string;
   subtasks: { done: number; total: number };
@@ -50,6 +53,8 @@ export function toTask(n: Note): Task {
     repeat: parseRule(d.repeat) ? String(d.repeat) : undefined,
     list: str(d.list),
     priority: p === 1 || p === 2 || p === 3 ? p : undefined,
+    project: str(d.project),
+    step: str(d.project) ? str(d.step) : undefined,
     created: String(d.created ?? ""),
     doneAt: str(d.done_at),
     subtasks: countSubtasks(n.body),

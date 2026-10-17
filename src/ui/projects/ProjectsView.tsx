@@ -5,6 +5,7 @@ import { flushAll } from "../../data/pending";
 import {
   STATUSES,
   createProject,
+  gatePatch,
   createStepNote,
   isProjectPath,
   isStepNotePath,
@@ -12,18 +13,25 @@ import {
   projectPathOf,
   stepIdOf,
   stepNumber,
+  type Decision,
   type Project,
 } from "../../data/projects";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText } from "../Dialog";
 import { useApp } from "../context";
+import { TaskEditor } from "../todo/TaskEditor";
+import { useTaskActions } from "../todo/useTaskActions";
+import type { TodoData } from "../todo/useTodo";
+import { useHold } from "../useHold";
+import { GateDialog, ProjectMenu } from "./Gate";
 import { NewProject } from "./NewProject";
 import { ProjectEditor } from "./ProjectEditor";
 import { StepNoteEditor } from "./StepNoteEditor";
 import { StepView } from "./StepView";
 
 // Projects (SPEC 5.5): the list grouped by status, and on the right the project page, one of its
-// steps, or a step note (one at a time on the phone; back goes up one level).
+// steps, or a step note or to-do (one at a time on the phone; back goes up one level). Hold a
+// project in the list (right-click on the PC) for its options.
 
 /** Projects, reloaded whenever data on disk changes. */
 export function useProjects(): Project[] {
@@ -41,16 +49,21 @@ export function useProjects(): Project[] {
 
 interface Props {
   projects: Project[];
+  todo: TodoData;
   /** A project or a step note to open (from search, an idea…). */
   openPath?: { path: string; key: number };
   onOpenIdea(path: string): void;
 }
 
-export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
+export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [step, setStep] = useState<string | null>(null);
   const [notePath, setNotePath] = useState<string | null>(null);
+  const [taskPath, setTaskPath] = useState<string | null>(null);
+  const [menu, setMenu] = useState<Project | null>(null);
+  const [gate, setGate] = useState<{ project: Project; decision: Decision } | null>(null);
+  const tasks = useTaskActions(path => setTaskPath(t => (t === path ? null : t)));
   const [adding, setAdding] = useState(false);
   const [newNote, setNewNote] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
@@ -64,6 +77,32 @@ export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
     setOpen(project);
     setStep(s);
     setNotePath(n);
+    setTaskPath(null);
+  };
+
+  /** A header change from the list (gate, resume), with Undo. */
+  const change = async (p: Project, patch: Record<string, unknown>, text: string) => {
+    try {
+      await flushAll();
+      const before = Object.fromEntries(Object.keys(patch).map(k => [k, p.note.data[k]]));
+      await notes.patchHeader(p.path, patch);
+      bump();
+      toast({ text, action: { label: "Undo", run: () => notes.patchHeader(p.path, before).then(bump, fail) } });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const decide = (p: Project, d: Decision, reason: string, to?: string) => {
+    setGate(null);
+    try {
+      const patch = gatePatch(p, d, reason, to);
+      const where = patch.step ? `Now on: ${p.flow.steps.find(s => s.id === patch.step)!.name}` : "";
+      const label = { active: "", "on-hold": "On hold", done: "Project done", killed: "Project killed" }[String(patch.status)];
+      change(p, patch, label || where || "Decided");
+    } catch (e) {
+      fail(e);
+    }
   };
 
   useEffect(() => {
@@ -172,14 +211,14 @@ export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
                 {!folded && (
                   <ul className="list">
                     {group.map(p => (
-                      <li key={p.path}>
-                        <button className={`list-item${open === p.path ? " active" : ""}`} onClick={() => show(p.path)}>
-                          <span className="list-title">{p.title || <span className="muted">(untitled)</span>}</span>
-                          <span className="list-meta mono">
-                            {p.flow.name} · {stepNumber(p.flow, p.step.id)}/{p.flow.steps.length} {p.step.name}
-                          </span>
-                        </button>
-                      </li>
+                      <ProjectRow
+                        key={p.path}
+                        project={p}
+                        active={open === p.path}
+                        todos={todo.tasks.filter(t => t.project === p.slug && t.status === "open").length}
+                        onOpen={() => show(p.path)}
+                        onMenu={() => setMenu(p)}
+                      />
                     ))}
                   </ul>
                 )}
@@ -189,7 +228,19 @@ export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
         )}
       </div>
       <div className="detail-pane">
-        {open && step && notePath ? (
+        {open && taskPath ? (
+          <TaskEditor
+            key={taskPath}
+            path={taskPath}
+            lists={todo.lists}
+            projects={projects}
+            ensureList={todo.ensureList}
+            onBack={() => setTaskPath(null)}
+            onFinish={s => tasks.finish(taskPath, s)}
+            onReopen={() => tasks.reopen(taskPath)}
+            onDelete={() => tasks.remove(taskPath)}
+          />
+        ) : open && step && notePath ? (
           <StepNoteEditor
             key={notePath}
             path={notePath}
@@ -203,15 +254,18 @@ export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
               key={step}
               project={project}
               stepId={step}
+              todo={todo}
               onBack={() => setStep(null)}
               onOpenNote={setNotePath}
               onNewNote={() => setNewNote(true)}
+              onOpenTask={setTaskPath}
             />
           ) : null
         ) : open ? (
           <ProjectEditor
             key={open}
             path={open}
+            tasks={todo.tasks}
             onBack={() => show(null)}
             onDelete={remove}
             onOpenStep={setStep}
@@ -221,10 +275,44 @@ export function ProjectsView({ projects, openPath, onOpenIdea }: Props) {
           <div className="detail-empty muted">Pick a project or press New.</div>
         )}
       </div>
+      {menu && (
+        <ProjectMenu
+          project={menu}
+          onOpen={() => show(menu.path)}
+          onGate={d => setGate({ project: menu, decision: d })}
+          onResume={() => change(menu, { status: "active" }, menu.status === "on-hold" ? "Resumed" : "Reopened")}
+          onDelete={() => remove(menu)}
+          onClose={() => setMenu(null)}
+        />
+      )}
+      {gate && (
+        <GateDialog
+          project={gate.project}
+          initial={gate.decision}
+          onOk={(d, reason, to) => decide(gate.project, d, reason, to)}
+          onClose={() => setGate(null)}
+        />
+      )}
       {adding && <NewProject title="New project" onOk={create} onClose={() => setAdding(false)} />}
       {newNote && (
         <AskText title="New note" placeholder="e.g. Interviews" okLabel="Create" onClose={() => setNewNote(false)} onOk={addNote} />
       )}
     </div>
+  );
+}
+
+function ProjectRow(props: { project: Project; active: boolean; todos: number; onOpen(): void; onMenu(): void }) {
+  const { project: p } = props;
+  const hold = useHold(props.onMenu);
+  return (
+    <li className="project-li" {...hold.handlers}>
+      <button className={`list-item${props.active ? " active" : ""}`} onClick={() => !hold.eaten() && props.onOpen()}>
+        <span className="list-title">{p.title || <span className="muted">(untitled)</span>}</span>
+        <span className="list-meta mono">
+          {p.flow.name} · {stepNumber(p.flow, p.step.id)}/{p.flow.steps.length} {p.step.name}
+          {props.todos > 0 && ` · ${props.todos} to-do`}
+        </span>
+      </button>
+    </li>
   );
 }

@@ -1,27 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ChevronRight, Lightbulb, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, Flag, Lightbulb, Play, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { RESULTS, answersOf, assumptionsOf, score, toIdea, type Idea } from "../../data/ideas";
+import type { Data } from "../../data/frontmatter";
 import type { Note } from "../../data/notes";
-import { STATUSES, extraSteps, toProject, type Project } from "../../data/projects";
+import { STATUSES, extraSteps, gatePatch, projectTasks, toProject, type Decision, type Project } from "../../data/projects";
+import type { Task } from "../../data/todo";
 import { joinTitle, splitTitle } from "../../data/todo";
 import { useApp } from "../context";
 import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { GateDialog, GateHistory } from "./Gate";
 import { useStepNotes } from "./StepView";
 
-// The project page (SPEC 5.5): title, status, flow with its steps (current one marked, notes
-// counted), the idea it came from with its checklist and assumptions, and free notes.
+// The project page (SPEC 5.5): title, status, flow with its steps (current one marked, notes and
+// open to-dos counted), the gate that ends the current step and the decisions so far, the idea it
+// came from with its checklist and assumptions, and free notes.
 
 interface Props {
   path: string;
+  tasks: Task[];
   onBack(): void;
   onDelete(p: Project): void;
   onOpenStep(id: string): void;
   onOpenIdea(path: string): void;
 }
 
-export function ProjectEditor({ path, onBack, onDelete, onOpenStep, onOpenIdea }: Props) {
+export function ProjectEditor({ path, tasks, onBack, onDelete, onOpenStep, onOpenIdea }: Props) {
   const f = useNoteFile(path);
   useBack(true, onBack);
   return (
@@ -51,7 +56,7 @@ export function ProjectEditor({ path, onBack, onDelete, onOpenStep, onOpenIdea }
           </div>
         </div>
       ) : (
-        f.note && <ProjectForm key={f.rev} file={f} note={f.note} onOpenStep={onOpenStep} onOpenIdea={onOpenIdea} />
+        f.note && <ProjectForm key={f.rev} file={f} note={f.note} tasks={tasks} onOpenStep={onOpenStep} onOpenIdea={onOpenIdea} />
       )}
       {f.dialog}
     </div>
@@ -108,16 +113,41 @@ function FromIdea({ path, onOpen }: { path: string; onOpen(): void }) {
   );
 }
 
-function ProjectForm(props: { file: NoteFile; note: Note; onOpenStep(id: string): void; onOpenIdea(path: string): void }) {
+function ProjectForm(props: {
+  file: NoteFile;
+  note: Note;
+  tasks: Task[];
+  onOpenStep(id: string): void;
+  onOpenIdea(path: string): void;
+}) {
   const { file: f, note } = props;
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const titleRef = useRef(split.title);
   const restRef = useRef(split.rest);
   const writeBody = () => f.setBody(joinTitle(titleRef.current, restRef.current));
-  const p = toProject(note);
+  // The header as last changed here (gates, resume); the file hook saves it.
+  const [d, setD] = useState(note.data);
+  const patch = (x: Data) => {
+    setD(old => ({ ...old, ...x }));
+    f.setData(x);
+  };
+  const p = toProject({ ...note, data: d });
   const stepNotes = useStepNotes(p.dir);
   const count = (id: string) => stepNotes.filter(n => n.step === id).length;
+  const open = projectTasks(props.tasks, p.slug).filter(t => t.status === "open");
+  const todos = (id: string) => open.filter(t => t.step === id).length;
+  const [gate, setGate] = useState<Decision | null>(null);
+  const { toast } = useApp();
+  const decide = (decision: Decision, reason: string, to?: string) => {
+    setGate(null);
+    try {
+      patch(gatePatch(p, decision, reason, to));
+    } catch (e) {
+      toast({ text: e instanceof Error ? e.message : String(e), error: true });
+    }
+  };
+  const lastReason = p.gates.at(-1)?.reason;
   const current = p.flow.steps.indexOf(p.step);
   const extra = extraSteps(p.flow, stepNotes);
 
@@ -163,6 +193,11 @@ function ProjectForm(props: { file: NoteFile; note: Note; onOpenStep(id: string)
                     {s.name}
                     {state === "current" && <span className="step-now small"> · current</span>}
                   </span>
+                  {todos(s.id) > 0 && (
+                    <span className="step-todos small mono" title="Open to-dos">
+                      {todos(s.id)} to-do
+                    </span>
+                  )}
                   {n > 0 && <span className="count">{n}</span>}
                   <ChevronRight size={16} className="muted" />
                 </button>
@@ -180,6 +215,45 @@ function ProjectForm(props: { file: NoteFile; note: Note; onOpenStep(id: string)
             </li>
           ))}
         </ol>
+
+        <section className="gate-box" aria-label="Decision">
+          {p.status === "active" ? (
+            <>
+              <span className="small">
+                When step {current + 1} is done, decide what comes next: go, hold, kill or recycle.
+              </span>
+              <button className="btn" onClick={() => setGate("go")}>
+                <Flag size={16} /> Finish this step…
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="small">
+                <strong>{STATUSES.find(s => s.id === p.status)!.label}</strong>
+                {lastReason && ` · ${lastReason}`}
+              </span>
+              <div className="row" style={{ gap: 6 }}>
+                {p.status === "on-hold" && (
+                  <button className="btn" onClick={() => setGate("kill")}>
+                    Kill…
+                  </button>
+                )}
+                <button className="btn" onClick={() => patch({ status: "active" })}>
+                  {p.status === "on-hold" ? <Play size={16} /> : <RotateCcw size={16} />}
+                  {p.status === "on-hold" ? "Resume" : "Reopen"}
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+        {p.gates.length > 0 && (
+          <>
+            <div className="task-notes-head">
+              <span className="fl">Decisions</span>
+            </div>
+            <GateHistory project={p} />
+          </>
+        )}
 
         <div className="task-notes-head">
           <span className="fl">Notes</span>
@@ -199,6 +273,7 @@ function ProjectForm(props: { file: NoteFile; note: Note; onOpenStep(id: string)
           <span className="muted small mono">Started {String(note.data.created ?? "").replace("T", " ")}</span>
         </div>
       </div>
+      {gate && <GateDialog project={p} initial={gate} onOk={decide} onClose={() => setGate(null)} />}
     </div>
   );
 }

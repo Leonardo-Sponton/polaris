@@ -280,6 +280,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           view={homeView}
           setView={setHomeView}
           data={todo}
+          projects={projects}
           home={{
             onCapture: capture,
             focusKey: captureKey,
@@ -333,7 +334,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       page = <IdeasView ideas={ideas} openPath={target} onOpenProject={path => openIn("projects", path)} />;
       break;
     case "projects":
-      page = <ProjectsView projects={projects} openPath={target} onOpenIdea={path => openIn("ideas", path)} />;
+      page = <ProjectsView projects={projects} todo={todo} openPath={target} onOpenIdea={path => openIn("ideas", path)} />;
       break;
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
@@ -353,7 +354,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       page = <InboxView items={inbox} openPath={target} />;
       break;
     case "todo":
-      page = <TodoView view={view} setView={setView} data={todo} openPath={target} />;
+      page = <TodoView view={view} setView={setView} data={todo} openPath={target} projects={projects} />;
       break;
     case "settings":
       page = <SettingsView />;

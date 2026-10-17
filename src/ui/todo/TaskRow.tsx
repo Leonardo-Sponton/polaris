@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, CalendarClock, Check, ListChecks, Moon, Repeat } from "lucide-react";
+import { Bell, CalendarClock, Check, FolderKanban, ListChecks, Moon, Repeat } from "lucide-react";
 import type { TodoList } from "../../data/lists";
 import { dayLabel, isOverdue, type Task } from "../../data/todo";
 import { reminderOf } from "../../data/reminders";
@@ -18,13 +18,15 @@ interface Props {
   active: boolean;
   /** Hide the date when the section already says it (Upcoming groups by day). */
   hideDay?: boolean;
+  /** Name of the task's project, shown as a chip (left out inside the project itself). */
+  project?: string;
   onOpen(): void;
   onToggle(): void;
   onSchedule(): void;
   onMenu(): void;
 }
 
-export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onToggle, onSchedule, onMenu }: Props) {
+export function TaskRow({ task: t, today, lists, active, hideDay, project, onOpen, onToggle, onSchedule, onMenu }: Props) {
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number; id: number; horizontal?: boolean } | null>(null);
   const swiped = useRef(false);
@@ -105,6 +107,14 @@ export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onTogg
     chips.push(
       <span key="list" style={{ color: `var(--${list.color})` }}>
         #{list.name}
+      </span>,
+    );
+  }
+
+  if (project) {
+    chips.push(
+      <span key="project">
+        <FolderKanban size={13} /> {project}
       </span>,
     );
   }

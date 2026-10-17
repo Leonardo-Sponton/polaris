@@ -5,21 +5,9 @@ import type { Data } from "../../data/frontmatter";
 import { LIST_COLORS } from "../../data/lists";
 import { flushAll } from "../../data/pending";
 import type { Capture } from "../../data/inbox";
+import type { Project } from "../../data/projects";
 import type { QuickAdd as Parsed } from "../../data/quickadd";
-import {
-  createTask,
-  dayLabel,
-  finishTask,
-  inView,
-  reopenTask,
-  sections,
-  toTask,
-  undoFinish,
-  updateTask,
-  type Task,
-  type View,
-} from "../../data/todo";
-import { moveToTrash, restoreFromTrash } from "../../data/trash";
+import { createTask, dayLabel, inView, sections, toTask, updateTask, type Task, type View } from "../../data/todo";
 import { AskText, Confirm } from "../Dialog";
 import { useApp } from "../context";
 import { QuickAdd } from "./QuickAdd";
@@ -27,6 +15,7 @@ import { ScheduleDialog } from "./Schedule";
 import { TaskEditor } from "./TaskEditor";
 import { TaskMenu } from "./TaskMenu";
 import { TaskRow } from "./TaskRow";
+import { useTaskActions } from "./useTaskActions";
 import type { TodoData } from "./useTodo";
 
 // To-do (SPEC 5.3): Things-style lists on the left, the task screen on the right
@@ -62,11 +51,12 @@ interface Props {
   home?: { onCapture(c: Capture): Promise<boolean>; footer?: ReactNode; focusKey?: number };
   /** A task to open (from Search). */
   openPath?: { path: string; key: number };
+  projects: Project[];
 }
 
 const LONG_DATE = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
-export function TodoView({ view, setView, data, home, openPath }: Props) {
+export function TodoView({ view, setView, data, home, openPath, projects }: Props) {
   const { notes, bump, toast, platform } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState<Task | null>(null);
@@ -143,68 +133,7 @@ export function TodoView({ view, setView, data, home, openPath }: Props) {
     }
   };
 
-  const finish = async (path: string, status: "done" | "canceled") => {
-    try {
-      await flushAll(); // an open task screen writes its last edits first
-      const c = await finishTask(notes, path, status);
-      bump();
-      const next = c.next ? ` · next ${dayLabel(String(c.next.data.when), now)}` : "";
-      toast({
-        text: `${status === "done" ? "Done" : "Canceled"}${next}`,
-        action: {
-          label: "Undo",
-          run: () => undoFinish(notes, c).then(bump, fail),
-        },
-      });
-    } catch (e) {
-      fail(e);
-    }
-  };
-
-  const reopen = async (path: string) => {
-    try {
-      await flushAll();
-      await reopenTask(notes, path);
-      bump();
-    } catch (e) {
-      fail(e);
-    }
-  };
-
-  const remove = async (path: string) => {
-    try {
-      await flushAll();
-      const trashed = await moveToTrash(notes.storage, path);
-      if (open === path) setOpen(null);
-      bump();
-      toast({
-        text: "Task deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
-      });
-    } catch (e) {
-      fail(e);
-    }
-  };
-
-  const schedule = async (t: Task, w: { when?: string; evening?: boolean }) => {
-    try {
-      await flushAll();
-      await updateTask(notes, t.path, { when: w.when, evening: w.evening || undefined });
-      bump();
-    } catch (e) {
-      fail(e);
-    }
-  };
-
-  const move = async (t: Task, to: string | undefined) => {
-    try {
-      await flushAll();
-      await updateTask(notes, t.path, { list: to });
-      bump();
-    } catch (e) {
-      fail(e);
-    }
-  };
+  const { finish, reopen, remove, schedule, move } = useTaskActions(path => setOpen(o => (o === path ? null : o)));
 
   const deleteList = async () => {
     if (!list) return;
@@ -322,6 +251,7 @@ export function TodoView({ view, setView, data, home, openPath }: Props) {
                     lists={data.lists}
                     active={open === t.path}
                     hideDay={view === "upcoming" || (view === "today" && s.key !== "overdue") || view === "logbook"}
+                    project={t.project && (projects.find(p => p.slug === t.project)?.title || t.project)}
                     onOpen={() => setOpen(t.path)}
                     onToggle={() => (t.status === "open" ? finish(t.path, "done") : reopen(t.path))}
                     onSchedule={() => setScheduling(t)}
@@ -346,6 +276,7 @@ export function TodoView({ view, setView, data, home, openPath }: Props) {
             key={open}
             path={open}
             lists={data.lists}
+            projects={projects}
             ensureList={data.ensureList}
             onBack={() => setOpen(null)}
             onFinish={s => finish(open, s)}
