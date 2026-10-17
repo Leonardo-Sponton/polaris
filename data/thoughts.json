@@ -1,0 +1,1165 @@
+{
+ "format": "hypomnemata-thoughts",
+ "version": 1,
+ "note": "Built-in library of Hypomnemata. Each quote was checked in a public-domain English translation (named in “translation”, with a link in “source”), or translated by the project from the original when no public-domain English translation was at hand. Items marked “uncertain” were not confirmed in the primary source. Seeded from the MyNotes library; checked 2026-10-17.",
+ "thoughts": [
+  {
+   "id": "sen-ep1-3a",
+   "kind": "verified",
+   "text": "Nothing, Lucilius, is ours, except time.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 1, §3",
+   "tradition": "Stoicism",
+   "themes": [
+    "time"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_1",
+   "notes": "Latin: “Omnia, Lucili, aliena sunt, tempus tantum nostrum est.”"
+  },
+  {
+   "id": "sen-ep1-3b",
+   "kind": "verified",
+   "text": "While we are postponing, life speeds by.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 1, §2",
+   "tradition": "Stoicism",
+   "themes": [
+    "time",
+    "action"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_1",
+   "notes": "Latin: “Dum differtur vita transcurrit.”"
+  },
+  {
+   "id": "sen-ep7-8",
+   "kind": "verified",
+   "text": "Men learn while they teach.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 7, §8",
+   "tradition": "Stoicism",
+   "themes": [
+    "learning",
+    "friendship"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_7",
+   "notes": "Latin: “homines dum docent discunt.” In context Seneca advises keeping company with those who make us better and those we can make better."
+  },
+  {
+   "id": "sen-ep13-4",
+   "kind": "verified",
+   "text": "There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 13, §4",
+   "tradition": "Stoicism",
+   "themes": [
+    "fear",
+    "suffering",
+    "wisdom"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_13",
+   "notes": "Latin: “Plura sunt, Lucili, quae nos terrent quam quae premunt, et saepius opinione quam re laboramus.”"
+  },
+  {
+   "id": "sen-ep28-1",
+   "kind": "verified",
+   "text": "You need a change of soul rather than a change of climate.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 28, §1",
+   "tradition": "Stoicism",
+   "themes": [
+    "self-knowledge",
+    "tranquility"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_28",
+   "notes": "Latin: “Animum debes mutare, non caelum.” Seneca answers a friend who travelled to escape his own gloom."
+  },
+  {
+   "id": "sen-ep104-26",
+   "kind": "verified",
+   "text": "Our lack of confidence is not the result of difficulty; the difficulty comes from our lack of confidence.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "Letters to Lucilius",
+   "reference": "Letter 104, §26",
+   "tradition": "Stoicism",
+   "themes": [
+    "courage",
+    "action"
+   ],
+   "language": "Latin",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_104",
+   "notes": "Latin: “Non quia difficilia sunt non audemus, sed quia non audemus difficilia sunt.” Literally: it is not because things are difficult that we do not dare; it is because we do not dare that they are difficult."
+  },
+  {
+   "id": "sen-brev-1-3",
+   "kind": "verified",
+   "text": "We do not have a very short time assigned to us, but we lose a great deal of it.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "On the Shortness of Life",
+   "reference": "1, §3",
+   "tradition": "Stoicism",
+   "themes": [
+    "time"
+   ],
+   "language": "Latin",
+   "translation": "Aubrey Stewart's translation (1889, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/64576",
+   "notes": "Latin: “Non exiguum temporis habemus, sed multum perdidimus.”"
+  },
+  {
+   "id": "sen-ira-3-36a",
+   "kind": "verified",
+   "text": "What bad habit of yours have you cured to-day? what vice have you checked? in what respect are you better?",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "On Anger",
+   "reference": "III, 36.1",
+   "tradition": "Stoicism",
+   "themes": [
+    "self-examination",
+    "temperance"
+   ],
+   "language": "Latin",
+   "translation": "Aubrey Stewart's translation (1889, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/64576",
+   "notes": "Seneca reports that the philosopher Sextius asked himself these questions at the end of each day, and then (III.36.2–3) says that he does the same."
+  },
+  {
+   "id": "sen-ira-3-36b",
+   "kind": "verified",
+   "text": "I pardon you this time: see that you never do that any more.",
+   "author": "Seneca",
+   "era": "c. 4 BC–AD 65",
+   "work": "On Anger",
+   "reference": "III, 36.4",
+   "tradition": "Stoicism",
+   "themes": [
+    "self-examination",
+    "forgiveness"
+   ],
+   "language": "Latin",
+   "translation": "Aubrey Stewart's translation (1889, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/64576",
+   "notes": "Latin: “vide ne istud amplius facias, nunc tibi ignosco.” What Seneca says to himself when he reviews his day: demanding, without condemning."
+  },
+  {
+   "id": "ept-man-1",
+   "kind": "verified",
+   "text": "Of things some are in our power, and others are not.",
+   "author": "Epictetus",
+   "era": "c. 50–AD 135",
+   "work": "Enchiridion (Manual)",
+   "reference": "1.1",
+   "tradition": "Stoicism",
+   "themes": [
+    "freedom",
+    "responsibility",
+    "wisdom"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": "The Manual was compiled by Arrian, Epictetus' student, from his teacher's lessons."
+  },
+  {
+   "id": "ept-man-5",
+   "kind": "verified",
+   "text": "Men are disturbed not by the things which happen, but by the opinions about the things.",
+   "author": "Epictetus",
+   "era": "c. 50–AD 135",
+   "work": "Enchiridion (Manual)",
+   "reference": "5",
+   "tradition": "Stoicism",
+   "themes": [
+    "tranquility",
+    "wisdom"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": ""
+  },
+  {
+   "id": "ept-man-8",
+   "kind": "verified",
+   "text": "Seek not that the things which happen should happen as you wish; but wish the things which happen to be as they are, and you will have a tranquil flow of life.",
+   "author": "Epictetus",
+   "era": "c. 50–AD 135",
+   "work": "Enchiridion (Manual)",
+   "reference": "8",
+   "tradition": "Stoicism",
+   "themes": [
+    "acceptance",
+    "tranquility"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": ""
+  },
+  {
+   "id": "ept-man-51",
+   "kind": "verified",
+   "text": "How long will you then still defer thinking yourself worthy of the best things…?",
+   "author": "Epictetus",
+   "era": "c. 50–AD 135",
+   "work": "Enchiridion (Manual)",
+   "reference": "51.1 (chapter L in G. Long)",
+   "tradition": "Stoicism",
+   "themes": [
+    "action",
+    "time"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": ""
+  },
+  {
+   "id": "ept-disc-2-18",
+   "kind": "verified",
+   "text": "Every habit and faculty is maintained and increased by the corresponding actions: the habit of walking by walking, the habit of running by running.",
+   "author": "Epictetus",
+   "era": "c. 50–AD 135",
+   "work": "Discourses",
+   "reference": "II, 18.1",
+   "tradition": "Stoicism",
+   "themes": [
+    "habit",
+    "action"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": ""
+  },
+  {
+   "id": "cle-man-53",
+   "kind": "verified",
+   "text": "Lead me, O Zeus, and thou O Destiny, / The way that I am bid by you to go: / To follow I am ready.",
+   "author": "Cleanthes",
+   "era": "c. 330–230 BC",
+   "work": "lines quoted in Epictetus' Enchiridion",
+   "reference": "Enchiridion 53.1 (chapter LII in G. Long)",
+   "tradition": "Stoicism",
+   "themes": [
+    "acceptance",
+    "courage"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1877, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/10661",
+   "notes": "Lines by Cleanthes, Zeno's successor, kept by Epictetus. They are not part of his Hymn to Zeus, another poem."
+  },
+  {
+   "id": "mar-2-1",
+   "kind": "verified",
+   "text": "Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial. All these things happen to them by reason of their ignorance of what is good and evil.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "II, 1",
+   "tradition": "Stoicism",
+   "themes": [
+    "justice",
+    "patience"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mar-4-3",
+   "kind": "verified",
+   "text": "The universe is transformation: life is opinion.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "IV, 3",
+   "tradition": "Stoicism",
+   "themes": [
+    "change",
+    "wisdom"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mar-4-17",
+   "kind": "verified",
+   "text": "Do not act as if thou wert going to live ten thousand years. Death hangs over thee. While thou livest, while it is in thy power, be good.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "IV, 17",
+   "tradition": "Stoicism",
+   "themes": [
+    "death",
+    "time",
+    "action"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mar-5-20",
+   "kind": "verified",
+   "text": "The mind converts and changes every hindrance to its activity into an aid; and so that which is a hindrance is made a furtherance to an act; and that which is an obstacle on the road helps us on this road.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "V, 20",
+   "tradition": "Stoicism",
+   "themes": [
+    "courage",
+    "adversity"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mar-6-6",
+   "kind": "verified",
+   "text": "The best way of avenging thyself is not to become like the wrong-doer.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "VI, 6",
+   "tradition": "Stoicism",
+   "themes": [
+    "justice",
+    "temperance"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": "Long prints “[the wrong-doer]” in brackets: the words are implied in the Greek."
+  },
+  {
+   "id": "mar-7-67",
+   "kind": "verified",
+   "text": "Very little indeed is necessary for living a happy life.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "VII, 67",
+   "tradition": "Stoicism",
+   "themes": [
+    "happiness",
+    "temperance"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mar-10-16",
+   "kind": "verified",
+   "text": "No longer talk at all about the kind of man that a good man ought to be, but be such.",
+   "author": "Marcus Aurelius",
+   "era": "121–AD 180",
+   "work": "Meditations",
+   "reference": "X, 16",
+   "tradition": "Stoicism",
+   "themes": [
+    "action",
+    "justice"
+   ],
+   "language": "Ancient Greek",
+   "translation": "George Long's translation (1862, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/15877",
+   "notes": ""
+  },
+  {
+   "id": "mus-gel-16-1",
+   "kind": "verified",
+   "text": "If you do something noble with toil, the toil passes but the noble remains; if you do something shameful with pleasure, the pleasure passes but the shameful remains.",
+   "author": "Musonius Rufus",
+   "era": "c. 30–AD 101",
+   "work": "saying quoted by Aulus Gellius, Attic Nights",
+   "reference": "XVI, 1.2",
+   "tradition": "Stoicism",
+   "themes": [
+    "temperance",
+    "effort"
+   ],
+   "language": "Ancient Greek",
+   "translation": "The project's own translation from the original Greek.",
+   "source": "https://penelope.uchicago.edu/Thayer/L/Roman/Texts/Gellius/16*.html",
+   "notes": "Greek: “Ἄν τι πράξεις καλὸν μετὰ πόνου, ὁ μὲν πόνος οἴχεται, τὸ δὲ καλὸν μένει· ἄν τι ποιήσεις αἰσχρὸν μετὰ ἡδονῆς, τὸ μὲν ἡδὺ οἴχεται, τὸ δὲ αἰσχρὸν μένει.” Gellius heard the saying as Musonius' and notes that Cato the Elder said something similar long before, in a speech at Numantia (XVI.1.3–4)."
+  },
+  {
+   "id": "zen-dl-7-23",
+   "kind": "verified",
+   "text": "This is the reason why we have two ears and only one mouth, that we may hear more and speak less.",
+   "author": "Zeno of Citium",
+   "era": "c. 334–262 BC",
+   "work": "saying recorded by Diogenes Laërtius, Lives of Eminent Philosophers",
+   "reference": "VII, 23",
+   "tradition": "Stoicism",
+   "themes": [
+    "listening",
+    "temperance"
+   ],
+   "language": "Ancient Greek",
+   "translation": "C. D. Yonge's translation (1853, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/57342",
+   "notes": "Zeno said it to a young man who was talking a great deal of nonsense. Diogenes Laërtius wrote some five centuries after Zeno: it is an attributed saying, not a text by Zeno himself."
+  },
+  {
+   "id": "pla-apo-38a",
+   "kind": "verified",
+   "text": "The unexamined life is not worth living.",
+   "author": "Plato",
+   "era": "c. 428–348 BC",
+   "work": "Apology",
+   "reference": "38a",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "self-knowledge",
+    "wisdom"
+   ],
+   "language": "Ancient Greek",
+   "translation": "Benjamin Jowett's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/1656",
+   "notes": "Socrates' words at his trial, as Plato wrote them down."
+  },
+  {
+   "id": "pla-gor-469c",
+   "kind": "verified",
+   "text": "I should not like either, but if I must choose between them, I would rather suffer than do.",
+   "author": "Plato",
+   "era": "c. 428–348 BC",
+   "work": "Gorgias",
+   "reference": "469c",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "justice",
+    "choice"
+   ],
+   "language": "Ancient Greek",
+   "translation": "Benjamin Jowett's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/1672",
+   "notes": "Socrates answers Polus, who has asked: “Then would you rather suffer than do injustice?”"
+  },
+  {
+   "id": "pla-tee-155d",
+   "kind": "verified",
+   "text": "Wonder is the feeling of a philosopher, and philosophy begins in wonder.",
+   "author": "Plato",
+   "era": "c. 428–348 BC",
+   "work": "Theaetetus",
+   "reference": "155d",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "knowledge",
+    "wonder"
+   ],
+   "language": "Ancient Greek",
+   "translation": "Benjamin Jowett's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/1726",
+   "notes": "Socrates speaking to Theaetetus."
+  },
+  {
+   "id": "ari-en-2-1",
+   "kind": "verified",
+   "text": "By doing just actions we come to be just; by doing the actions of self-mastery we come to be perfected in self-mastery; and by doing brave actions brave.",
+   "author": "Aristotle",
+   "era": "384–322 BC",
+   "work": "Nicomachean Ethics",
+   "reference": "II, 1 (1103a–b)",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "habit",
+    "justice",
+    "courage",
+    "temperance"
+   ],
+   "language": "Ancient Greek",
+   "translation": "D. P. Chase's translation (1847, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/8438",
+   "notes": ""
+  },
+  {
+   "id": "ari-en-1-7",
+   "kind": "verified",
+   "text": "As it is not one swallow or one fine day that makes a spring, so it is not one day or a short time that makes a man blessed and happy.",
+   "author": "Aristotle",
+   "era": "384–322 BC",
+   "work": "Nicomachean Ethics",
+   "reference": "I, 7 (1098a18)",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "happiness",
+    "time",
+    "habit"
+   ],
+   "language": "Ancient Greek",
+   "translation": "D. P. Chase's translation (1847, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/8438",
+   "notes": "The Greek has “spring” (éar); in English the proverb became “one swallow does not make a summer”."
+  },
+  {
+   "id": "ari-en-8-1",
+   "kind": "verified",
+   "text": "No one would choose to live without friends though he should have all the other good things in the world.",
+   "author": "Aristotle",
+   "era": "384–322 BC",
+   "work": "Nicomachean Ethics",
+   "reference": "VIII, 1 (1155a5)",
+   "tradition": "Classical Greek philosophy",
+   "themes": [
+    "friendship"
+   ],
+   "language": "Ancient Greek",
+   "translation": "D. P. Chase's translation (1847, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/8438",
+   "notes": ""
+  },
+  {
+   "id": "epc-men-122",
+   "kind": "verified",
+   "text": "Let no one delay to study philosophy while he is young, and when he is old let him not become weary of the study; for no man can ever find the time unsuitable or too late to study the health of his soul.",
+   "author": "Epicurus",
+   "era": "341–270 BC",
+   "work": "Letter to Menoeceus",
+   "reference": "in Diogenes Laërtius, X, 122",
+   "tradition": "Epicureanism",
+   "themes": [
+    "wisdom",
+    "learning"
+   ],
+   "language": "Ancient Greek",
+   "translation": "C. D. Yonge's translation (1853, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/57342",
+   "notes": "The letter survives because Diogenes Laërtius copied it out in full."
+  },
+  {
+   "id": "epc-men-125",
+   "kind": "verified",
+   "text": "The most formidable of all evils, death, is nothing to us, since, when we exist, death is not present to us; and when death is present, then we have no existence.",
+   "author": "Epicurus",
+   "era": "341–270 BC",
+   "work": "Letter to Menoeceus",
+   "reference": "in Diogenes Laërtius, X, 125",
+   "tradition": "Epicureanism",
+   "themes": [
+    "death",
+    "tranquility"
+   ],
+   "language": "Ancient Greek",
+   "translation": "C. D. Yonge's translation (1853, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/57342",
+   "notes": ""
+  },
+  {
+   "id": "epc-kd-27",
+   "kind": "verified",
+   "text": "Of all the things which wisdom provides for the happiness of the whole life, by far the most important is the acquisition of friendship.",
+   "author": "Epicurus",
+   "era": "341–270 BC",
+   "work": "Principal Doctrines",
+   "reference": "27 (in Diogenes Laërtius, X, 148; number 28 in Yonge)",
+   "tradition": "Epicureanism",
+   "themes": [
+    "friendship",
+    "happiness"
+   ],
+   "language": "Ancient Greek",
+   "translation": "C. D. Yonge's translation (1853, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/57342",
+   "notes": ""
+  },
+  {
+   "id": "epc-sen-16-7",
+   "kind": "verified",
+   "text": "If you live according to nature, you will never be poor; if you live according to opinion, you will never be rich.",
+   "author": "Epicurus",
+   "era": "341–270 BC",
+   "work": "saying quoted by Seneca, Letters to Lucilius",
+   "reference": "Letter 16, §7",
+   "tradition": "Epicureanism",
+   "themes": [
+    "desire",
+    "temperance"
+   ],
+   "language": "Latin (quoted by Seneca)",
+   "translation": "Richard M. Gummere's translation (1917, public domain)",
+   "source": "https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_16",
+   "notes": "Seneca quotes the saying as Epicurus': “si ad naturam vives, numquam eris pauper; si ad opiniones, numquam eris dives.” We know it only from this quotation."
+  },
+  {
+   "id": "ago-conf-1-1",
+   "kind": "verified",
+   "text": "Thou madest us for Thyself, and our heart is restless, until it repose in Thee.",
+   "author": "Augustine of Hippo",
+   "era": "354–430",
+   "work": "Confessions",
+   "reference": "I, 1.1",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "faith",
+    "restlessness"
+   ],
+   "language": "Latin",
+   "translation": "E. B. Pusey's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3296",
+   "notes": "Latin: “fecisti nos ad te et inquietum est cor nostrum donec requiescat in te.” It is a prayer addressed to God."
+  },
+  {
+   "id": "ago-conf-10-8",
+   "kind": "verified",
+   "text": "And men go abroad to admire the heights of mountains, the mighty billows of the sea, the broad tides of rivers, the compass of the ocean, and the circuits of the stars, and pass themselves by.",
+   "author": "Augustine of Hippo",
+   "era": "354–430",
+   "work": "Confessions",
+   "reference": "X, 8.15",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "self-knowledge",
+    "wonder"
+   ],
+   "language": "Latin",
+   "translation": "E. B. Pusey's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3296",
+   "notes": "Latin: “et eunt homines mirari alta montium … et relinquunt se ipsos.” Augustine is speaking of the vastness of memory, which is himself and which he cannot take in."
+  },
+  {
+   "id": "boe-cons-2-4",
+   "kind": "verified",
+   "text": "Nothing is wretched, but thinking makes it so, and conversely every lot is happy if borne with equanimity.",
+   "author": "Boethius",
+   "era": "c. 480–524",
+   "work": "The Consolation of Philosophy",
+   "reference": "Book II, prose 4",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "suffering",
+    "tranquility"
+   ],
+   "language": "Latin",
+   "translation": "H. R. James's translation (1897, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/14328",
+   "notes": "Philosophy, as a person, speaks to Boethius, who wrote the book in prison before his execution."
+  },
+  {
+   "id": "pas-277",
+   "kind": "verified",
+   "text": "The heart has its reasons, which reason does not know.",
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensées",
+   "reference": "fragment 277 (Brunschvicg numbering)",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "faith",
+    "knowledge"
+   ],
+   "language": "French",
+   "translation": "W. F. Trotter's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/18269",
+   "notes": "French: “Le cœur a ses raisons que la raison ne connaît point.” The Pensées are notes Pascal left unfinished; the numbering changes with the edition."
+  },
+  {
+   "id": "pas-139",
+   "kind": "verified",
+   "text": "All the unhappiness of men arises from one single fact, that they cannot stay quietly in their own chamber.",
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensées",
+   "reference": "fragment 139 (Brunschvicg numbering)",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "tranquility",
+    "distraction"
+   ],
+   "language": "French",
+   "translation": "W. F. Trotter's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/18269",
+   "notes": "From the fragment on “diversion”: seeking distraction so as not to think about oneself."
+  },
+  {
+   "id": "pas-347",
+   "kind": "verified",
+   "text": "Man is but a reed, the most feeble thing in nature; but he is a thinking reed.",
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensées",
+   "reference": "fragment 347 (Brunschvicg numbering)",
+   "tradition": "Christian philosophy",
+   "themes": [
+    "human condition",
+    "knowledge"
+   ],
+   "language": "French",
+   "translation": "W. F. Trotter's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/18269",
+   "notes": ""
+  },
+  {
+   "id": "mon-1-39",
+   "kind": "verified",
+   "text": "The greatest thing in the world is for a man to know that he is his own.",
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Essays",
+   "reference": "I, 39 “Of Solitude” (I, 38 in some editions)",
+   "tradition": "Renaissance humanism",
+   "themes": [
+    "freedom",
+    "self-knowledge"
+   ],
+   "language": "Middle French",
+   "translation": "Charles Cotton's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3600",
+   "notes": "Original: “La plus grande chose du monde, c’est de sçavoir estre à soy.”"
+  },
+  {
+   "id": "mon-3-2",
+   "kind": "verified",
+   "text": "Every man carries the entire form of human condition.",
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Essays",
+   "reference": "III, 2 “Of Repentance”",
+   "tradition": "Renaissance humanism",
+   "themes": [
+    "human condition",
+    "self-knowledge"
+   ],
+   "language": "Middle French",
+   "translation": "Charles Cotton's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3600",
+   "notes": "Original: “chaque homme porte la forme entiere de l’humaine condition.”"
+  },
+  {
+   "id": "mon-3-13",
+   "kind": "verified",
+   "text": "The glorious masterpiece of man is to live to purpose.",
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Essays",
+   "reference": "III, 13 “Of Experience”",
+   "tradition": "Renaissance humanism",
+   "themes": [
+    "wisdom",
+    "life"
+   ],
+   "language": "Middle French",
+   "translation": "Charles Cotton's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3600",
+   "notes": "Original: “Nostre grand et glorieux chef-d’œuvre c’est vivre à propos.” Montaigne goes on: to reign, to lay up treasure, to build are only little appendices and props."
+  },
+  {
+   "id": "spi-4-67",
+   "kind": "verified",
+   "text": "A free man thinks of death least of all things; and his wisdom is a meditation not of death but of life.",
+   "author": "Baruch Spinoza",
+   "era": "1632–1677",
+   "work": "Ethics",
+   "reference": "Part IV, proposition 67",
+   "tradition": "Rationalism",
+   "themes": [
+    "freedom",
+    "death",
+    "life"
+   ],
+   "language": "Latin",
+   "translation": "R. H. M. Elwes's translation (1883, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3800",
+   "notes": "For Spinoza a “free man” is one who lives under the guidance of reason, not led by fear."
+  },
+  {
+   "id": "spi-5-42",
+   "kind": "verified",
+   "text": "All things excellent are as difficult as they are rare.",
+   "author": "Baruch Spinoza",
+   "era": "1632–1677",
+   "work": "Ethics",
+   "reference": "Part V, proposition 42, note",
+   "tradition": "Rationalism",
+   "themes": [
+    "effort",
+    "wisdom"
+   ],
+   "language": "Latin",
+   "translation": "R. H. M. Elwes's translation (1883, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3800",
+   "notes": "The last sentence of the Ethics. Latin: “Sed omnia praeclara tam difficilia quam rara sunt.”"
+  },
+  {
+   "id": "nie-gc-270",
+   "kind": "verified",
+   "text": "What Saith thy Conscience?—“Thou shalt become what thou art.”",
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "The Gay Science",
+   "reference": "§ 270",
+   "tradition": "19th-century German philosophy",
+   "themes": [
+    "self-knowledge",
+    "freedom"
+   ],
+   "language": "German",
+   "translation": "Thomas Common's translation (1910, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/52881",
+   "notes": "The formula echoes the Greek poet Pindar (“become what you are”). Nietzsche used it again in the subtitle of Ecce Homo."
+  },
+  {
+   "id": "nie-gc-290",
+   "kind": "verified",
+   "text": "To “give style” to one’s character—that is a grand and a rare art!",
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "The Gay Science",
+   "reference": "§ 290",
+   "tradition": "19th-century German philosophy",
+   "themes": [
+    "character",
+    "self-knowledge"
+   ],
+   "language": "German",
+   "translation": "Thomas Common's translation (1910, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/52881",
+   "notes": "It goes on to describe someone who surveys the strengths and weaknesses of their own nature and fashions them into a plan."
+  },
+  {
+   "id": "nie-ci-8",
+   "kind": "verified",
+   "text": "From the military school of life.—That which does not kill me, makes me stronger.",
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "Twilight of the Idols",
+   "reference": "“Maxims and Arrows”, 8",
+   "tradition": "19th-century German philosophy",
+   "themes": [
+    "suffering",
+    "courage"
+   ],
+   "language": "German",
+   "translation": "A. M. Ludovici's translation (1911, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/52263",
+   "notes": "It is not a promise that all suffering makes us stronger; the text gives no further explanation."
+  },
+  {
+   "id": "nie-ci-12",
+   "kind": "verified",
+   "text": "If a man knows the wherefore of his existence, then the manner of it can take care of itself.",
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "Twilight of the Idols",
+   "reference": "“Maxims and Arrows”, 12",
+   "tradition": "19th-century German philosophy",
+   "themes": [
+    "meaning",
+    "suffering"
+   ],
+   "language": "German",
+   "translation": "A. M. Ludovici's translation (1911, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/52263",
+   "notes": "German: “Hat man sein warum? des Lebens, so verträgt man sich fast mit jedem wie?” Closer to the German: whoever has their why of life can bear almost any how."
+  },
+  {
+   "id": "kie-angest",
+   "kind": "verified",
+   "text": "Anxiety is the dizziness of freedom.",
+   "author": "Søren Kierkegaard",
+   "era": "1813–1855",
+   "work": "The Concept of Anxiety (Begrebet Angest, 1844)",
+   "reference": "passage beginning “Angest kan man sammenligne med Svimmelhed” (p. 58 in the 1991 DSL edition)",
+   "tradition": "Existentialism (forerunner)",
+   "themes": [
+    "freedom",
+    "choice",
+    "anxiety"
+   ],
+   "language": "Danish",
+   "translation": "The project's own translation from the original Danish.",
+   "source": "https://tekster.kb.dk/text/adl-texts-kierkegaard01val-shoot-idm140698092521808.pdf",
+   "notes": "Original: “Saaledes er Angest den Frihedens Svimlen …”; the sentence goes on: it arises when the spirit wants to posit the synthesis and freedom looks down into its own possibility. The book came out under the pseudonym Vigilius Haufniensis. Just before, Kierkegaard compares: someone who looks down into an abyss grows dizzy, and the cause is as much the eye as the abyss."
+  },
+  {
+   "id": "kie-diario-1843",
+   "kind": "uncertain",
+   "text": "Life can only be understood backwards; but it must be lived forwards.",
+   "author": "Søren Kierkegaard",
+   "era": "1813–1855",
+   "work": "journal entry (1843)",
+   "reference": "",
+   "tradition": "Existentialism (forerunner)",
+   "themes": [
+    "time",
+    "choice"
+   ],
+   "language": "Danish",
+   "translation": "The project's own translation from the original Danish (as quoted in secondary sources).",
+   "source": "",
+   "notes": "Danish (“… Livet maa forstaaes baglænds … det maa leves forlænds”) found only in secondary sources, not checked against the critical edition (Søren Kierkegaards Skrifter). Very likely Kierkegaard's, but kept as an uncertain attribution until checked."
+  },
+  {
+   "id": "kaf-z5",
+   "kind": "verified",
+   "text": "From a certain point on there is no more turning back. That is the point to reach.",
+   "author": "Franz Kafka",
+   "era": "1883–1924",
+   "work": "Zürau Aphorisms (Betrachtungen über Sünde, Leid, Hoffnung und den wahren Weg)",
+   "reference": "aphorism 5",
+   "tradition": "Literature",
+   "themes": [
+    "choice",
+    "decision"
+   ],
+   "language": "German",
+   "translation": "The project's own translation from the original German.",
+   "source": "https://de.wikisource.org/wiki/Betrachtungen_%C3%BCber_S%C3%BCnde,_Leid,_Hoffnung_und_den_wahren_Weg",
+   "notes": "Original: “Von einem gewissen Punkt an gibt es keine Rückkehr mehr. Dieser Punkt ist zu erreichen.” Kafka was a fiction writer, not an academic philosopher. He wrote these aphorisms in 1917–1918; Max Brod published them in 1931, after the author's death."
+  },
+  {
+   "id": "kaf-z26",
+   "kind": "verified",
+   "text": "There is a goal, but no way; what we call the way is hesitation.",
+   "author": "Franz Kafka",
+   "era": "1883–1924",
+   "work": "Zürau Aphorisms (Betrachtungen über Sünde, Leid, Hoffnung und den wahren Weg)",
+   "reference": "aphorism 26, second paragraph",
+   "tradition": "Literature",
+   "themes": [
+    "path",
+    "decision"
+   ],
+   "language": "German",
+   "translation": "The project's own translation from the original German.",
+   "source": "https://de.wikisource.org/wiki/Betrachtungen_%C3%BCber_S%C3%BCnde,_Leid,_Hoffnung_und_den_wahren_Weg",
+   "notes": "Original: “Es gibt ein Ziel, aber keinen Weg; was wir Weg nennen, ist Zögern.” Kafka wrote these aphorisms as a fiction writer, not as an academic philosopher."
+  },
+  {
+   "id": "mac-bc-160",
+   "kind": "verified",
+   "text": "I had no children, I passed on to no creature the legacy of our misery.",
+   "author": "Machado de Assis",
+   "era": "1839–1908",
+   "work": "The Posthumous Memoirs of Brás Cubas (1881)",
+   "reference": "ch. CLX, “Das negativas”",
+   "tradition": "Literature",
+   "themes": [
+    "human condition",
+    "irony"
+   ],
+   "language": "Portuguese",
+   "translation": "The project's own translation from the original Portuguese.",
+   "source": "https://www.gutenberg.org/ebooks/54829",
+   "notes": "Original: “Não tive filhos, não transmiti a nenhuma criatura o legado da nossa miséria.” The last sentence of the book, said by the dead narrator Brás Cubas: the bitterness and the irony are the character's, not advice."
+  },
+  {
+   "id": "pes-mar-portugues",
+   "kind": "verified",
+   "text": "Was it worth it? Everything is worth it / If the soul is not small.",
+   "author": "Fernando Pessoa",
+   "era": "1888–1935",
+   "work": "Mensagem (1934)",
+   "reference": "poem “Mar Portuguez”",
+   "tradition": "Literature",
+   "themes": [
+    "meaning",
+    "courage",
+    "suffering"
+   ],
+   "language": "Portuguese",
+   "translation": "The project's own translation from the original Portuguese.",
+   "source": "https://pt.wikisource.org/wiki/Mar_Portuguez",
+   "notes": "Original: “Valeu a pena? Tudo vale a pena / Se a alma não é pequena.” The lines answer the grief of the losses at sea in the Portuguese voyages: “how many mothers wept”."
+  },
+  {
+   "id": "con-2-17",
+   "kind": "verified",
+   "text": "When you know a thing, to hold that you know it; and when you do not know a thing, to allow that you do not know it;—this is knowledge.",
+   "author": "Confucius",
+   "era": "551–479 BC (traditional dates)",
+   "work": "Analects (Lunyu)",
+   "reference": "II, 17",
+   "tradition": "Confucianism",
+   "themes": [
+    "knowledge",
+    "humility"
+   ],
+   "language": "Classical Chinese",
+   "translation": "James Legge's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3330",
+   "notes": "The Analects were compiled by disciples after Confucius' death. He is speaking to a disciple (Zilu, called “Yu” in the text)."
+  },
+  {
+   "id": "con-15-23",
+   "kind": "verified",
+   "text": "What you do not want done to yourself, do not do to others.",
+   "author": "Confucius",
+   "era": "551–479 BC (traditional dates)",
+   "work": "Analects (Lunyu)",
+   "reference": "XV, 23 (Legge numbering)",
+   "tradition": "Confucianism",
+   "themes": [
+    "justice",
+    "reciprocity"
+   ],
+   "language": "Classical Chinese",
+   "translation": "James Legge's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3330",
+   "notes": "The answer to someone who asks whether there is one word that can serve as a rule for the whole of life: “reciprocity” (shu)."
+  },
+  {
+   "id": "con-7-21",
+   "kind": "verified",
+   "text": "When I walk along with two others, they may serve me as my teachers. I will select their good qualities and follow them, their bad qualities and avoid them.",
+   "author": "Confucius",
+   "era": "551–479 BC (traditional dates)",
+   "work": "Analects (Lunyu)",
+   "reference": "VII, 21 (Legge numbering)",
+   "tradition": "Confucianism",
+   "themes": [
+    "learning",
+    "humility"
+   ],
+   "language": "Classical Chinese",
+   "translation": "James Legge's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/3330",
+   "notes": ""
+  },
+  {
+   "id": "lao-33",
+   "kind": "verified",
+   "text": "He who knows other men is discerning; he who knows himself is intelligent. He who overcomes others is strong; he who overcomes himself is mighty.",
+   "author": "Laozi",
+   "era": "6th–4th century BC (uncertain)",
+   "work": "Daodejing (Tao Te Ching)",
+   "reference": "chapter 33",
+   "tradition": "Taoism",
+   "themes": [
+    "self-knowledge",
+    "temperance"
+   ],
+   "language": "Classical Chinese",
+   "translation": "James Legge's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/216",
+   "notes": "Chinese: “知人者智，自知者明。勝人者有力，自勝者強。” Laozi's authorship is traditional; the book probably gathers texts from several periods."
+  },
+  {
+   "id": "lao-64",
+   "kind": "verified",
+   "text": "The journey of a thousand li commenced with a single step.",
+   "author": "Laozi",
+   "era": "6th–4th century BC (uncertain)",
+   "work": "Daodejing (Tao Te Ching)",
+   "reference": "chapter 64",
+   "tradition": "Taoism",
+   "themes": [
+    "action",
+    "patience"
+   ],
+   "language": "Classical Chinese",
+   "translation": "James Legge's translation (public domain)",
+   "source": "https://www.gutenberg.org/ebooks/216",
+   "notes": "Chinese: “千里之行，始於足下”, literally “begins beneath the feet”. A li is a Chinese measure of distance. The context is about acting while things are still small."
+  },
+  {
+   "id": "zhu-26",
+   "kind": "verified",
+   "text": "The raison d'être of a fish-trap is the fish. When the fish is caught, the trap may be ignored. The raison d'être of a rabbit-snare is the rabbit. When the rabbit is caught the snare may be ignored. The raison d'être of language is an idea to be expressed. When the idea is expressed, the language may be ignored. But where shall I find a man to ignore language, with whom I may be able to converse?",
+   "author": "Zhuangzi",
+   "era": "c. 369–286 BC",
+   "work": "Zhuangzi",
+   "reference": "chapter 26, “External Things” (Wai wu)",
+   "tradition": "Taoism",
+   "themes": [
+    "language",
+    "knowledge"
+   ],
+   "language": "Classical Chinese",
+   "translation": "Herbert A. Giles's translation (1889, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/59709",
+   "notes": "The end of the chapter. The “outer” chapters of the book may have been written by disciples."
+  },
+  {
+   "id": "dha-5",
+   "kind": "verified",
+   "text": "For hatred does not cease by hatred at any time: hatred ceases by love, this is an old rule.",
+   "author": "Dhammapada (Buddhist tradition)",
+   "era": "",
+   "work": "Dhammapada",
+   "reference": "verse 5",
+   "tradition": "Buddhism",
+   "themes": [
+    "forgiveness",
+    "peace"
+   ],
+   "language": "Pali",
+   "translation": "F. Max Müller's translation (1881, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/2017",
+   "notes": "Pali: “averena ca sammanti”: it ceases by the absence of hatred (Müller renders it “love”). The Dhammapada is a collection of verses that tradition attributes to the Buddha."
+  },
+  {
+   "id": "dha-103",
+   "kind": "verified",
+   "text": "If one man conquer in battle a thousand times thousand men, and if another conquer himself, he is the greatest of conquerors.",
+   "author": "Dhammapada (Buddhist tradition)",
+   "era": "",
+   "work": "Dhammapada",
+   "reference": "verse 103",
+   "tradition": "Buddhism",
+   "themes": [
+    "self-mastery",
+    "temperance"
+   ],
+   "language": "Pali",
+   "translation": "F. Max Müller's translation (1881, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/2017",
+   "notes": "The Dhammapada is a collection of verses that tradition attributes to the Buddha."
+  },
+  {
+   "id": "bg-2-47",
+   "kind": "verified",
+   "text": "Let right deeds be / Thy motive, not the fruit which comes from them.",
+   "author": "Bhagavad Gita (Mahabharata)",
+   "era": "",
+   "work": "Bhagavad Gita",
+   "reference": "II, 47",
+   "tradition": "Hinduism",
+   "themes": [
+    "action",
+    "detachment"
+   ],
+   "language": "Sanskrit",
+   "translation": "Edwin Arnold's verse translation (1885, public domain)",
+   "source": "https://www.gutenberg.org/ebooks/2388",
+   "notes": "Krishna's words to Arjuna before the battle. Sanskrit: “karmaṇy evādhikāras te mā phaleṣu kadācana”, literally: your right is to the action alone, never to its fruits."
+  }
+ ]
+}

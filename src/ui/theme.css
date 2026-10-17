@@ -1688,3 +1688,96 @@ label.contents {
   border-radius: 5px;
   background: var(--accent);
 }
+
+/* Thoughts (stage 4a) */
+.th-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+.th-search {
+  flex: 1 1 180px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.th-search .field {
+  flex: 1;
+  min-width: 0;
+}
+.thoughts .chips {
+  padding-bottom: 8px;
+}
+.th-selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 8px 10px;
+}
+.th-selects .field {
+  flex: 1 1 140px;
+  min-width: 0;
+  width: auto;
+}
+.th-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+.th-quote {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--strong);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.th-cite {
+  color: var(--text);
+}
+.th-kind {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.th-kind.warn {
+  color: var(--h2);
+  border-color: var(--h2);
+}
+.th-value {
+  overflow-wrap: anywhere;
+}
+.th-source {
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.th-link {
+  justify-self: start;
+  max-width: 100%;
+  padding: 2px 4px;
+  gap: 6px;
+  color: var(--accent);
+}
+.th-notes {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.th-errors {
+  margin: 0;
+  padding-left: 18px;
+}
+.fav-on {
+  color: var(--h3);
+}

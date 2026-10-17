@@ -1,25 +1,29 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import type { Data } from "../../data/frontmatter";
 import { parseTags } from "../../data/ideas";
 import type { Note } from "../../data/notes";
 import { joinQuote, splitQuote, toQuote } from "../../data/quotes";
+import { createThought, loadThoughts, parseThemes } from "../../data/thoughts";
+import { useApp } from "../context";
 import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 import { numberOrText } from "./BookEditor";
 
 // A quote note (SPEC 5.6): the quote, page, chapter, tags and my comment. Saved as you go; a quote
-// left with no text at all is removed on leaving. "Send to Thoughts" comes with stage 4.
+// left with no text at all is removed on leaving. "Send to Thoughts" copies it into the Thoughts
+// library as a verified quote (SPEC 5.6), once.
 
 interface Props {
   path: string;
   bookTitle: string;
+  bookAuthor: string;
   onBack(): void;
   onDelete(path: string): void;
 }
 
-export function QuoteEditor({ path, bookTitle, onBack, onDelete }: Props) {
+export function QuoteEditor({ path, bookTitle, bookAuthor, onBack, onDelete }: Props) {
   const f = useNoteFile(path, { removeIfEmpty: body => body.trim() === "" });
   useBack(true, onBack);
   return (
@@ -45,14 +49,15 @@ export function QuoteEditor({ path, bookTitle, onBack, onDelete }: Props) {
           </div>
         </div>
       ) : (
-        f.note && <QuoteForm key={f.rev} file={f} note={f.note} />
+        f.note && <QuoteForm key={f.rev} file={f} note={f.note} book={{ title: bookTitle, author: bookAuthor }} />
       )}
       {f.dialog}
     </div>
   );
 }
 
-function QuoteForm({ file: f, note }: { file: NoteFile; note: Note }) {
+function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: { title: string; author: string } }) {
+  const { notes, version, bump, toast } = useApp();
   const split = splitQuote(note.body);
   const [text, setText] = useState(split.text);
   const [d, setD] = useState<Data>(note.data);
@@ -74,6 +79,39 @@ function QuoteForm({ file: f, note }: { file: NoteFile; note: Note }) {
       const p = { tags: tags.length ? tags : undefined };
       setD(old => ({ ...old, ...p }));
       f.setData(p);
+    }
+  };
+
+  // Already sent? (a thought that points back to this quote)
+  const [sent, setSent] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    loadThoughts(notes).then(r => alive && setSent(r.all.some(t => t.quote === note.path)));
+    return () => {
+      alive = false;
+    };
+  }, [notes, version, note.path]);
+
+  const send = async () => {
+    const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
+    if (!book.author.trim()) return fail("Add the book's author first: a quote in Thoughts needs one.");
+    try {
+      const { all } = await loadThoughts(notes);
+      const page = value("page");
+      await createThought(notes, all, {
+        kind: "verified",
+        text: textRef.current,
+        author: book.author,
+        work: book.title,
+        reference: [page && `p. ${page}`, value("chapter")].filter(Boolean).join(", "),
+        source: `My copy of ${book.title || "the book"}`,
+        themes: parseThemes(tagText),
+        quote: note.path,
+      });
+      bump();
+      toast({ text: "Sent to Thoughts" });
+    } catch (e) {
+      fail(e);
     }
   };
 
@@ -138,8 +176,8 @@ function QuoteForm({ file: f, note }: { file: NoteFile; note: Note }) {
           />
         </div>
         <div className="row task-actions">
-          <button className="btn" disabled title="Thoughts come in stage 4">
-            <Send size={16} /> Send to Thoughts
+          <button className="btn" disabled={sent || !text.trim()} onClick={send}>
+            <Send size={16} /> {sent ? "In Thoughts" : "Send to Thoughts"}
           </button>
           <span className="muted small mono" style={{ marginLeft: "auto" }}>
             Added {String(d.created ?? "").replace("T", " ")}

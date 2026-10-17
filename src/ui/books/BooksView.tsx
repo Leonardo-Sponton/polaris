@@ -206,7 +206,8 @@ export function BooksView({ books, quotes, openPath }: Props) {
     }
   };
 
-  const openTitle = books.find(b => b.path === open)?.title ?? "";
+  const openBookItem = books.find(b => b.path === open);
+  const openTitle = openBookItem?.title ?? "";
 
   // A search looks at every tab.
   const searching = query.trim() !== "";
@@ -274,7 +275,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
         {stats ? (
           <BookStats books={books} onBack={() => setStats(false)} />
         ) : open && quote ? (
-          <QuoteEditor key={quote} path={quote} bookTitle={openTitle} onBack={() => setQuote(null)} onDelete={removeQuote} />
+          <QuoteEditor key={quote} path={quote} bookTitle={openTitle} bookAuthor={openBookItem?.author ?? ""} onBack={() => setQuote(null)} onDelete={removeQuote} />
         ) : open ? (
           <BookEditor
             key={open}

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { isQuotePath } from "../data/quotes";
 import { markSeen, resurface, type Idea } from "../data/ideas";
@@ -11,6 +11,8 @@ import { InboxView, useInbox } from "./InboxView";
 import { useCapture } from "./useCapture";
 import { SearchView, type SearchState } from "./SearchView";
 import { SettingsView } from "./SettingsView";
+import { ThoughtOfDay } from "./thoughts/ThoughtOfDay";
+import { ThoughtsView, useThoughts } from "./thoughts/ThoughtsView";
 import { TrashView } from "./TrashView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
@@ -19,13 +21,14 @@ import { goBack } from "./useBack";
 import { useReminders } from "./useReminders";
 
 // The areas built so far. Journal, Review… join in later stages (SPEC 7).
-export type Area = "today" | "ideas" | "books" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
+export type Area = "today" | "ideas" | "books" | "todo" | "thoughts" | "inbox" | "search" | "trash" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
   { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
   { id: "books", label: "Books", icon: <BookOpen size={20} /> },
   { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
+  { id: "thoughts", label: "Thoughts", icon: <Feather size={20} /> },
   { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
   { id: "search", label: "Search", icon: <Search size={20} /> },
   { id: "trash", label: "Trash", icon: <Trash2 size={20} /> },
@@ -85,6 +88,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const ideas = useIdeas();
   const books = useBooks();
   const quotes = useQuotes(books);
+  const thoughts = useThoughts();
+  // A thought to open in Thoughts (built-in ones have no file, so by id).
+  const [thoughtTarget, setThoughtTarget] = useState<{ id: string; key: number } | undefined>();
   const capture = useCapture();
   const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
   const [searchKey, setSearchKey] = useState(0);
@@ -97,6 +103,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   });
   const go = (a: Area) => {
     setTarget(undefined);
+    setThoughtTarget(undefined);
     setArea(a);
   };
 
@@ -147,6 +154,13 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
             focusKey: captureKey,
             footer: (
               <>
+                <ThoughtOfDay
+                  data={thoughts}
+                  onOpen={t => {
+                    setThoughtTarget({ id: t.id, key: Date.now() });
+                    setArea("thoughts");
+                  }}
+                />
                 {old && (
                   <ResurfaceCard
                     idea={old}
@@ -189,6 +203,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
       break;
+    case "thoughts":
+      page = <ThoughtsView data={thoughts} openId={thoughtTarget} />;
+      break;
     case "inbox":
       page = <InboxView items={inbox} openPath={target} />;
       break;
@@ -205,6 +222,11 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           setState={setSearch}
           focusKey={searchKey}
           openElsewhere={d => {
+            if (d.area === "thoughts" && /^thoughts\/[^/]+\.md$/.test(d.path)) {
+              setThoughtTarget({ id: d.path.slice(9, -3), key: Date.now() });
+              setArea("thoughts");
+              return true;
+            }
             if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas" && d.area !== "books") return false;
             if (d.area === "books" && !d.path.endsWith("/book.md") && !isQuotePath(d.path)) return false;
             setTarget({ path: d.path, key: Date.now() });
