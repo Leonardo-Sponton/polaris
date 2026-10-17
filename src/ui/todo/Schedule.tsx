@@ -2,7 +2,7 @@ import { Archive, CalendarDays, Moon, Star, Sunrise, X } from "lucide-react";
 import { addDays, isoDate } from "../../data/dates";
 import { Dialog } from "../Dialog";
 
-// "When" picker (SPEC 5.3): used by the task screen and by swiping a task left on the phone.
+// "When" picker (SPEC 5.3): used by the task screen, the task options and a left swipe on the phone.
 
 export interface When {
   when?: string;

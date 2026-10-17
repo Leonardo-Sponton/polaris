@@ -24,6 +24,7 @@ import { useApp } from "../context";
 import { QuickAdd } from "./QuickAdd";
 import { ScheduleDialog } from "./Schedule";
 import { TaskEditor } from "./TaskEditor";
+import { TaskMenu } from "./TaskMenu";
 import { TaskRow } from "./TaskRow";
 import type { TodoData } from "./useTodo";
 
@@ -62,6 +63,7 @@ export function TodoView({ view, setView, data }: Props) {
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState<Task | null>(null);
+  const [menu, setMenu] = useState<Task | null>(null);
   const [dialog, setDialog] = useState<"rename" | "delete" | null>(null);
   const [limit, setLimit] = useState(LOGBOOK_PAGE);
   const qa = useRef<HTMLTextAreaElement>(null);
@@ -175,6 +177,16 @@ export function TodoView({ view, setView, data }: Props) {
     }
   };
 
+  const move = async (t: Task, to: string | undefined) => {
+    try {
+      await flushAll();
+      await updateTask(notes, t.path, { list: to });
+      bump();
+    } catch (e) {
+      fail(e);
+    }
+  };
+
   const deleteList = async () => {
     if (!list) return;
     try {
@@ -281,6 +293,7 @@ export function TodoView({ view, setView, data }: Props) {
                     onOpen={() => setOpen(t.path)}
                     onToggle={() => (t.status === "open" ? finish(t.path, "done") : reopen(t.path))}
                     onSchedule={() => setScheduling(t)}
+                    onMenu={() => setMenu(t)}
                   />
                 ))}
               </ul>
@@ -311,6 +324,19 @@ export function TodoView({ view, setView, data }: Props) {
         )}
       </div>
 
+      {menu && (
+        <TaskMenu
+          task={menu}
+          lists={data.lists}
+          onOpen={() => setOpen(menu.path)}
+          onToggle={() => (menu.status === "open" ? finish(menu.path, "done") : reopen(menu.path))}
+          onSchedule={() => setScheduling(menu)}
+          onMove={to => move(menu, to)}
+          onCancelTask={() => finish(menu.path, "canceled")}
+          onDelete={() => remove(menu.path)}
+          onClose={() => setMenu(null)}
+        />
+      )}
       {scheduling && (
         <ScheduleDialog
           current={{ when: scheduling.when, evening: scheduling.evening }}

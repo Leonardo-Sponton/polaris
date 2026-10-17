@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarClock, Check, ListChecks, Moon, Repeat } from "lucide-react";
 import type { TodoList } from "../../data/lists";
 import { dayLabel, isOverdue, type Task } from "../../data/todo";
 
-// One task in a list. Tap opens it; the box completes it. On touch screens a swipe right
-// completes and a swipe left opens the "When" picker (SPEC 5.3).
+// One task in a list. Tap opens it; the box completes it. Holding it (or right-clicking on
+// the PC) shows its options. On touch screens a swipe right also completes and a swipe left
+// opens the "When" picker (SPEC 5.3).
 
 const SWIPE = 72; // px the row must travel before letting go acts
+const HOLD = 500; // ms a still finger needs to open the options
 
 interface Props {
   task: Task;
@@ -18,19 +20,36 @@ interface Props {
   onOpen(): void;
   onToggle(): void;
   onSchedule(): void;
+  onMenu(): void;
 }
 
-export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onToggle, onSchedule }: Props) {
+export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onToggle, onSchedule, onMenu }: Props) {
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number; id: number; horizontal?: boolean } | null>(null);
   const swiped = useRef(false);
+  const hold = useRef<ReturnType<typeof setTimeout>>(undefined);
   const done = t.status !== "open";
   const list = t.list ? lists.find(l => l.id === t.list) : undefined;
   const late = isOverdue(t, today);
 
+  // The click that follows a swipe or a hold must not open the task.
+  const eatClick = () => {
+    swiped.current = true;
+    setTimeout(() => (swiped.current = false), 50);
+  };
+  const stopHold = () => clearTimeout(hold.current);
+  useEffect(() => stopHold, []);
+
   const onDown = (e: React.PointerEvent) => {
     if (e.pointerType !== "touch") return;
     start.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    stopHold();
+    hold.current = setTimeout(() => {
+      start.current = null;
+      eatClick();
+      navigator.vibrate?.(20);
+      onMenu();
+    }, HOLD);
   };
   const onMove = (e: React.PointerEvent) => {
     const s = start.current;
@@ -38,17 +57,18 @@ export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onTogg
     const x = e.clientX - s.x;
     const y = e.clientY - s.y;
     if (s.horizontal === undefined && Math.abs(x) + Math.abs(y) > 10) {
+      stopHold(); // the finger moved: it is a swipe or a scroll, not a hold
       s.horizontal = Math.abs(x) > Math.abs(y) * 1.5;
       if (s.horizontal) (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     }
     if (s.horizontal) setDx(Math.max(-120, Math.min(120, x)));
   };
   const onUp = () => {
+    stopHold();
     const s = start.current;
     start.current = null;
     if (!s?.horizontal) return;
-    swiped.current = true; // the click that follows the swipe must not open the task
-    setTimeout(() => (swiped.current = false), 50);
+    eatClick();
     if (dx >= SWIPE) onToggle();
     else if (dx <= -SWIPE) onSchedule();
     setDx(0);
@@ -98,7 +118,16 @@ export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onTogg
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
+        onContextMenu={e => {
+          // Right click on the PC. Android may fire it on a long press too, racing the timer
+          // above; opening the same menu twice is harmless.
+          e.preventDefault();
+          stopHold();
+          start.current = null;
+          onMenu();
+        }}
         onPointerCancel={() => {
+          stopHold();
           start.current = null;
           setDx(0);
         }}

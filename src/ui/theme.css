@@ -683,6 +683,9 @@ h3 {
 .menu-item.active {
   background: var(--select);
 }
+.menu-item.danger {
+  color: var(--err);
+}
 .menu-item .date-field {
   width: auto;
   min-height: 36px;
@@ -874,6 +877,10 @@ h3 {
   border-radius: var(--radius);
   background: var(--surface);
   touch-action: pan-y;
+  /* Holding a task opens its options; don't select text or show the system menu. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 @media (max-width: 719px) {
   .task-row {
