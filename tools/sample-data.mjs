@@ -206,9 +206,14 @@ function samples() {
     "Reading it with the study task on Today.\n");
   book(at(-40, 10, 0), { title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", year: 1999, status: "want" });
   book(at(-60, 18, 30), { title: "Sapiens", author: "Yuval Noah Harari", year: 2011, status: "want" });
-  book(at(-90, 9, 0), { title: "Dom Casmurro", author: "Machado de Assis", year: 1899, status: "read", started: day(-80), finished: day(-50), rating: 5 },
+  book(at(-90, 9, 0), { title: "Dom Casmurro", author: "Machado de Assis", year: 1899, status: "read", started: day(-80), finished: day(-50), rating: 5, pages: 256 },
     "Capitu: did she or didn't she? The narrator is the one to doubt.\n");
-  book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4 });
+  book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4, pages: 328 });
+  // More read books, some last year, so the reading stats (stage 3c) have bars to show. Page
+  // counts here and above are made up for the sample (they depend on the edition).
+  book(at(-200, 19, 0), { title: "Letters from a Stoic", author: "Seneca", status: "read", started: day(-230), finished: day(-200), rating: 5, pages: 254 });
+  book(at(-300, 15, 0), { title: "The Little Prince", author: "Antoine de Saint-Exupéry", year: 1943, status: "read", started: day(-301), finished: day(-300), rating: 4, pages: 96 });
+  book(at(-420, 20, 0), { title: "Animal Farm", author: "George Orwell", year: 1945, format: "ebook", status: "read", started: day(-430), finished: day(-420), pages: 112 });
   book(at(-70, 22, 0), { title: "Ulysses", author: "James Joyce", year: 1922, status: "dnf", started: day(-70), finished: day(-62),
     dnf_reason: "Not the right moment; try again some day" });
   book(at(-3, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist",

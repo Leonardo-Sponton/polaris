@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Search, Star } from "lucide-react";
+import { ChartColumn, Plus, Search, Star } from "lucide-react";
 import { STATUSES, createBook, loadBooks, matches, statusPatch, type Book, type BookStatus } from "../../data/books";
 import type { Data } from "../../data/frontmatter";
 import { flushAll } from "../../data/pending";
@@ -10,6 +10,7 @@ import { useApp } from "../context";
 import { useHold } from "../useHold";
 import { BookEditor } from "./BookEditor";
 import { BookMenu } from "./BookMenu";
+import { BookStats } from "./BookStats";
 import { placeholderColor, useCoverUrl } from "./cover";
 import { QuoteEditor } from "./QuoteEditor";
 import { QuoteReview } from "./QuoteReview";
@@ -100,6 +101,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
   const [adding, setAdding] = useState(false);
   const [menu, setMenu] = useState<Book | null>(null);
   const [dnf, setDnf] = useState<Book | null>(null);
+  const [stats, setStats] = useState(false);
 
   const fail = useCallback(
     (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true }),
@@ -108,6 +110,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
 
   useEffect(() => {
     if (!openPath) return;
+    setStats(false);
     if (isQuotePath(openPath.path)) {
       setOpen(bookPathOf(openPath.path));
       setQuote(openPath.path);
@@ -118,10 +121,12 @@ export function BooksView({ books, quotes, openPath }: Props) {
   }, [openPath]);
 
   const openBook = (path: string | null) => {
+    setStats(false);
     setOpen(path);
     setQuote(null);
   };
   const openQuote = (q: Quote) => {
+    setStats(false);
     setOpen(q.bookPath);
     setQuote(q.path);
   };
@@ -209,13 +214,20 @@ export function BooksView({ books, quotes, openPath }: Props) {
   const count = (s: BookStatus) => books.filter(b => b.status === s).length;
 
   return (
-    <div className={`split books${open ? " has-detail" : ""}`}>
+    <div className={`split books${open || stats ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
           <h1>Books</h1>
-          <button className="btn primary" onClick={() => setAdding(true)}>
-            <Plus size={18} /> New
-          </button>
+          <div className="row">
+            {books.length > 0 && (
+              <button className={`btn ghost icon${stats ? " active" : ""}`} aria-label="Reading stats" title="Reading stats" onClick={() => setStats(true)}>
+                <ChartColumn size={20} />
+              </button>
+            )}
+            <button className="btn primary" onClick={() => setAdding(true)}>
+              <Plus size={18} /> New
+            </button>
+          </div>
         </div>
         {books.length > 0 && (
           <div className="book-search">
@@ -259,7 +271,9 @@ export function BooksView({ books, quotes, openPath }: Props) {
         )}
       </div>
       <div className="detail-pane">
-        {open && quote ? (
+        {stats ? (
+          <BookStats books={books} onBack={() => setStats(false)} />
+        ) : open && quote ? (
           <QuoteEditor key={quote} path={quote} bookTitle={openTitle} onBack={() => setQuote(null)} onDelete={removeQuote} />
         ) : open ? (
           <BookEditor
