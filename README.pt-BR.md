@@ -93,7 +93,10 @@ Chaves desconhecidas no cabeçalho são mantidas como estão, então você pode 
 
 ## Instalar e compilar
 
-Ainda não há downloads prontos; compile a partir do código. É preciso o Node.js 22 ou mais novo.
+**Downloads:** a [versão mais recente](https://github.com/Leonardo-Sponton/polaris/releases/latest) traz
+o APK para Android (Android 8.0 ou mais novo) e um AppImage e um tar.gz para Linux.
+
+Para compilar a partir do código é preciso o Node.js 22 ou mais novo.
 
 ```sh
 git clone https://github.com/Leonardo-Sponton/polaris.git

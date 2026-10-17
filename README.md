@@ -93,7 +93,10 @@ Unknown header keys are kept as they are, so you can add your own.
 
 ## Install and build
 
-There are no prebuilt downloads yet; build it from source. You need Node.js 22 or newer.
+**Downloads:** the [latest release](https://github.com/Leonardo-Sponton/polaris/releases/latest) has
+the Android APK (Android 8.0 or newer) and a Linux AppImage and tar.gz.
+
+To build it from source you need Node.js 22 or newer.
 
 ```sh
 git clone https://github.com/Leonardo-Sponton/polaris.git
