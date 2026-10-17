@@ -10,7 +10,7 @@
 //   node tools/sample-data.mjs add --phone        add to the phone's data folder over adb
 //   node tools/sample-data.mjs remove --phone
 //
-// Later stages add their own samples here (projects…); `add` again brings only new areas.
+// Later stages add their own samples here; `add` again brings only new areas.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -180,6 +180,30 @@ function samples() {
   idea(at(-45, 14, 30), "Bike delivery for the neighbourhood", {
     status: "archived", template: "business", archived_reason: "The hills here make it too slow, and apps already do it",
   }, "Deliveries for the small shops on my street.\n", -40);
+
+  // ---- Projects (stage 6) ----
+  // Linked to two of the sample ideas above, so the project page shows their checklist and
+  // assumptions (the ideas themselves keep their status: they were added in an earlier stage).
+  const ideaFile = (created, title) => `${isoDate(created).replace(/-/g, "")}-${slug(title)}`;
+  const project = (created, title, data, rest = "") => {
+    const c = isoMinute(created);
+    out.push([`projects/${slug(title)}/project.md`, file({ type: "project", created: c, modified: c, status: "active", ...data }, `# ${title}\n` + (rest ? `\n${rest}` : ""))]);
+  };
+  const stepNote = (proj, step, created, title, rest) => {
+    const c = isoMinute(created);
+    out.push([`projects/${slug(proj)}/${step}/${stamp(created)}-${slug(title)}.md`, file({ type: "step-note", created: c, modified: c }, `# ${title}\n\n${rest}`)]);
+  };
+  project(at(-15, 20, 0), "Granola at the fair", { flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "01-business-model" },
+    "Saturday fair first; a small shop later if it works.\n");
+  stepNote("Granola at the fair", "00-integrating-environment", at(-14, 21, 0), "Incubator and accelerator",
+    "## Incubator\n\nThe city's food incubator: kitchen space by the hour and help with the health rules.\n\n## Accelerator\n\nNone yet; too early. Look again after six months of sales.\n");
+  stepNote("Granola at the fair", "01-business-model", at(-6, 20, 30), "Canvas, first pass",
+    "## Value proposition\n\nHealthy snack made the same week, in a jar that comes back.\n\n## Customer segments\n\nPeople at the Saturday fair; the gym next to it.\n\n## Revenue streams\n\n25 per jar; 2 off when the jar comes back.\n");
+  stepNote("Granola at the fair", "01-business-model", at(-2, 21, 15), "Costs per jar",
+    "Oats, honey, nuts and the jar. Bulk only pays off above 25 kg.\n\n- [ ] Ask two more suppliers\n- [ ] Price the labels\n");
+  project(at(-1, 9, 0), "Study group app", { flow: "software", idea: ideaFile(at(-2, 22, 40), "Study group app for classmates"), step: "01-discovery" });
+  stepNote("Study group app", "01-discovery", at(-1, 9, 30), "Talk to classmates",
+    "## Interviews\n\n- Ana: uses the group chat, loses the files.\n- Bruno: prints the summaries.\n\n## Insights\n\nThe problem is finding things later, not writing them.\n");
 
   // ---- Books (stage 3) ----
   // No covers: the shelf shows the colored cards; add a photo to see a real one.
@@ -403,6 +427,9 @@ function remove(io) {
   // A sample book is a folder: drop it too when nothing of the user's is inside.
   for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/quotes\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/book\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
+  // Sample projects too: the step folders, then the project folder.
+  for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
+  for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/project\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   const index = readJson(io, ".trash/.deleted.json", {});
   for (const k of files) delete index[k];
   if (Object.keys(index).length) io.write(".trash/.deleted.json", JSON.stringify(index, null, 2) + "\n");

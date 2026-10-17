@@ -2126,3 +2126,120 @@ label.contents {
   max-width: 100%;
   margin: 0 auto;
 }
+
+/* ---- Projects (stage 6) ---- */
+.flow-preview {
+  margin: 0;
+  padding-left: 22px;
+  line-height: 1.5;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.step button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .step button:hover {
+    background: var(--hover);
+  }
+}
+.step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.step.past .step-num {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+.step.current .step-num {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.step.current .step-name {
+  color: var(--strong);
+  font-weight: 600;
+}
+.step-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.step-now {
+  color: var(--accent);
+  font-weight: 400;
+}
+.step .count {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.step-title {
+  margin: 2px 0 0;
+  font-size: 1.25rem;
+  color: var(--strong);
+  overflow-wrap: anywhere;
+}
+.step-guidance {
+  margin: 0;
+  line-height: 1.55;
+}
+.from-idea {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.from-idea .list-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.from-idea-assumptions {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+.from-idea-assumptions li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.from-idea-assumptions .result {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.from-idea-assumptions .result.confirmed {
+  color: var(--ok);
+}
+.from-idea-assumptions .result.rejected {
+  color: var(--err);
+}

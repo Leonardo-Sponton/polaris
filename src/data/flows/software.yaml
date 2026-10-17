@@ -1,0 +1,61 @@
+# Software flow, from common industry practice (SPEC 5.5).
+# Each step: id (also the step's folder name), name, short guidance, suggested note sections.
+id: software
+name: Software
+steps:
+  - id: 01-discovery
+    name: Discovery
+    guidance: >-
+      Understand the problem before the solution. Who has it, how they deal with it today and why
+      that is not enough. Talk to real people and write down what you saw, not what you imagine.
+    sections: [Problem, Who has it, Current alternatives, Interviews, Insights]
+  - id: 02-lean-canvas
+    name: Lean Canvas
+    guidance: >-
+      One page with the plan as hypotheses: problem, customer segments, unique value proposition,
+      solution, channels, revenue streams, cost structure, key metrics and unfair advantage.
+    sections:
+      - Problem
+      - Customer segments
+      - Unique value proposition
+      - Solution
+      - Channels
+      - Revenue streams
+      - Cost structure
+      - Key metrics
+      - Unfair advantage
+  - id: 03-requirements
+    name: Requirements
+    guidance: >-
+      Write user stories ("As a …, I want … so that …") with acceptance criteria. Sort them with
+      MoSCoW: Must have, Should have, Could have, Won't have (this time).
+    sections: [User stories, Must have, Should have, Could have, Won't have]
+  - id: 04-mvp-scope
+    name: MVP scope
+    guidance: >-
+      The smallest version that tests the riskiest assumption with real users. Say what is in, what
+      is out, and how you will know it worked.
+    sections: [In scope, Out of scope, Success criteria]
+  - id: 05-architecture
+    name: Architecture
+    guidance: >-
+      C4 model: context (the system and who uses it), containers (apps, databases), components.
+      Record each important decision as an ADR: context, decision, consequences.
+    sections: [Context, Containers, Components, Decisions (ADRs)]
+  - id: 06-backlog-roadmap
+    name: Backlog / Roadmap
+    guidance: >-
+      Break the stories into small tasks in priority order and group them into milestones. Keep the
+      backlog as this step's to-dos.
+    sections: [Milestones, Backlog]
+  - id: 07-release
+    name: Release
+    guidance: >-
+      Prepare and ship: tests, build, version number, release notes, where people get it, and how
+      to roll back if something breaks.
+    sections: [Checklist, Release notes, Distribution]
+  - id: 08-retrospective
+    name: Retrospective
+    guidance: >-
+      Look back: what went well, what did not, what was learned, and what to change next time.
+    sections: [What went well, What did not, Learnings, Next time]

@@ -1,0 +1,70 @@
+# Business flow, from the "Plano de Voo Empreendedor" (modules 0 to 5).
+# Each step: id (also the step's folder name), name, short guidance, suggested note sections.
+id: business
+name: Business
+steps:
+  - id: 00-integrating-environment
+    name: Integrating environment
+    guidance: >-
+      Pick an incubator and an accelerator that fit the idea, and write why. They differ in focus,
+      criteria and resources: mentoring, networking, infrastructure, access to investment and
+      validation with the market.
+    sections: [Incubator, Accelerator]
+  - id: 01-business-model
+    name: Business Model Canvas + financial viability
+    guidance: >-
+      Canvas: how the business works (partners, activities, resources, value proposition,
+      relationships, channels, customer segments, costs, revenue). Viability: whether it can pay
+      for itself (income statement, price, unit cost, average sales, investment, break-even,
+      payback).
+    sections:
+      - Key partners
+      - Key activities
+      - Key resources
+      - Value proposition
+      - Customer relationships
+      - Channels
+      - Customer segments
+      - Cost structure
+      - Revenue streams
+      - Financial viability
+  - id: 02-prototype-mvp
+    name: Prototype / MVP
+    guidance: >-
+      Take the idea off paper and test it before investing much. Prototype: a first version to see,
+      test and improve. MVP: the simplest version with the essentials, shown to real customers to
+      check interest. Goals: validation, feedback, less risk.
+    sections: [Prototype, MVP, Validation, Feedback]
+  - id: 03-agile-methods
+    name: Agile methods
+    guidance: >-
+      Choose how to work. Lean Startup: build → measure → learn with MVPs to test hypotheses.
+      Scrum: short cycles (sprints) with tasks, owners and deliveries. Kanban: a board
+      To do → Doing → Done.
+    sections: [Lean Startup, Scrum, Kanban]
+  - id: 04-sustainability
+    name: Sustainability
+    guidance: >-
+      Assess the impact and propose adaptations. Environmental (energy, data, old devices), social
+      (real problem, ease of use, accessibility, price), privacy and security (which personal data,
+      protection, deleting the account; LGPD in Brazil), economic (costs, revenue model,
+      break-even, no constant outside investment). Turn the analysis into indicators.
+    sections: [Environmental, Social, Privacy and security, Economic, Indicators]
+  - id: 05-pitch
+    name: Pitch
+    guidance: >-
+      A short presentation that tells the idea's path and the evidence behind the opportunity:
+      problem, solution, customers, how it makes money, what was validated and the next steps.
+    sections:
+      - Opening
+      - Problem
+      - Target audience
+      - Solution
+      - Value proposition
+      - Business model
+      - Prototype
+      - Methods used
+      - Financial viability
+      - Sustainability
+      - Next steps
+      - Closing

@@ -60,7 +60,8 @@ function IdeaRow({ idea: i, active, onOpen, onMenu }: { idea: Idea; active: bool
   );
 }
 
-export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { path: string; key: number } }) {
+export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key: number }; onOpenProject(path: string): void }) {
+  const { ideas, openPath } = props;
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
@@ -217,7 +218,7 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
       </div>
       <div className="detail-pane">
         {open ? (
-          <IdeaEditor key={open} path={open} onBack={() => setOpen(null)} onGone={() => setOpen(null)} />
+          <IdeaEditor key={open} path={open} onBack={() => setOpen(null)} onGone={() => setOpen(null)} onOpenProject={props.onOpenProject} />
         ) : (
           <div className="detail-empty muted">Pick an idea or press New.</div>
         )}

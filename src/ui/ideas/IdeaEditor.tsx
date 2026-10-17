@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Archive, ArrowLeft, FolderPlus, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, FolderKanban, FolderPlus, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import type { Data } from "../../data/frontmatter";
 import {
@@ -13,6 +13,8 @@ import {
   type Template,
 } from "../../data/ideas";
 import type { Note } from "../../data/notes";
+import { PROJECT_FILE, createProject, flowForTemplate } from "../../data/projects";
+import { NewProject } from "../projects/NewProject";
 import { joinTitle, splitTitle } from "../../data/todo";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText } from "../Dialog";
@@ -30,9 +32,10 @@ interface Props {
   onBack(): void;
   /** The idea left this screen (deleted). */
   onGone(): void;
+  onOpenProject(path: string): void;
 }
 
-export function IdeaEditor({ path, onBack, onGone }: Props) {
+export function IdeaEditor({ path, onBack, onGone, onOpenProject }: Props) {
   const { notes, bump, toast } = useApp();
   const f = useNoteFile(path);
   useBack(true, onBack);
@@ -75,14 +78,16 @@ export function IdeaEditor({ path, onBack, onGone }: Props) {
           </div>
         </div>
       ) : (
-        f.note && <IdeaForm key={f.rev} file={f} note={f.note} />
+        f.note && <IdeaForm key={f.rev} file={f} note={f.note} onOpenProject={onOpenProject} />
       )}
       {f.dialog}
     </div>
   );
 }
 
-function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
+function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note; onOpenProject(path: string): void }) {
+  const { notes, bump, toast } = useApp();
+  const [making, setMaking] = useState(false);
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const [d, setD] = useState<Data>(note.data);
@@ -221,17 +226,21 @@ function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
         <div className="row task-actions">
           {active ? (
             <>
-              <button className="btn" disabled title="Projects come in stage 6">
+              <button className="btn" onClick={() => setMaking(true)}>
                 <FolderPlus size={18} /> Make it a project
               </button>
               <button className="btn" onClick={() => setArchiving(true)}>
                 <Archive size={18} /> Archive
               </button>
             </>
+          ) : idea.status === "archived" ? (
+            <button className="btn" onClick={() => patch(reopenPatch())}>
+              <RotateCcw size={18} /> Reopen
+            </button>
           ) : (
-            idea.status === "archived" && (
-              <button className="btn" onClick={() => patch(reopenPatch())}>
-                <RotateCcw size={18} /> Reopen
+            idea.project && (
+              <button className="btn" onClick={() => onOpenProject(`projects/${idea.project}/${PROJECT_FILE}`)}>
+                <FolderKanban size={18} /> Open the project
               </button>
             )
           )}
@@ -239,6 +248,26 @@ function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
         </div>
       </div>
 
+      {making && (
+        <NewProject
+          title="Make it a project"
+          initialName={title}
+          initialFlow={flowForTemplate(idea.template)}
+          okLabel="Make project"
+          onClose={() => setMaking(false)}
+          onOk={async (name, flow) => {
+            setMaking(false);
+            try {
+              await f.saveNow();
+              const n = await createProject(notes, { title: name, flow, idea: note.path });
+              bump();
+              onOpenProject(n.path);
+            } catch (e) {
+              toast({ text: e instanceof Error ? e.message : String(e), error: true });
+            }
+          }}
+        />
+      )}
       {archiving && (
         <AskText
           title="Why didn't it work?"

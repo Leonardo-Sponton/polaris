@@ -1,7 +1,8 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, FolderKanban, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { dayOfPath, MOODS, type Entry } from "../data/journal";
+import { isProjectPath, isStepNotePath } from "../data/projects";
 import { isQuotePath } from "../data/quotes";
 import { QUESTIONS, type ReviewEntry } from "../data/review";
 import { markSeen, resurface, type Idea } from "../data/ideas";
@@ -10,6 +11,7 @@ import { BooksView, useBooks } from "./books/BooksView";
 import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
+import { ProjectsView, useProjects } from "./projects/ProjectsView";
 import { CloseDay } from "./journal/CloseDay";
 import { JournalView, useJournal } from "./journal/JournalView";
 import { ReviewView, useReviews } from "./review/ReviewView";
@@ -27,12 +29,12 @@ import { goBack, useBack } from "./useBack";
 import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
 
-// The areas built so far. Projects join in a later stage (SPEC 7).
-export type Area = "today" | "ideas" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
+export type Area = "today" | "ideas" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
   { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
+  { id: "projects", label: "Projects", icon: <FolderKanban size={20} /> },
   { id: "books", label: "Books", icon: <BookOpen size={20} /> },
   { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
   { id: "journal", label: "Journal", icon: <NotebookPen size={20} /> },
@@ -191,6 +193,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const todo = useTodo();
   const inbox = useInbox();
   const ideas = useIdeas();
+  const projects = useProjects();
   const books = useBooks();
   const quotes = useQuotes(books);
   const thoughts = useThoughts();
@@ -223,6 +226,10 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
     setTarget({ path, key: Date.now() });
     setArea("todo");
   });
+  const openIn = (a: Area, path: string) => {
+    setTarget({ path, key: Date.now() });
+    setArea(a);
+  };
   const go = (a: Area) => {
     setTarget(undefined);
     setThoughtTarget(undefined);
@@ -323,7 +330,10 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       );
       break;
     case "ideas":
-      page = <IdeasView ideas={ideas} openPath={target} />;
+      page = <IdeasView ideas={ideas} openPath={target} onOpenProject={path => openIn("projects", path)} />;
+      break;
+    case "projects":
+      page = <ProjectsView projects={projects} openPath={target} onOpenIdea={path => openIn("ideas", path)} />;
       break;
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
@@ -365,10 +375,11 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
               (d.area === "journal" ? openJournal : openReview)(day);
               return true;
             }
-            if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas" && d.area !== "books") return false;
+            if (!["todo", "inbox", "ideas", "books", "projects"].includes(d.area)) return false;
             if (d.area === "books" && !d.path.endsWith("/book.md") && !isQuotePath(d.path)) return false;
+            if (d.area === "projects" && !isProjectPath(d.path) && !isStepNotePath(d.path)) return false;
             setTarget({ path: d.path, key: Date.now() });
-            setArea(d.area);
+            setArea(d.area as Area);
             return true;
           }}
         />
