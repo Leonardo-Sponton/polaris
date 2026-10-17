@@ -20,6 +20,7 @@ interface HypoBridge {
     remove(path: string): Promise<void>;
   };
   onFileChanged(cb: (path: string) => void): () => void;
+  onClosing(flush: () => Promise<void>): void;
 }
 
 declare global {
@@ -44,5 +45,6 @@ export function electronPlatform(): Platform {
     pickFolder: () => b.pickFolder(),
     openDataFolder: () => b.openFolder(),
     onFileChanged: cb => b.onFileChanged(cb),
+    onClosing: flush => b.onClosing(flush),
   };
 }

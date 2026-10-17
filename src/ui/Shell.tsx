@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { CheckSquare, Inbox, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { InboxView } from "./InboxView";
 import { SettingsView } from "./SettingsView";
 
 // The areas built so far. Ideas, Books, Journal… join in later stages (SPEC 7).
@@ -51,6 +52,9 @@ export function Shell() {
 
   let page: ReactNode;
   switch (area) {
+    case "inbox":
+      page = <InboxView />;
+      break;
     case "settings":
       page = <SettingsView />;
       break;

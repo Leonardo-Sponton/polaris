@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Platform } from "../platform/types";
 import { Notes } from "../data/notes";
 import { initDataFolder, loadSettings, saveSettings, type Settings } from "../data/settings";
+import { flushAll } from "../data/pending";
 import { Ctx, type AppCtx, type Toast } from "./context";
 import { FileAccess, FirstRun } from "./FirstRun";
 import { Shell } from "./Shell";
@@ -62,6 +63,16 @@ export function App({ platform }: { platform: Platform }) {
     };
   }, [boot.step, platform]);
 
+  // Unsaved edits are written when the app goes to the background (Android) or closes (desktop).
+  useEffect(() => {
+    platform.onClosing?.(flushAll);
+    const onHide = () => document.visibilityState === "hidden" && flushAll();
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, [platform]);
+
+  const bump = useCallback(() => setVersion(v => v + 1), []);
+
   const toast = useCallback((t: Omit<Toast, "id">) => {
     const id = nextId.current++;
     setToasts(list => [...list.slice(-2), { ...t, id }]);
@@ -96,7 +107,7 @@ export function App({ platform }: { platform: Platform }) {
     },
     toast,
     version,
-    bump: () => setVersion(v => v + 1),
+    bump,
   };
 
   return (

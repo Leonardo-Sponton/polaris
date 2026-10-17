@@ -16,4 +16,6 @@ export interface Platform {
   storage: Storage;
   /** Calls back when a file changes outside the app. Returns a function that stops it. */
   onFileChanged?(cb: (path: string) => void): () => void;
+  /** Desktop: the window is closing; `flush` writes unsaved edits first. */
+  onClosing?(flush: () => Promise<void>): void;
 }

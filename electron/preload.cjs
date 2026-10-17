@@ -17,6 +17,16 @@ contextBridge.exposeInMainWorld("hypo", {
     move: call("fs:move"),
     remove: call("fs:remove"),
   },
+  // The window is closing: run `flush`, then tell the main process it may close.
+  onClosing: flush => {
+    ipcRenderer.on("app:closing", async () => {
+      try {
+        await flush();
+      } finally {
+        ipcRenderer.send("app:flushed");
+      }
+    });
+  },
   onFileChanged: cb => {
     const listener = (_e, path) => cb(path);
     ipcRenderer.on("fs:changed", listener);

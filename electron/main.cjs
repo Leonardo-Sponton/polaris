@@ -149,13 +149,31 @@ function createWindow() {
   else mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   if (process.env.HYPO_SHOT) {
     // Test helper: save a screenshot and quit (used to check the UI without a person watching).
+    // HYPO_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
     mainWindow.webContents.once("did-finish-load", () =>
       setTimeout(async () => {
+        if (process.env.HYPO_SHOT_JS) {
+          await mainWindow.webContents.executeJavaScript(process.env.HYPO_SHOT_JS).catch(e => console.error(e));
+          await new Promise(r => setTimeout(r, Number(process.env.HYPO_SHOT_WAIT || 800)));
+        }
+        // HYPO_SHOT=close: close the window the way the window manager does (tests saving on close).
+        if (process.env.HYPO_SHOT === "close") return mainWindow.close();
         fs.writeFileSync(process.env.HYPO_SHOT, (await mainWindow.webContents.capturePage()).toPNG());
         app.quit();
       }, Number(process.env.HYPO_SHOT_DELAY || 1500)),
     );
   }
+  // Closing: give the page up to 3 s to write unsaved edits (SPEC 2.4), then close.
+  let closing = false;
+  mainWindow.on("close", e => {
+    if (closing) return;
+    e.preventDefault();
+    closing = true;
+    const done = () => mainWindow && mainWindow.destroy();
+    ipcMain.once("app:flushed", done);
+    setTimeout(done, 3000);
+    mainWindow.webContents.send("app:closing");
+  });
   mainWindow.on("closed", () => (mainWindow = null));
 }
 
