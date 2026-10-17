@@ -2052,3 +2052,28 @@ label.contents {
   height: 7px;
   border-radius: 50%;
 }
+
+/* ---- Sync (SPEC 6) ---- */
+.sync-device {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.sync-device .what {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.sync-conflicts {
+  margin: 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+/* Above everything, toasts included: nothing can be edited while the PC syncs. */
+.dialog-backdrop.sync-lock {
+  z-index: 100;
+  background: rgb(0 0 0 / 0.75);
+}

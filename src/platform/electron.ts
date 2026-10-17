@@ -1,6 +1,6 @@
 import type { Reminder } from "../data/reminders";
 import type { FileInfo, Storage } from "../storage/types";
-import type { Platform } from "./types";
+import type { Device, Platform, SyncBridge } from "./types";
 
 // Functions exposed by electron/preload.cjs.
 interface HypoBridge {
@@ -15,6 +15,14 @@ interface HypoBridge {
   saveBackup(name: string, data: Uint8Array): Promise<string | null>;
   setReminders(list: Reminder[]): Promise<void>;
   onReminderOpen(cb: (path: string) => void): () => void;
+  sync: {
+    devices(): Promise<{ adb: boolean; list: Device[] }>;
+    pcName(): Promise<string>;
+    localHashes(): Promise<Record<string, string>>;
+    deviceHashes(serial: string, dir: string): Promise<Record<string, string>>;
+    /** The same functions as `fs`, with the device serial and folder first. */
+    fs: Record<keyof Storage, (serial: string, dir: string, ...args: any[]) => Promise<any>>;
+  };
   fs: {
     list(dir: string): Promise<FileInfo[]>;
     stat(path: string): Promise<FileInfo | null>;
@@ -39,6 +47,29 @@ export function isElectron() {
   return !!window.hypo;
 }
 
+function syncBridge(b: HypoBridge): SyncBridge {
+  const map = (o: Record<string, string>) => new Map(Object.entries(o));
+  return {
+    devices: () => b.sync.devices(),
+    pcName: () => b.sync.pcName(),
+    localHashes: async () => map(await b.sync.localHashes()),
+    deviceHashes: async (serial, dir) => map(await b.sync.deviceHashes(serial, dir)),
+    deviceStorage: (serial, dir) => {
+      const f = b.sync.fs;
+      return {
+        list: p => f.list(serial, dir, p),
+        stat: p => f.stat(serial, dir, p),
+        read: p => f.read(serial, dir, p),
+        readBinary: p => f.readBinary(serial, dir, p),
+        write: (p, text) => f.write(serial, dir, p, text),
+        writeBinary: (p, data) => f.writeBinary(serial, dir, p, data),
+        move: (from, to) => f.move(serial, dir, from, to),
+        remove: p => f.remove(serial, dir, p),
+      };
+    },
+  };
+}
+
 export function electronPlatform(): Platform {
   const b = window.hypo!;
   const storage: Storage = { ...b.fs };
@@ -57,5 +88,6 @@ export function electronPlatform(): Platform {
     saveBackup: (name, data) => b.saveBackup(name, data),
     setReminders: list => b.setReminders(list),
     onReminderOpen: cb => b.onReminderOpen(cb),
+    sync: syncBridge(b),
   };
 }

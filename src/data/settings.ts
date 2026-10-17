@@ -6,6 +6,8 @@ export type Theme = "dark" | "light" | "system";
 
 export interface Settings {
   theme: Theme;
+  /** PC: the data folder on the Android devices it syncs with (SPEC 6.1). */
+  syncDeviceDir?: string;
 }
 
 export const SETTINGS_PATH = ".hypomnemata/settings.json";

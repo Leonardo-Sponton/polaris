@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { dayOfPath, MOODS, type Entry } from "../data/journal";
 import { isQuotePath } from "../data/quotes";
@@ -16,6 +16,7 @@ import { ReviewView, useReviews } from "./review/ReviewView";
 import { useCapture } from "./useCapture";
 import { SearchView, type SearchState } from "./SearchView";
 import { SettingsView } from "./SettingsView";
+import { SyncView } from "./SyncView";
 import { ThoughtOfDay } from "./thoughts/ThoughtOfDay";
 import { ThoughtsView, useThoughts } from "./thoughts/ThoughtsView";
 import { TrashView } from "./TrashView";
@@ -27,7 +28,7 @@ import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
 
 // The areas built so far. Projects join in a later stage (SPEC 7).
-export type Area = "today" | "ideas" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "settings" | "more";
+export type Area = "today" | "ideas" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
@@ -40,6 +41,7 @@ const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
   { id: "search", label: "Search", icon: <Search size={20} /> },
   { id: "trash", label: "Trash", icon: <Trash2 size={20} /> },
+  { id: "sync", label: "Sync", icon: <Usb size={20} /> },
   { id: "settings", label: "Settings", icon: <SettingsIcon size={20} /> },
 ];
 
@@ -374,6 +376,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       break;
     case "trash":
       page = <TrashView />;
+      break;
+    case "sync":
+      page = <SyncView />;
       break;
     case "more":
       page = <More go={go} />;

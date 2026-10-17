@@ -16,6 +16,15 @@ contextBridge.exposeInMainWorld("hypo", {
     ipcRenderer.on("reminder:open", listener);
     return () => ipcRenderer.removeListener("reminder:open", listener);
   },
+  sync: {
+    devices: call("sync:devices"),
+    pcName: call("sync:pcName"),
+    localHashes: call("sync:localHashes"),
+    deviceHashes: call("sync:deviceHashes"),
+    fs: Object.fromEntries(
+      ["list", "stat", "read", "readBinary", "write", "writeBinary", "move", "remove"].map(op => [op, call(`dev:${op}`)]),
+    ),
+  },
   fs: {
     list: call("fs:list"),
     stat: call("fs:stat"),

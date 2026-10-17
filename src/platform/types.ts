@@ -1,5 +1,25 @@
 import type { Reminder } from "../data/reminders";
 import type { Storage } from "../storage/types";
+import type { Hashes } from "../data/sync";
+
+/** A device seen by `adb devices`. state: "device" (ready), "unauthorized", "offline"… */
+export interface Device {
+  serial: string;
+  state: string;
+  model: string;
+}
+
+/** PC side of the USB sync (SPEC 6). */
+export interface SyncBridge {
+  /** adb: false when the adb program was not found. */
+  devices(): Promise<{ adb: boolean; list: Device[] }>;
+  pcName(): Promise<string>;
+  /** Every file of this data folder (the trash left out). */
+  localHashes(): Promise<Hashes>;
+  deviceHashes(serial: string, dir: string): Promise<Hashes>;
+  /** The device's data folder `dir`, as a Storage. */
+  deviceStorage(serial: string, dir: string): Storage;
+}
 
 // What each launcher (Electron, Android) gives the app besides file access.
 export interface Platform {
@@ -19,6 +39,8 @@ export interface Platform {
   /** Saves a backup .zip outside the data folder. Returns where it went, or null if canceled. */
   saveBackup?(name: string, data: Uint8Array): Promise<string | null>;
   storage: Storage;
+  /** Desktop: USB sync with Android devices. */
+  sync?: SyncBridge;
   /** Calls back when a file changes outside the app. Returns a function that stops it. */
   onFileChanged?(cb: (path: string) => void): () => void;
   /** Desktop: the window is closing; `flush` writes unsaved edits first. */

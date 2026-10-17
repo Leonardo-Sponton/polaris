@@ -7,6 +7,7 @@ import { Ctx, type AppCtx, type Toast } from "./context";
 import { FileAccess, FirstRun } from "./FirstRun";
 import { Shell } from "./Shell";
 import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
+import { SyncLock } from "./SyncView";
 
 // `#capture`: the small quick capture window (Linux, `hypomnemata --capture`).
 const CAPTURE_ONLY = location.hash === "#capture";
@@ -129,6 +130,7 @@ export function App({ platform }: { platform: Platform }) {
   return (
     <Ctx.Provider value={ctx}>
       {CAPTURE_ONLY ? <CaptureWindow /> : <Shell captureKey={captureKey} />}
+      <SyncLock />
       <div className="toasts" aria-live="polite">
         {toasts.map(t => (
           <div key={t.id} className={`toast${t.error ? " error" : ""}`}>

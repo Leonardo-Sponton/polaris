@@ -5,6 +5,7 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 const os = require("os");
+const adb = require("./adb.cjs");
 
 const configFile = () => path.join(app.getPath("userData"), "config.json");
 
@@ -122,6 +123,13 @@ const handlers = {
   },
   "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
   "reminders:set": (_e, list) => setReminders(list),
+  "sync:devices": () => adb.devices(),
+  "sync:pcName": () => os.hostname(),
+  "sync:localHashes": () => adb.localHashes(resolve("")),
+  "sync:deviceHashes": (_e, serial, root) => adb.deviceHashes(String(serial), root),
+  ...Object.fromEntries(
+    Object.entries(adb.deviceFs).map(([op, fn]) => [`dev:${op}`, (_e, serial, root, ...args) => fn(String(serial), root, ...args)]),
+  ),
 };
 
 // ---- Reminders (SPEC 5.3) ----
