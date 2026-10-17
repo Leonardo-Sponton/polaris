@@ -4,7 +4,9 @@ import { isoDate } from "../data/dates";
 import { isToday, type View } from "../data/todo";
 import { InboxView, useInbox } from "./InboxView";
 import { useCapture } from "./useCapture";
+import { SearchView, type SearchState } from "./SearchView";
 import { SettingsView } from "./SettingsView";
+import { TrashView } from "./TrashView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
 
@@ -22,17 +24,6 @@ const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
 
 // Phone bottom bar (SPEC 4.1); the rest lives under More.
 const BOTTOM: Area[] = ["today", "todo", "more"];
-
-function Placeholder({ title, note }: { title: string; note: string }) {
-  return (
-    <div className="page">
-      <div className="page-inner">
-        <h1>{title}</h1>
-        <p className="muted">{note}</p>
-      </div>
-    </div>
-  );
-}
 
 function More({ go }: { go: (a: Area) => void }) {
   return (
@@ -59,7 +50,28 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const todo = useTodo();
   const inbox = useInbox();
   const capture = useCapture();
+  const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
+  const [searchKey, setSearchKey] = useState(0);
+  // A search result to open in To-do or Inbox (key: open it again even if it is the same path).
+  const [target, setTarget] = useState<{ path: string; key: number } | undefined>();
   const today = isoDate();
+  const go = (a: Area) => {
+    setTarget(undefined);
+    setArea(a);
+  };
+
+  // Ctrl+F: search (SPEC 4.4).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setArea("search");
+        setSearchKey(k => k + 1);
+      }
+    };
+    addEventListener("keydown", onKey);
+    return () => removeEventListener("keydown", onKey);
+  }, []);
   const todayCount = todo.tasks.filter(t => isToday(t, today)).length;
 
   // The Android "Capture" shortcut: go to Today, where the field gets the focus.
@@ -79,7 +91,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
             onCapture: capture,
             focusKey: captureKey,
             footer: inbox.length > 0 && (
-              <button className="today-card" onClick={() => setArea("inbox")}>
+              <button className="today-card" onClick={() => go("inbox")}>
                 <Inbox size={18} />
                 <span>Inbox</span>
                 <span className="count">{inbox.length}</span>
@@ -91,19 +103,35 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       );
       break;
     case "inbox":
-      page = <InboxView items={inbox} />;
+      page = <InboxView items={inbox} openPath={target} />;
       break;
     case "todo":
-      page = <TodoView view={view} setView={setView} data={todo} />;
+      page = <TodoView view={view} setView={setView} data={todo} openPath={target} />;
       break;
     case "settings":
       page = <SettingsView />;
       break;
-    case "more":
-      page = <More go={setArea} />;
+    case "search":
+      page = (
+        <SearchView
+          state={search}
+          setState={setSearch}
+          focusKey={searchKey}
+          openElsewhere={d => {
+            if (d.area !== "todo" && d.area !== "inbox") return false;
+            setTarget({ path: d.path, key: Date.now() });
+            setArea(d.area);
+            return true;
+          }}
+        />
+      );
       break;
-    default:
-      page = <Placeholder title={AREAS.find(a => a.id === area)!.label} note="Being built in stage 1." />;
+    case "trash":
+      page = <TrashView />;
+      break;
+    case "more":
+      page = <More go={go} />;
+      break;
   }
 
   const inMore = !BOTTOM.includes(area);
@@ -144,7 +172,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           <Fragment key={a.id}>
             <button
               className={`nav-item${area === a.id ? " active" : ""}`}
-              onClick={() => setArea(a.id)}
+              onClick={() => go(a.id)}
               title={a.label}
             >
               {a.icon}
@@ -162,7 +190,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           const a = AREAS.find(x => x.id === id);
           const active = id === "more" ? inMore : area === id;
           return (
-            <button key={id} className={`nav-item${active ? " active" : ""}`} onClick={() => setArea(id)}>
+            <button key={id} className={`nav-item${active ? " active" : ""}`} onClick={() => go(id)}>
               {a ? a.icon : <Menu size={20} />}
               <span>{a ? a.label : "More"}</span>
             </button>

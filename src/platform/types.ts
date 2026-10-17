@@ -13,6 +13,8 @@ export interface Platform {
   hasFileAccess?(): Promise<boolean>;
   openFileAccessSettings?(): Promise<void>;
   openDataFolder?(): Promise<void>;
+  /** Saves a backup .zip outside the data folder. Returns where it went, or null if canceled. */
+  saveBackup?(name: string, data: Uint8Array): Promise<string | null>;
   storage: Storage;
   /** Calls back when a file changes outside the app. Returns a function that stops it. */
   onFileChanged?(cb: (path: string) => void): () => void;

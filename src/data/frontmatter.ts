@@ -67,6 +67,14 @@ export function titleOf(body: string): string {
   return m ? m[1].trim() : "";
 }
 
+/** What a list row shows: the title, or else the first line without Markdown symbols. */
+export function previewOf(body: string): string {
+  const t = titleOf(body);
+  if (t) return t;
+  const first = body.split("\n").find(l => l.trim()) ?? "";
+  return first.replace(/^\s*(#+|>|[-*+]( \[[ xX]\])?|\d+\.)\s*/, "").replace(/[*_~`]/g, "").trim();
+}
+
 /** Replaces (or adds) the first "# " heading. */
 export function withTitle(body: string, title: string): string {
   const line = `# ${title.trim()}`;

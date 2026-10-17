@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { CheckSquare, Lightbulb, Pencil, Plus, Trash2 } from "lucide-react";
-import { titleOf } from "../data/frontmatter";
+import { previewOf } from "../data/frontmatter";
 import { createInboxItem, inboxToIdea, inboxToTodo, loadInbox, undoMove, type Moved } from "../data/inbox";
 import type { Note } from "../data/notes";
 import { flushAll } from "../data/pending";
@@ -11,14 +11,6 @@ import { useApp } from "./context";
 import { useHold } from "./useHold";
 
 // Inbox (SPEC 5.2): captured items wait here until they become a to-do or an idea.
-
-/** What a list row shows: the title, or else the first line without Markdown symbols. */
-export function previewOf(body: string): string {
-  const t = titleOf(body);
-  if (t) return t;
-  const first = body.split("\n").find(l => l.trim()) ?? "";
-  return first.replace(/^\s*(#+|>|[-*+]( \[[ xX]\])?|\d+\.)\s*/, "").replace(/[*_~`]/g, "").trim();
-}
 
 /** Inbox items, newest first, reloaded whenever data on disk changes. */
 export function useInbox(): Note[] {
@@ -63,10 +55,14 @@ function ItemRow({
   );
 }
 
-export function InboxView({ items }: { items: Note[] }) {
+export function InboxView({ items, openPath }: { items: Note[]; openPath?: { path: string; key: number } }) {
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<{ path: string; isNew: boolean } | null>(null);
   const [menu, setMenu] = useState<Note | null>(null);
+
+  useEffect(() => {
+    if (openPath) setOpen({ path: openPath.path, isNew: false });
+  }, [openPath]);
 
   const fail = useCallback(
     (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true }),

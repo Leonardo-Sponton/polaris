@@ -66,6 +66,15 @@ const handlers = {
     });
     return r.canceled ? null : r.filePaths[0];
   },
+  "dialog:saveBackup": async (e, name, data) => {
+    const r = await dialog.showSaveDialog(BrowserWindow.fromWebContents(e.sender), {
+      defaultPath: path.join(os.homedir(), path.basename(String(name))),
+      filters: [{ name: "Zip", extensions: ["zip"] }],
+    });
+    if (r.canceled || !r.filePath) return null;
+    await fsp.writeFile(r.filePath, Buffer.from(data));
+    return r.filePath;
+  },
   "fs:list": async (_e, dir) => {
     const abs = dir ? resolve(dir) : resolve("");
     let names;

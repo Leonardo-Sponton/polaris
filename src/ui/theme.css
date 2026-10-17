@@ -1137,3 +1137,56 @@ h3 {
   justify-content: center;
   color: var(--ok);
 }
+
+/* ---- Search ---- */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 8px 10px;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.search-box:focus-within {
+  border-color: var(--accent);
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--strong);
+  font: inherit;
+}
+.search-filters {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.search-snippet {
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.search-snippet mark {
+  background: var(--select);
+  color: var(--strong);
+  border-radius: 3px;
+}
+
+/* ---- Trash ---- */
+.trash-li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.trash-li .list-item {
+  flex: 1;
+  min-width: 0;
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorState } from "@codemirror/state";
 import { buildDecorations, toggleTask } from "../src/editor/livePreview";
-import { previewOf } from "../src/ui/InboxView";
+import { previewOf } from "../src/data/frontmatter";
 
 const stateOf = (doc: string) => EditorState.create({ doc, extensions: [markdown({ base: markdownLanguage })] });
 

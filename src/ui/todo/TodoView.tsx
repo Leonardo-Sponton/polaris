@@ -60,11 +60,13 @@ interface Props {
   data: TodoData;
   /** The Today start screen (SPEC 5.1): the capture field instead of task entry, no list chips. */
   home?: { onCapture(c: Capture): Promise<boolean>; footer?: ReactNode; focusKey?: number };
+  /** A task to open (from Search). */
+  openPath?: { path: string; key: number };
 }
 
 const LONG_DATE = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
-export function TodoView({ view, setView, data, home }: Props) {
+export function TodoView({ view, setView, data, home, openPath }: Props) {
   const { notes, bump, toast, platform } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState<Task | null>(null);
@@ -92,6 +94,10 @@ export function TodoView({ view, setView, data, home }: Props) {
   }, []);
 
   useEffect(() => setLimit(LOGBOOK_PAGE), [view]);
+
+  useEffect(() => {
+    if (openPath) setOpen(openPath.path);
+  }, [openPath]);
 
   // The Android "Capture" shortcut asks for the field (focusKey changes each time).
   useEffect(() => {

@@ -60,6 +60,12 @@ export function androidPlatform(): Platform {
     setDataDir: async dir => localStorage.setItem(KEY, dir.replace(/\/+$/, "")),
     hasFileAccess: async () => (await Native.hasAccess()).granted,
     openFileAccessSettings: () => Native.openAccessSettings(),
+    // Backups go to the phone's Download folder, outside the data folder.
+    saveBackup: async (name, data) => {
+      const dir = `${(await Native.storageRoot()).path}/Download`;
+      await Native.writeBase64({ root: dir, path: name, data: toBase64(data) });
+      return `${dir}/${name}`;
+    },
     showKeyboard: () => Native.showKeyboard(),
     onCaptureRequest: cb => {
       const handle = Native.addListener("capture", cb);
