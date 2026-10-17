@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Editor } from "../editor/Editor";
+import { useBack } from "./useBack";
 import { STATUS_TEXT, useNoteFile } from "./useNoteFile";
 
 // Opens one file in the editor and keeps it saved (see useNoteFile).
@@ -20,6 +21,7 @@ interface Props {
 
 export function NoteEditor({ path, placeholder, onBack, removeIfEmpty, autoFocus, actions }: Props) {
   const f = useNoteFile(path, { removeIfEmpty: removeIfEmpty ? body => body.trim() === "" : undefined });
+  useBack(!!onBack, () => onBack?.());
 
   return (
     <div className="note-editor">

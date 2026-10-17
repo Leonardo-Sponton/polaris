@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useBack } from "./useBack";
 
 // Small modal pieces. Electron has no window.prompt, so text questions use AskText.
 
 export function Dialog({ title, onClose, children }: { title: string; onClose(): void; children: ReactNode }) {
+  useBack(true, onClose);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
   }, [onClose]);
+  // A tap on the backdrop closes; a swipe that starts there does not (on Android the back swipe
+  // from the screen edge would otherwise close the dialog and then go back once more).
+  const downOnBackdrop = useRef(false);
   return (
-    <div className="dialog-backdrop" onPointerDown={e => e.target === e.currentTarget && onClose()}>
+    <div
+      className="dialog-backdrop"
+      onPointerDown={e => (downOnBackdrop.current = e.target === e.currentTarget)}
+      onClick={e => downOnBackdrop.current && e.target === e.currentTarget && onClose()}
+    >
       <div className="card stack dialog" role="dialog" aria-label={title}>
         <h2>{title}</h2>
         {children}

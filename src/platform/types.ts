@@ -37,4 +37,8 @@ export interface Platform {
   openExactAlarmSettings?(): Promise<void>;
   /** Android: the app came back to the front (files may have changed meanwhile, e.g. by sync). */
   onResume?(cb: () => void): () => void;
+  /** Android: the back button or back swipe. Returns a function that stops it. */
+  onBackButton?(cb: () => void): () => void;
+  /** Android: leaves the app (sends it to the background, as Android does by default). */
+  leaveApp?(): Promise<void>;
 }

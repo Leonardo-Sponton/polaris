@@ -17,6 +17,7 @@ import { joinTitle, splitTitle } from "../../data/todo";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText } from "../Dialog";
 import { useApp } from "../context";
+import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 
 // The idea screen (SPEC 5.4): title, status, template, tags, then the free draft with the
@@ -32,6 +33,7 @@ interface Props {
 export function IdeaEditor({ path, onBack, onGone }: Props) {
   const { notes, bump, toast } = useApp();
   const f = useNoteFile(path);
+  useBack(true, onBack);
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
   const remove = async () => {

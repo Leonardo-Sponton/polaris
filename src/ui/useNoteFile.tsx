@@ -3,6 +3,7 @@ import type { Data } from "../data/frontmatter";
 import { ConflictError, type Note } from "../data/notes";
 import { onFlush } from "../data/pending";
 import { useApp } from "./context";
+import { useBack } from "./useBack";
 
 // Keeps one open file saved (SPEC 2.4): body edits autosave 1 s after typing stops, header
 // changes save at once, everything is written on leaving and when the app closes or goes to the
@@ -44,6 +45,8 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
   const [rev, setRev] = useState(0);
   const [status, setStatus] = useState<Status>("saved");
   const [conflict, setConflict] = useState<ConflictError | null>(null);
+  // The conflict question has to be answered: back does nothing while it is open.
+  useBack(!!conflict, () => {});
   const [gone, setGone] = useState<string | null>(null);
 
   const noteRef = useRef<Note | null>(null); // last version read or written by us

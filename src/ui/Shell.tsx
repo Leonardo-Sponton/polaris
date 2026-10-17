@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { isToday, type View } from "../data/todo";
@@ -10,6 +10,8 @@ import { SettingsView } from "./SettingsView";
 import { TrashView } from "./TrashView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
+import { useApp } from "./context";
+import { goBack } from "./useBack";
 import { useReminders } from "./useReminders";
 
 // The areas built so far. Books, Journal… join in later stages (SPEC 7).
@@ -67,6 +69,20 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
     setTarget(undefined);
     setArea(a);
   };
+
+  // Android back: first whatever is open (ui/useBack), then back to Today, then leave the app.
+  const { platform } = useApp();
+  const areaRef = useRef(area);
+  areaRef.current = area;
+  useEffect(
+    () =>
+      platform.onBackButton?.(() => {
+        if (goBack()) return;
+        if (areaRef.current !== "today") go("today");
+        else void platform.leaveApp?.();
+      }),
+    [platform],
+  );
 
   // Ctrl+F: search (SPEC 4.4).
   useEffect(() => {

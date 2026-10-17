@@ -11,6 +11,7 @@ import type { Note } from "../../data/notes";
 import { reminderOf } from "../../data/reminders";
 import { useApp } from "../context";
 import { AskText } from "../Dialog";
+import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 import { ScheduleDialog } from "./Schedule";
 
@@ -30,6 +31,7 @@ interface Props {
 
 export function TaskEditor(props: Props) {
   const f = useNoteFile(props.path);
+  useBack(true, props.onBack);
   return (
     <div className="note-editor">
       <div className="note-bar">

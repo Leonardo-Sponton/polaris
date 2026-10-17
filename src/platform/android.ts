@@ -1,3 +1,4 @@
+import { App } from "@capacitor/app";
 import { registerPlugin } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { parseLocal } from "../data/dates";
@@ -131,5 +132,11 @@ export function androidPlatform(): Platform {
       const handle = Native.addListener("capture", cb);
       return () => void handle.then(h => h.remove());
     },
+    // With a listener, Capacitor no longer closes the app on back; the app decides (ui/useBack).
+    onBackButton: cb => {
+      const handle = App.addListener("backButton", cb);
+      return () => void handle.then(h => h.remove());
+    },
+    leaveApp: () => App.minimizeApp(),
   };
 }
