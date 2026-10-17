@@ -1,70 +1,76 @@
-# Business flow, from the "Plano de Voo Empreendedor" (modules 0 to 5).
+# Business flow: a small real-world business (a shop, food, services), following Sebrae's guide
+# "Como elaborar um plano de negócio" (SEBRAE/MG, 2004, sections 1 to 6; formulas from 5.10).
+# Scenarios and SWOT come from the guide's later edition (2013). The executive summary is the
+# guide's first section, but the guide says to write it last, so here it is the last step.
 # Each step: id (also the step's folder name), name, short guidance, suggested note sections.
 id: business
 name: Business
 steps:
-  - id: 00-integrating-environment
-    name: Integrating environment
+  - id: 01-business-and-founders
+    name: The business and the founders
     guidance: >-
-      Pick an incubator and an accelerator that fit the idea, and write why. They differ in focus,
-      criteria and resources: mentoring, networking, infrastructure, access to investment and
-      validation with the market.
-    sections: [Incubator, Accelerator]
-  - id: 01-business-model
-    name: Business Model Canvas + financial viability
+      What the business is, what it sells and where. Who runs it: each founder's skills,
+      experience and tasks. With partners, agree in writing on goals, hours, pay (pro-labore),
+      profit sharing and what happens if one leaves. Company data: sector (industry, trade or
+      services), legal form, tax regime (in Brazil: MEI, Simples Nacional…) and starting capital.
+    sections: [The business, Founders and roles, Sector, Legal form, Tax regime, Starting capital]
+  - id: 02-market-study
+    name: Market study
     guidance: >-
-      Canvas: how the business works (partners, activities, resources, value proposition,
-      relationships, channels, customer segments, costs, revenue). Viability: whether it can pay
-      for itself (income statement, price, unit cost, average sales, investment, break-even,
-      payback).
+      Customers: who they are, what they buy, how much, how often, where, and what makes them
+      choose. Competitors: who already sells it, their prices, quality, service and location.
+      Suppliers: who sells you the materials, prices, payment terms and delivery times; have
+      more than one.
+    sections: [Customers, Competitors, Suppliers]
+  - id: 03-marketing-plan
+    name: Marketing plan
+    guidance: >-
+      The products or services in detail, the price (it must cover the costs and fit what
+      customers pay elsewhere), how people will hear about you (promotion) and how you will sell
+      (your own shop, fairs, resellers, delivery, online).
+    sections: [Products and services, Price, Promotion, Sales channels]
+  - id: 04-operational-plan
+    name: Operational plan
+    guidance: >-
+      Where the business will be and why (rules of the city, customers nearby, rent). The layout
+      of the space. How much you can make or sell per month. Each step of making and selling. How
+      many people are needed, with which skills.
+    sections: [Location, Layout, Capacity, Process, Staff]
+  - id: 05-financial-plan
+    name: Financial plan
+    guidance: >-
+      Total investment = fixed investment (equipment, furniture, tools) + working capital (stock
+      and the money to run until sales come in) + pre-operating costs (licences, renovation,
+      fees). Then per month: expected sales, cost of materials per unit, selling costs (taxes,
+      card fees, commissions), labour, depreciation and fixed costs (rent, power, phone…).
+      Income statement: sales − variable costs = contribution margin; − fixed costs = net profit.
     sections:
-      - Key partners
-      - Key activities
-      - Key resources
-      - Value proposition
-      - Customer relationships
-      - Channels
-      - Customer segments
-      - Cost structure
-      - Revenue streams
-      - Financial viability
-  - id: 02-prototype-mvp
-    name: Prototype / MVP
+      - Total investment
+      - Monthly sales
+      - Unit cost
+      - Selling costs
+      - Labour costs
+      - Fixed monthly costs
+      - Income statement
+  - id: 06-viability
+    name: Viability indicators
     guidance: >-
-      Take the idea off paper and test it before investing much. Prototype: a first version to see,
-      test and improve. MVP: the simplest version with the essentials, shown to real customers to
-      check interest. Goals: validation, feedback, less risk.
-    sections: [Prototype, MVP, Validation, Feedback]
-  - id: 03-agile-methods
-    name: Agile methods
+      Break-even in sales = fixed costs ÷ contribution margin ratio (contribution margin ÷ sales).
+      Break-even in units = fixed costs ÷ (unit price − unit variable cost). Profitability = net
+      profit ÷ sales × 100. Return on investment = net profit ÷ total investment × 100 (compare it
+      with what the money would earn in the bank). Payback = total investment ÷ net profit.
+    sections: [Break-even, Profitability, Return on investment, Payback]
+  - id: 07-scenarios-swot
+    name: Scenarios and SWOT
     guidance: >-
-      Choose how to work. Lean Startup: build → measure → learn with MVPs to test hypotheses.
-      Scrum: short cycles (sprints) with tasks, owners and deliveries. Kanban: a board
-      To do → Doing → Done.
-    sections: [Lean Startup, Scrum, Kanban]
-  - id: 04-sustainability
-    name: Sustainability
+      Run the numbers again for a pessimistic and an optimistic month (fewer or more sales,
+      higher costs) and plan what you would do in each. SWOT: strengths and weaknesses inside the
+      business, opportunities and threats outside it.
+    sections: [Pessimistic, Realistic, Optimistic, Strengths, Weaknesses, Opportunities, Threats]
+  - id: 08-summary-review
+    name: Executive summary and review
     guidance: >-
-      Assess the impact and propose adaptations. Environmental (energy, data, old devices), social
-      (real problem, ease of use, accessibility, price), privacy and security (which personal data,
-      protection, deleting the account; LGPD in Brazil), economic (costs, revenue model,
-      break-even, no constant outside investment). Turn the analysis into indicators.
-    sections: [Environmental, Social, Privacy and security, Economic, Indicators]
-  - id: 05-pitch
-    name: Pitch
-    guidance: >-
-      A short presentation that tells the idea's path and the evidence behind the opportunity:
-      problem, solution, customers, how it makes money, what was validated and the next steps.
-    sections:
-      - Opening
-      - Problem
-      - Target audience
-      - Solution
-      - Value proposition
-      - Business model
-      - Prototype
-      - Methods used
-      - Financial viability
-      - Sustainability
-      - Next steps
-      - Closing
+      Write it last, short: what the business is, the products, the customers, where it will be,
+      the investment, monthly sales, expected profit and payback. Then read the whole plan again:
+      is it viable? Decide to open it, change it or drop it.
+    sections: [Summary, Indicators, Review of the plan]

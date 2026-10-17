@@ -1,11 +1,12 @@
 import { parse } from "yaml";
 import business from "./flows/business.yaml?raw";
 import software from "./flows/software.yaml?raw";
+import startup from "./flows/startup.yaml?raw";
 
 // Built-in project flows (SPEC 5.5), kept as YAML in data/flows/. Each step's id is also the name
 // of the step's folder inside the project. Custom flows are not in this version (Q9).
 
-export type FlowId = "business" | "software";
+export type FlowId = "business" | "startup" | "software";
 
 export interface FlowStep {
   /** "02-lean-canvas": the step's folder name and the value of a project's `step`. */
@@ -36,6 +37,6 @@ function read(text: string): Flow {
   };
 }
 
-export const FLOWS: Flow[] = [read(business), read(software)];
+export const FLOWS: Flow[] = [read(business), read(startup), read(software)];
 
-export const flowOf = (id: unknown): Flow => FLOWS.find(f => f.id === id) ?? FLOWS[1];
+export const flowOf = (id: unknown): Flow => FLOWS.find(f => f.id === id) ?? FLOWS[2];

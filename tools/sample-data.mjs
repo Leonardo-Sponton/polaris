@@ -194,28 +194,41 @@ function samples() {
     out.push([`projects/${slug(proj)}/${step}/${stamp(created)}-${slug(title)}.md`, file({ type: "step-note", created: c, modified: c }, `# ${title}\n\n${rest}`)]);
   };
   // Stage 6b: gate history, one project on hold, and to-dos on the current steps.
+  // Business flow (Sebrae's plan): a real small business, now on the financial plan.
   project(at(-15, 20, 0), "Granola at the fair", {
-    flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "01-business-model",
-    gates: [{ step: "00-integrating-environment", decision: "go", reason: "The food incubator rents the kitchen by the hour; enough to start.", date: day(-8) }],
+    flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "05-financial-plan",
+    gates: [
+      { step: "01-business-and-founders", decision: "go", reason: "Just me for now; MEI is enough to start.", date: day(-13) },
+      { step: "02-market-study", decision: "go", reason: "Nobody at the fair sells granola in jars.", date: day(-11) },
+      { step: "03-marketing-plan", decision: "go", reason: "25 per jar sold well in the test.", date: day(-9) },
+      { step: "04-operational-plan", decision: "go", reason: "The food incubator rents the kitchen by the hour; enough to start.", date: day(-7) },
+    ],
   },
     "Saturday fair first; a small shop later if it works.\n");
-  stepNote("Granola at the fair", "00-integrating-environment", at(-14, 21, 0), "Incubator and accelerator",
-    "## Incubator\n\nThe city's food incubator: kitchen space by the hour and help with the health rules.\n\n## Accelerator\n\nNone yet; too early. Look again after six months of sales.\n");
-  stepNote("Granola at the fair", "01-business-model", at(-6, 20, 30), "Canvas, first pass",
-    "## Value proposition\n\nHealthy snack made the same week, in a jar that comes back.\n\n## Customer segments\n\nPeople at the Saturday fair; the gym next to it.\n\n## Revenue streams\n\n25 per jar; 2 off when the jar comes back.\n");
-  stepNote("Granola at the fair", "01-business-model", at(-2, 21, 15), "Costs per jar",
-    "Oats, honey, nuts and the jar. Bulk only pays off above 25 kg.\n\n- [ ] Ask two more suppliers\n- [ ] Price the labels\n");
+  stepNote("Granola at the fair", "01-business-and-founders", at(-14, 21, 0), "Who and how",
+    "## The business\n\nHomemade granola in returnable jars, sold at the Saturday fair near home.\n\n## Founders and roles\n\nJust me: recipes, cooking and the stall.\n\n## Tax regime\n\nMEI (food made at home or in a rented kitchen fits).\n");
+  stepNote("Granola at the fair", "02-market-study", at(-12, 20, 0), "A Saturday at the fair",
+    "## Customers\n\nPeople from the gym next door and families doing the weekly shopping.\n\n## Competitors\n\nThe bakery stall sells granola by weight in plastic bags, cheaper but no jar.\n\n## Suppliers\n\nWholesale market for oats and nuts; bulk only pays off above 25 kg.\n");
+  stepNote("Granola at the fair", "03-marketing-plan", at(-10, 21, 30), "Price and stall",
+    "## Price\n\n25 per jar; 2 off when the jar comes back.\n\n## Promotion\n\nFree tasting cups; a small sign about the returnable jar.\n");
+  stepNote("Granola at the fair", "05-financial-plan", at(-6, 20, 30), "Costs per jar",
+    "Oats, honey and nuts 9, jar 3, label 1: **13 per jar**.\n\n- [ ] Ask two more suppliers\n- [ ] Price the labels\n");
+  stepNote("Granola at the fair", "05-financial-plan", at(-2, 21, 15), "First month",
+    "## Total investment\n\nTrays, scale and cooler 600 + first stock 400 + licences 200 = **1,200**.\n\n" +
+    "## Income statement\n\n- Sales: 80 jars × 25 = 2,000\n- Variable costs: 80 × 13 = 1,040\n- Contribution margin: 960\n" +
+    "- Fixed costs: kitchen 240 + stall 160 + MEI fee 80 = 480\n- **Net profit: 480**\n");
   project(at(-1, 9, 0), "Study group app", { flow: "software", idea: ideaFile(at(-2, 22, 40), "Study group app for classmates"), step: "01-discovery" });
+  // Tech startup flow (Plano de Voo Empreendedor), on hold.
   project(at(-30, 19, 0), "Used textbook swap", {
-    flow: "software", step: "02-lean-canvas", status: "on-hold",
+    flow: "startup", step: "01-business-model", status: "on-hold",
     gates: [
-      { step: "01-discovery", decision: "go", reason: "Classmates buy and sell books in the group chat every semester.", date: day(-25) },
-      { step: "02-lean-canvas", decision: "hold", reason: "Exams first; look again in December.", date: day(-12) },
+      { step: "00-integrating-environment", decision: "go", reason: "The college incubator takes student projects every semester.", date: day(-25) },
+      { step: "01-business-model", decision: "hold", reason: "Exams first; look again in December.", date: day(-12) },
     ],
   }, "A page where classmates list the books they no longer need.\n");
-  task(at(-5, 20, 0), "Ask two more oat suppliers for prices", { project: "granola-at-the-fair", step: "01-business-model", priority: 2 });
-  task(at(-2, 21, 20), "Price the jar labels", { project: "granola-at-the-fair", step: "01-business-model", when: day(2) });
-  task(at(-12, 18, 0), "Visit the food incubator", { project: "granola-at-the-fair", step: "00-integrating-environment", status: "done", done_at: `${day(-9)}T16:00` });
+  task(at(-5, 20, 0), "Ask two more oat suppliers for prices", { project: "granola-at-the-fair", step: "05-financial-plan", priority: 2 });
+  task(at(-2, 21, 20), "Price the jar labels", { project: "granola-at-the-fair", step: "05-financial-plan", when: day(2) });
+  task(at(-12, 18, 0), "Visit the food incubator", { project: "granola-at-the-fair", step: "04-operational-plan", status: "done", done_at: `${day(-8)}T16:00` });
   task(at(-1, 9, 40), "Interview three more classmates", { project: "study-group-app", step: "01-discovery", when: day(1) });
   stepNote("Study group app", "01-discovery", at(-1, 9, 30), "Talk to classmates",
     "## Interviews\n\n- Ana: uses the group chat, loses the files.\n- Bruno: prints the summaries.\n\n## Insights\n\nThe problem is finding things later, not writing them.\n");

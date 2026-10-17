@@ -21,9 +21,10 @@ import {
 import { toTask } from "../src/data/todo";
 
 describe("flows", () => {
-  it("ships Business (6 steps from the Plano de Voo) and Software (8 steps)", () => {
+  it("ships Business (8 steps, Sebrae), Tech startup (6, Plano de Voo) and Software (8)", () => {
     expect(FLOWS.map(f => [f.id, f.steps.length])).toEqual([
-      ["business", 6],
+      ["business", 8],
+      ["startup", 6],
       ["software", 8],
     ]);
     for (const f of FLOWS) {
@@ -33,7 +34,8 @@ describe("flows", () => {
         expect(s.name && s.guidance).toBeTruthy();
       }
     }
-    expect(flowOf("business").steps[0].id).toBe("00-integrating-environment");
+    expect(flowOf("business").steps[0].id).toBe("01-business-and-founders");
+    expect(flowOf("startup").steps[0].id).toBe("00-integrating-environment");
     expect(flowOf("odd").id).toBe("software");
   });
 });
@@ -63,7 +65,7 @@ describe("projects", () => {
     await s.write("projects/empty/notes.txt", "no project.md");
     const [p] = await loadProjects(new Notes(s));
     expect(p).toMatchObject({ status: "active", title: "X", idea: undefined });
-    expect(p.step.id).toBe("00-integrating-environment");
+    expect(p.step.id).toBe("01-business-and-founders");
   });
 
   it("keeps step notes in step folders, in creation order", async () => {

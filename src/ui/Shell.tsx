@@ -69,7 +69,7 @@ function More({ go }: { go: (a: Area) => void }) {
 }
 
 // Hold More (right-click on PC) for these without leaving the current page.
-const QUICK: Area[] = ["journal", "thoughts", "inbox"];
+const QUICK: Area[] = ["projects", "journal", "review", "thoughts", "inbox"];
 
 /** Small window above the More button. While the finger that opened it is still down, sliding
  *  onto an item and lifting picks it; otherwise it stays open to be tapped. */
