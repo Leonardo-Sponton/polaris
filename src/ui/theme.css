@@ -1116,6 +1116,41 @@ h3 {
   padding-top: 12px;
 }
 
+/* ---- Ideas (SPEC 5.4) ---- */
+.chips {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-head.fold {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.idea-archived {
+  padding: 8px 12px;
+  border-left: 3px solid var(--muted);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.idea-archived p {
+  margin: 2px 0 0;
+}
+.idea-sections {
+  gap: 2px;
+}
+
 /* ---- Quick capture window (Linux --capture) ---- */
 
 .capture-window {

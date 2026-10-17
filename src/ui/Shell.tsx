@@ -1,7 +1,8 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react";
-import { ChevronRight, CheckSquare, Inbox, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { isToday, type View } from "../data/todo";
+import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
 import { useCapture } from "./useCapture";
 import { SearchView, type SearchState } from "./SearchView";
@@ -11,11 +12,12 @@ import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
 import { useReminders } from "./useReminders";
 
-// The areas built so far. Ideas, Books, Journal… join in later stages (SPEC 7).
-export type Area = "today" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
+// The areas built so far. Books, Journal… join in later stages (SPEC 7).
+export type Area = "today" | "ideas" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
+  { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
   { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
   { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
   { id: "search", label: "Search", icon: <Search size={20} /> },
@@ -24,7 +26,7 @@ const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
 ];
 
 // Phone bottom bar (SPEC 4.1); the rest lives under More.
-const BOTTOM: Area[] = ["today", "todo", "more"];
+const BOTTOM: Area[] = ["today", "ideas", "todo", "more"];
 
 function More({ go }: { go: (a: Area) => void }) {
   return (
@@ -50,6 +52,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const [homeView, setHomeView] = useState<View>("today");
   const todo = useTodo();
   const inbox = useInbox();
+  const ideas = useIdeas();
   const capture = useCapture();
   const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
   const [searchKey, setSearchKey] = useState(0);
@@ -107,6 +110,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
         />
       );
       break;
+    case "ideas":
+      page = <IdeasView ideas={ideas} openPath={target} />;
+      break;
     case "inbox":
       page = <InboxView items={inbox} openPath={target} />;
       break;
@@ -123,7 +129,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           setState={setSearch}
           focusKey={searchKey}
           openElsewhere={d => {
-            if (d.area !== "todo" && d.area !== "inbox") return false;
+            if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas") return false;
             setTarget({ path: d.path, key: Date.now() });
             setArea(d.area);
             return true;

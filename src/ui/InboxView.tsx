@@ -95,8 +95,7 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
       const m: Moved = action === "todo" ? await inboxToTodo(notes, path) : await inboxToIdea(notes, path);
       bump();
       toast({
-        // The Ideas screen arrives in stage 2; until then ideas wait in the ideas/ folder.
-        text: action === "todo" ? "Moved to To-do · Anytime" : "Moved to Ideas (the Ideas screen comes in stage 2)",
+        text: action === "todo" ? "Moved to To-do · Anytime" : "Moved to Ideas · Draft",
         action: { label: "Undo", run: () => undoMove(notes, m).then(bump, fail) },
       });
     } catch (e) {

@@ -10,7 +10,7 @@
 //   node tools/sample-data.mjs add --phone        add to the phone's data folder over adb
 //   node tools/sample-data.mjs remove --phone
 //
-// Later stages add their own samples here (ideas, books, journal…).
+// Later stages add their own samples here (books, journal…); `add` again brings only new areas.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -128,6 +128,25 @@ function samples() {
   inbox(at(-2, 14, 3), "Song to learn: Clair de Lune, Debussy\n");
   inbox(at(0, 9, 2), "Does the library open on Saturday?\n");
 
+  // ---- Ideas ----
+  const idea = (created, title, data, rest = "", seen = 0) => {
+    const c = new Date(created.getTime() + sec++ * 1000);
+    const rel = `ideas/${isoDate(c).replace(/-/g, "")}-${slug(title)}.md`;
+    const body = rest ? `# ${title}\n\n${rest}` : `# ${title}\n`;
+    const d = { type: "idea", created: isoMinute(c), modified: isoMinute(c), status: "draft", template: "blank", ...data };
+    out.push([rel, file({ ...d, last_seen: day(seen) }, body)]);
+  };
+  idea(at(-2, 22, 40), "Study group app for classmates", { template: "software", tags: "[app, study]" },
+    "Something to split the subjects and share summaries before the tests.\n\n## Problem\n\nEveryone studies alone and the group chat gets lost.\n\n## For whom\n\nMy class (about 30 people).\n", -2);
+  idea(at(-20, 19, 15), "Sell homemade granola at the fair", { status: "maturing", template: "business", tags: "[money]" },
+    "Saturday fair near home. Start with 20 jars and see.\n\n## Problem\n\nPeople there ask for healthy snacks and there are none.\n\n## Risks\n\n- Health rules for selling food\n- The cost of the jars\n", -18);
+  idea(at(-1, 8, 5), "Morning routine without the phone", { template: "personal", tags: "[life]" },
+    "First hour of the day: water, stretch, read. Phone only after breakfast.\n", -1);
+  idea(at(-30, 21, 0), "Podcast about everyday science", { tags: "[hobby]" }, "", -28);
+  idea(at(-45, 14, 30), "Bike delivery for the neighbourhood", {
+    status: "archived", template: "business", archived_reason: "The hills here make it too slow, and apps already do it",
+  }, "Deliveries for the small shops on my street.\n", -40);
+
   // ---- Trash ----
   const old = at(-12, 9, 0);
   const trashed = `.trash/todo/${stamp(old)}-print-the-boarding-pass.md`;
@@ -206,21 +225,40 @@ function readJson(io, rel, fallback) {
   }
 }
 
+const areaOf = rel => rel.split("/")[0];
+
+/**
+ * Adds the samples of every area that has none yet, so running `add` again after a new stage
+ * only brings that stage's samples (older manifests have no `areas`: taken from their files).
+ */
 function add(io) {
-  if (readJson(io, MANIFEST, null)) {
+  const m = readJson(io, MANIFEST, null);
+  const had = new Set(m ? (m.areas ?? m.files.map(areaOf)) : []);
+  const { files: all, trashIndex } = samples();
+  const files = all.filter(([rel]) => !had.has(areaOf(rel)));
+  if (!files.length) {
     console.log("Sample data is already there. Run `remove` first to make it again with today's dates.");
     return;
   }
-  const { files, trashIndex } = samples();
   for (const [rel, text] of files) io.write(rel, text);
-  const lists = readJson(io, LISTS, { lists: [] });
-  const ids = new Set(lists.lists.map(l => l.id));
-  const addedLists = SAMPLE_LISTS.filter(l => !ids.has(l.id));
-  io.write(LISTS, JSON.stringify({ ...lists, lists: [...lists.lists, ...addedLists] }, null, 2) + "\n");
-  const index = readJson(io, ".trash/.deleted.json", {});
-  io.write(".trash/.deleted.json", JSON.stringify({ ...index, ...trashIndex }, null, 2) + "\n");
-  io.write(MANIFEST, JSON.stringify({ files: files.map(f => f[0]), lists: addedLists.map(l => l.id) }, null, 2) + "\n");
-  console.log(`Added ${files.length} sample files and ${addedLists.length} lists.`);
+  let addedLists = [];
+  if (files.some(([rel]) => areaOf(rel) === "todo")) {
+    const lists = readJson(io, LISTS, { lists: [] });
+    const ids = new Set(lists.lists.map(l => l.id));
+    addedLists = SAMPLE_LISTS.filter(l => !ids.has(l.id));
+    io.write(LISTS, JSON.stringify({ ...lists, lists: [...lists.lists, ...addedLists] }, null, 2) + "\n");
+  }
+  if (files.some(([rel]) => areaOf(rel) === ".trash")) {
+    const index = readJson(io, ".trash/.deleted.json", {});
+    io.write(".trash/.deleted.json", JSON.stringify({ ...index, ...trashIndex }, null, 2) + "\n");
+  }
+  const manifest = {
+    files: [...(m?.files ?? []), ...files.map(f => f[0])],
+    lists: [...(m?.lists ?? []), ...addedLists.map(l => l.id)],
+    areas: [...new Set([...had, ...files.map(([rel]) => areaOf(rel))])],
+  };
+  io.write(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+  console.log(`Added ${files.length} sample files (${[...new Set(files.map(([r]) => areaOf(r)))].join(", ")}) and ${addedLists.length} lists.`);
 }
 
 function remove(io) {
