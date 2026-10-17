@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { MemoryStorage } from "../src/storage/memory";
 import { listTrash } from "../src/data/trash";
+import { diffLines } from "../src/data/diff";
 import {
+  canKeepBoth,
+  type Choice,
   DEVICE_LAST,
   isSynced,
   loadDeviceLast,
@@ -29,7 +32,8 @@ async function pair(files: Record<string, string>) {
   return { pc, dev };
 }
 
-const sync = (pc: MemoryStorage, dev: MemoryStorage) => syncDevice(side(pc), side(dev), target, undefined, 0);
+const sync = (pc: MemoryStorage, dev: MemoryStorage, choices?: Record<string, Choice>) =>
+  syncDevice(side(pc), side(dev), target, undefined, 0, choices && (async () => new Map(Object.entries(choices))));
 
 describe("sync plan (SPEC 6.2)", () => {
   it("follows the decision table, row by row", () => {
@@ -168,5 +172,81 @@ describe("sync run", () => {
     };
     await expect(run(sly, side(dev), new Map())).rejects.toThrow("changed during the sync");
     expect(await dev.stat("todo/a.md")).toBeNull();
+  });
+});
+
+describe("sync conflicts (SPEC 6.2)", () => {
+  async function conflicted() {
+    const { pc, dev } = await pair({ "todo/a.md": "a", "todo/gone.md": "g", "books/x/book.md": "x" });
+    await sync(pc, dev);
+    await pc.write("todo/a.md", "pc");
+    await dev.write("todo/a.md", "device");
+    await pc.remove("todo/gone.md");
+    await dev.write("todo/gone.md", "edited");
+    await pc.write("books/x/book.md", "pc book");
+    await dev.write("books/x/book.md", "device book");
+    return { pc, dev };
+  }
+
+  it("keep this PC's: copied over the device's; a deletion is repeated into the trash", async () => {
+    const { pc, dev } = await conflicted();
+    const r = await sync(pc, dev, { "todo/a.md": "pc", "todo/gone.md": "pc" });
+    expect(r.settled).toBe(2);
+    expect(r.conflicts.map(c => c.path)).toEqual(["books/x/book.md"]);
+    expect(await dev.read("todo/a.md")).toBe("pc");
+    expect(await dev.stat("todo/gone.md")).toBeNull();
+    expect((await listTrash(dev)).map(t => t.from)).toEqual(["todo/gone.md"]);
+    // Settled for good; the one left comes back.
+    expect((await sync(pc, dev)).conflicts.map(c => c.path)).toEqual(["books/x/book.md"]);
+  });
+
+  it("keep the device's: the other way round", async () => {
+    const { pc, dev } = await conflicted();
+    const r = await sync(pc, dev, { "todo/a.md": "device", "todo/gone.md": "device", "books/x/book.md": "device" });
+    expect(r.conflicts).toEqual([]);
+    expect(await pc.read("todo/a.md")).toBe("device");
+    expect(await pc.read("todo/gone.md")).toBe("edited");
+    expect(await pc.read("books/x/book.md")).toBe("device book");
+    const again = await sync(pc, dev);
+    expect(again.conflicts).toEqual([]);
+    expect(again.counts).toEqual({ toDevice: 0, toPC: 0, trashDevice: 0, trashPC: 0 });
+  });
+
+  it("keep both: the device's version becomes a (device copy) file on both sides", async () => {
+    const { pc, dev } = await conflicted();
+    await pc.write("todo/a (device copy).md", "an older copy");
+    const r = await sync(pc, dev, { "todo/a.md": "both", "todo/gone.md": "both", "books/x/book.md": "both" });
+    // Only where both files exist and the area can hold a second file.
+    expect(r.settled).toBe(1);
+    expect(r.conflicts.map(c => c.path)).toEqual(["books/x/book.md", "todo/gone.md"]);
+    for (const s of [pc, dev]) {
+      expect(await s.read("todo/a.md")).toBe("pc");
+      expect(await s.read("todo/a (device copy 2).md")).toBe("device");
+    }
+    expect((await loadLast(pc, "R5"))!.files["todo/a (device copy 2).md"]).toBeDefined();
+    expect((await sync(pc, dev)).conflicts).toHaveLength(2);
+  });
+
+  it("nothing is settled on a version that changed after it was shown", async () => {
+    const { pc, dev } = await conflicted();
+    const r = syncDevice(side(pc), side(dev), target, undefined, 0, async () => {
+      await dev.write("todo/a.md", "edited meanwhile");
+      return new Map([["todo/a.md", "pc" as Choice]]);
+    });
+    await expect(r).rejects.toThrow(/changed during the sync/);
+    expect(await dev.read("todo/a.md")).toBe("edited meanwhile");
+    expect(await dev.stat(LOCK_PATH)).toBeNull();
+  });
+
+  it("knows which files can be kept twice", () => {
+    for (const p of ["todo/a.md", "inbox/a.md", "ideas/a.md", "thoughts/a.md", "books/x/quotes/1.md", "projects/p/01-step/a.md"]) expect(canKeepBoth(p)).toBe(true);
+    for (const p of ["books/x/book.md", "books/x/cover.jpg", "journal/2026-10-17.md", "review/2026-10-17.md", ".hypomnemata/lists.json", "projects/p/project.md"])
+      expect(canKeepBoth(p)).toBe(false);
+  });
+
+  it("marks the lines that differ", () => {
+    const d = diffLines(["---", "last_reviewed: 2026-10-16", "---", "> quote"], ["---", "last_reviewed: 2026-10-17", "---", "> quote", "comment"])!;
+    expect(d.a).toEqual([false, true, false, false]);
+    expect(d.b).toEqual([false, true, false, false, true]);
   });
 });

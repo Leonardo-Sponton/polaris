@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, Smartphone } from "lucide-react";
 import { flushAll } from "../data/pending";
-import { DEVICE_DIR, LOCK_PATH, LOCK_POLL_MS, loadDeviceLast, loadLast, syncDevice, type LastSync, type Result } from "../data/sync";
+import { DEVICE_DIR, LOCK_PATH, LOCK_POLL_MS, loadDeviceLast, loadLast, syncDevice, type Choice, type LastSync, type Result, type Step } from "../data/sync";
+import type { Storage } from "../storage/types";
 import type { Device } from "../platform/types";
 import { AskText } from "./Dialog";
+import { SyncConflicts } from "./SyncConflicts";
 import { useApp } from "./context";
 import { useBack } from "./useBack";
 
@@ -26,6 +28,7 @@ function PcSync() {
   const [progress, setProgress] = useState<{ text: string; done: number; total: number } | null>(null);
   const [result, setResult] = useState<(Result & { model: string }) | null>(null);
   const [editDir, setEditDir] = useState(false);
+  const [ask, setAsk] = useState<{ conflicts: Step[]; device: Storage; model: string; done(c: Map<string, Choice>): void } | null>(null);
 
   const fail = useCallback((e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true }), [toast]);
 
@@ -56,8 +59,18 @@ function PcSync() {
       if (!(await device.storage.stat(".hypomnemata"))) {
         throw new Error(`No Hypomnemata data folder at ${dir} on the ${d.model}. Open the app there once, or change the device folder below.`);
       }
-      const r = await syncDevice(pc, device, { serial: d.serial, model: d.model, pcName: await sync.pcName() }, (text, done, total) =>
-        setProgress({ text, done, total }),
+      // Conflicts are decided while the device is still locked.
+      const resolve = (conflicts: Step[]) =>
+        new Promise<Map<string, Choice>>(done =>
+          setAsk({ conflicts, device: device.storage, model: d.model, done: c => (setAsk(null), done(c)) }),
+        );
+      const r = await syncDevice(
+        pc,
+        device,
+        { serial: d.serial, model: d.model, pcName: await sync.pcName() },
+        (text, done, total) => setProgress({ text, done, total }),
+        undefined,
+        resolve,
       );
       setResult({ ...r, model: d.model });
     } catch (e) {
@@ -128,12 +141,13 @@ function PcSync() {
           </div>
           <p className="muted small" style={{ margin: 0 }}>
             Files changed on only one side are copied to the other; files deleted on one side go to
-            the other side's trash. A file changed on both sides is left as it is on each side and
-            listed after the sync.
+            the other side's trash. For a file changed on both sides you see both versions and choose
+            which one to keep.
           </p>
         </section>
       </div>
-      {progress && <SyncProgress {...progress} />}
+      {progress && !ask && <SyncProgress {...progress} />}
+      {ask && <SyncConflicts conflicts={ask.conflicts} pc={platform.storage} device={ask.device} model={ask.model} onDone={ask.done} />}
       {editDir && (
         <AskText
           title="Data folder on the device"
@@ -158,6 +172,7 @@ function SyncResult({ r }: { r: Result & { model: string } }) {
     c.toPC && `${c.toPC} received from the ${r.model}`,
     c.trashDevice && `${c.trashDevice} moved to the ${r.model}'s trash`,
     c.trashPC && `${c.trashPC} moved to this PC's trash`,
+    r.settled && `${r.settled} conflict${r.settled > 1 ? "s" : ""} settled`,
   ].filter(Boolean);
   return (
     <section className="card stack" aria-label="Sync result">
@@ -166,7 +181,7 @@ function SyncResult({ r }: { r: Result & { model: string } }) {
       {r.conflicts.length > 0 && (
         <>
           <p className="err" style={{ margin: 0 }}>
-            Changed on both sides, left untouched ({r.conflicts.length}):
+            Changed on both sides, left untouched ({r.conflicts.length}); they come back on the next sync:
           </p>
           <ul className="sync-conflicts mono small">
             {r.conflicts.map(s => (

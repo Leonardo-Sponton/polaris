@@ -75,9 +75,38 @@ export interface Result {
   state: Hashes;
   conflicts: Step[];
   counts: { toDevice: number; toPC: number; trashDevice: number; trashPC: number };
+  /** Conflicts the user settled during this sync. */
+  settled: number;
 }
 
 export type Progress = (text: string, done: number, total: number) => void;
+
+/** What the user picked for a conflict: one side's version (or deletion), or both files. */
+export type Choice = "pc" | "device" | "both";
+
+/** Asked while the device stays locked; a path left out of the answer stays a conflict. */
+export type Resolver = (conflicts: Step[]) => Promise<Map<string, Choice>>;
+
+/**
+ * Files that stand on their own and can exist twice. A book's book.md or cover, a journal day
+ * or the app's state files have one fixed name, so for those only one version can be kept.
+ */
+export function canKeepBoth(path: string): boolean {
+  return (
+    /^(inbox|todo|ideas|thoughts)\/[^/]+\.md$/.test(path) ||
+    /^books\/[^/]+\/quotes\/[^/]+\.md$/.test(path) ||
+    /^projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(path)
+  );
+}
+
+/** `todo/a.md` → `todo/a (device copy).md`, then `(device copy 2)`…, free on both sides. */
+export async function copyName(a: Storage, b: Storage, path: string): Promise<string> {
+  const m = /^(.*?)(\.[^./]*)?$/.exec(path)!;
+  for (let i = 1; ; i++) {
+    const to = `${m[1]} (device copy${i > 1 ? ` ${i}` : ""})${m[2] ?? ""}`;
+    if (!(await a.stat(to)) && !(await b.stat(to))) return to;
+  }
+}
 
 /**
  * Files deleted on one side go to the other side's trash. A whole folder (a book with its cover
@@ -103,11 +132,17 @@ export async function sha256(data: Uint8Array): Promise<string> {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** A conflict is only settled on the versions the user saw: nothing changed since. */
+async function expectHash(s: Storage, path: string, hash: string | undefined) {
+  const now = (await s.stat(path)) ? await sha256(await s.readBinary(path)) : undefined;
+  if (now !== hash) throw new Error(`${path} changed during the sync; sync again`);
+}
+
 /** Copies one file and checks what arrived against the hash it should have. */
-async function copy(from: Storage, to: Storage, path: string, hash: string) {
+async function copy(from: Storage, to: Storage, path: string, hash: string, toPath = path) {
   const data = await from.readBinary(path);
   if ((await sha256(data)) !== hash) throw new Error(`${path} changed during the sync; sync again`);
-  await to.writeBinary(path, data);
+  await to.writeBinary(toPath, data);
 }
 
 /** Runs one sync over two sides. Conflicts are not touched. */
@@ -148,7 +183,49 @@ export async function run(pc: Side, device: Side, base: Hashes, progress?: Progr
     counts.trashPC++;
     tick(`Moving ${item} to the trash`);
   }
-  return { state, conflicts: steps.filter(s => s.kind === "conflict"), counts };
+  return { state, conflicts: steps.filter(s => s.kind === "conflict"), counts, settled: 0 };
+}
+
+/**
+ * Applies the user's choices to the conflicts of a run: the chosen version is copied over the
+ * other (or the deletion repeated, into the trash); "both" keeps the PC's version under the
+ * name and the device's as a "(device copy)" file on both sides.
+ */
+export async function settle(pc: Side, device: Side, r: Result, choices: Map<string, Choice>, progress?: Progress): Promise<Result> {
+  const left: Step[] = [];
+  const state = new Map(r.state);
+  const total = r.conflicts.filter(s => choices.has(s.path)).length;
+  let done = 0;
+  for (const s of r.conflicts) {
+    const c = choices.get(s.path);
+    if (!c || (c === "both" && !(s.pc && s.device && canKeepBoth(s.path)))) {
+      left.push(s);
+      continue;
+    }
+    progress?.(`Settling ${s.path}`, done, total);
+    await expectHash(pc.storage, s.path, s.pc);
+    await expectHash(device.storage, s.path, s.device);
+    if (c === "both") {
+      const to = await copyName(pc.storage, device.storage, s.path);
+      await copy(device.storage, pc.storage, s.path, s.device!, to);
+      await device.storage.writeBinary(to, await pc.storage.readBinary(to));
+      await copy(pc.storage, device.storage, s.path, s.pc!);
+      state.set(to, s.device!);
+      state.set(s.path, s.pc!);
+    } else {
+      const [win, lose, hash] = c === "pc" ? [pc, device, s.pc] : [device, pc, s.device];
+      if (hash) {
+        await copy(win.storage, lose.storage, s.path, hash);
+        state.set(s.path, hash);
+      } else {
+        await moveToTrash(lose.storage, s.path);
+        state.delete(s.path);
+      }
+    }
+    done++;
+    progress?.(`Settling ${s.path}`, done, total);
+  }
+  return { ...r, state, conflicts: left, settled: r.settled + done };
 }
 
 // ---- Saved state ----
@@ -186,18 +263,39 @@ export interface Target {
   pcName: string;
 }
 
+/** While the user decides, the lock is written again now and then, so the device does not take it for a broken sync. */
+const LOCK_REFRESH_MS = 2 * 60_000;
+
 /**
- * A whole sync with one device: lock the device (its app saves and stops editing), sync, save
- * the new state on both sides, unlock. The PC's own unsaved edits must be written before.
+ * A whole sync with one device: lock the device (its app saves and stops editing), sync, ask
+ * about conflicts (still locked), save the new state on both sides, unlock. The PC's own
+ * unsaved edits must be written before.
  */
-export async function syncDevice(pc: Side, device: Side, t: Target, progress?: Progress, wait = LOCK_WAIT_MS): Promise<Result> {
-  const now = new Date();
+export async function syncDevice(
+  pc: Side,
+  device: Side,
+  t: Target,
+  progress?: Progress,
+  wait = LOCK_WAIT_MS,
+  resolve?: Resolver,
+): Promise<Result> {
+  const lock = () => device.storage.write(LOCK_PATH, JSON.stringify({ pc: t.pcName, at: isoMinute(new Date()) }) + "\n");
   progress?.("Waiting for the device to save…", 0, 0);
-  await device.storage.write(LOCK_PATH, JSON.stringify({ pc: t.pcName, at: isoMinute(now) }) + "\n");
+  await lock();
   try {
     await new Promise(r => setTimeout(r, wait));
     const last = await loadLast(pc.storage, t.serial);
-    const result = await run(pc, device, new Map(Object.entries(last?.files ?? {})), progress);
+    let result = await run(pc, device, new Map(Object.entries(last?.files ?? {})), progress);
+    if (resolve && result.conflicts.length) {
+      const timer = setInterval(() => lock().catch(() => {}), LOCK_REFRESH_MS);
+      let choices: Map<string, Choice>;
+      try {
+        choices = await resolve(result.conflicts);
+      } finally {
+        clearInterval(timer);
+      }
+      if (choices.size) result = await settle(pc, device, result, choices, progress);
+    }
     const files = Object.fromEntries([...result.state].sort(([a], [b]) => a.localeCompare(b)));
     const at = isoMinute(new Date());
     await pc.storage.write(statePath(t.serial), toJson({ at, with: t.model, files }));

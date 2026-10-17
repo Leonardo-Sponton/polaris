@@ -2077,3 +2077,52 @@ label.contents {
   z-index: 100;
   background: rgb(0 0 0 / 0.75);
 }
+
+/* Sync conflicts: both versions side by side, stacked when narrow. */
+.dialog.sync-conflict {
+  max-width: 1100px;
+}
+.conflict-sides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.conflict-side {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.conflict-side h3 {
+  margin: 0;
+  padding: 6px 10px;
+  gap: 6px;
+  background: var(--header);
+  color: var(--strong);
+}
+.conflict-body {
+  max-height: 50dvh;
+  overflow: auto;
+  padding: 6px 0;
+}
+.conflict-body p {
+  margin: 0;
+  padding: 0 10px;
+}
+.conflict-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.conflict-body pre div {
+  padding: 0 10px;
+}
+.conflict-body pre .changed {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--strong);
+}
+.conflict-body img {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+}
