@@ -1,8 +1,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { isoDate } from "../../data/dates";
-import { MOODS, type Entry } from "../../data/journal";
+import { MOODS, type Mood } from "../../data/journal";
 
-// Month grid for the Journal (SPEC 5.7): written days are marked with their mood color.
+// Month grid for the Journal and the Review (SPEC 5.7, 5.8): written days are marked, with the
+// mood color when there is one.
 // Weeks start on Sunday, as Brazilian calendars do.
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -13,7 +14,7 @@ interface Props {
   month: string;
   setMonth(m: string): void;
   selected: string | null;
-  entries: Map<string, Entry>;
+  entries: Map<string, { day: string; mood?: Mood }>;
   onPick(day: string): void;
 }
 

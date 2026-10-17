@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Moon, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Moon, Plus, Scale, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { isoDate } from "../../data/dates";
 import { addSection, sectionsOf } from "../../data/ideas";
@@ -66,9 +66,11 @@ interface Props {
   entries: Entry[];
   /** A day to open (from Today or Search). */
   openDay?: { day: string; key: number };
+  /** The Review of a day (button in the day's bar). */
+  onReview(day: string): void;
 }
 
-export function JournalView({ entries, openDay: target }: Props) {
+export function JournalView({ entries, openDay: target, onReview }: Props) {
   const [open, setOpen] = useState<string | null>(() => target?.day ?? (wide() ? isoDate() : null));
   const [month, setMonth] = useState(monthOf(open ?? isoDate()));
   const [closing, setClosing] = useState<string | null>(null);
@@ -149,6 +151,7 @@ export function JournalView({ entries, openDay: target }: Props) {
             day={open}
             onBack={() => setOpen(null)}
             onDay={pick}
+            onReview={() => onReview(open)}
             onClose={() => setClosing(open)}
           />
         ) : (
@@ -164,11 +167,12 @@ interface DayProps {
   day: string;
   onBack(): void;
   onDay(day: string): void;
+  onReview(): void;
   onClose(): void;
 }
 
 /** One day: the page when it has a file, otherwise the same form that creates it on first use. */
-function JournalDay({ day, onBack, onDay, onClose }: DayProps) {
+function JournalDay({ day, onBack, onDay, onReview, onClose }: DayProps) {
   const { notes, version, toast, bump } = useApp();
   const path = journalPath(day);
   const [exists, setExists] = useState<boolean | null>(null);
@@ -211,6 +215,9 @@ function JournalDay({ day, onBack, onDay, onClose }: DayProps) {
       <span className="note-status mono" aria-live="polite">
         {status}
       </span>
+      <button className="btn ghost icon" aria-label="Review of this day" title="Review of this day" onClick={onReview}>
+        <Scale size={18} />
+      </button>
       {extra}
     </div>
   );

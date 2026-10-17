@@ -10,7 +10,7 @@
 //   node tools/sample-data.mjs add --phone        add to the phone's data folder over adb
 //   node tools/sample-data.mjs remove --phone
 //
-// Later stages add their own samples here (journal…); `add` again brings only new areas.
+// Later stages add their own samples here (projects…); `add` again brings only new areas.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -253,6 +253,25 @@ function samples() {
     "Long call with an old friend from work. Good to remember how much I already learned.\n\n" +
     "## Learnings\n\nAsking for help early saves a week of guessing.\n");
   entry(-12, "hard", "");
+
+  // ---- Review (stage 4c) ----
+  // Past days only (blank questions are hidden there; "Show the blank questions" brings them back).
+  const review = (n, data, body) => {
+    const c = isoMinute(at(n, 22, 40));
+    out.push([`review/${day(n)}.md`, file({ type: "review", created: c, modified: c, ...data }, body)]);
+  };
+  review(-1, { virtues: "[wisdom, temperance]", develop: "[courage]" },
+    "## Gratitude\n\nA quiet morning and a walk to the market.\n\n" +
+    "## Done well\n\nStopped working at a good point instead of pushing until late.\n\n" +
+    "## Up to me\n\nHow many hours I spent on the app, and when I stopped.\n\n" +
+    "## Intentions for tomorrow\n\nWrite down the questions for the class before it starts.\n");
+  review(-2, { develop: "[temperance]" },
+    "## Difficulties\n\nGot annoyed in the bank queue and was short with the clerk.\n\n" +
+    "## Not up to me\n\nThe queue and the bus breaking down.\n\n" +
+    "## Repair\n\nBe kind to the clerk next time; it was not their fault.\n");
+  review(-7, { virtues: "[justice]" },
+    "## Gratitude\n\nOld friends who still call.\n\n" +
+    "## Done well\n\nAsked for help instead of guessing for another week.\n");
 
   // ---- Trash ----
   const old = at(-12, 9, 0);
