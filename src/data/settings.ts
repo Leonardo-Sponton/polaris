@@ -1,0 +1,39 @@
+import type { Storage } from "../storage/types";
+
+// Per-device settings in .hypomnemata/settings.json (not synced, SPEC 6.2).
+
+export type Theme = "dark" | "light" | "system";
+
+export interface Settings {
+  theme: Theme;
+}
+
+export const SETTINGS_PATH = ".hypomnemata/settings.json";
+
+const defaults: Settings = { theme: "dark" };
+
+export async function loadSettings(s: Storage): Promise<Settings> {
+  if (!(await s.stat(SETTINGS_PATH))) return { ...defaults };
+  try {
+    return { ...defaults, ...JSON.parse(await s.read(SETTINGS_PATH)) };
+  } catch {
+    return { ...defaults };
+  }
+}
+
+export async function saveSettings(s: Storage, settings: Settings) {
+  // Keep keys written by newer versions of the app.
+  let old: Record<string, unknown> = {};
+  try {
+    if (await s.stat(SETTINGS_PATH)) old = JSON.parse(await s.read(SETTINGS_PATH));
+  } catch {
+    /* unreadable: replaced below */
+  }
+  await s.write(SETTINGS_PATH, JSON.stringify({ ...old, ...settings }, null, 2) + "\n");
+}
+
+/** Creates the standard folders of a new data folder. Existing content is left alone. */
+export async function initDataFolder(s: Storage) {
+  const stat = await s.stat(SETTINGS_PATH);
+  if (!stat) await saveSettings(s, defaults);
+}

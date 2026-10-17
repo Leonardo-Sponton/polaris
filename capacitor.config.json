@@ -1,0 +1,6 @@
+{
+  "appId": "io.github.leonardo_sponton.hypomnemata",
+  "appName": "Hypomnemata",
+  "webDir": "dist",
+  "android": { "allowMixedContent": false }
+}
