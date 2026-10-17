@@ -235,6 +235,25 @@ function samples() {
     notes: "Shared online as Plato, but it is not in his dialogues. Quote Investigator traces a similar line to Ian Maclaren (1897).",
   }, "Be kind, for everyone you meet is fighting a hard battle.");
 
+  // ---- Journal (stage 4b) ----
+  // Past days only, so writing today's entry can be tried from an empty page.
+  const entry = (n, mood, body) => {
+    const c = isoMinute(at(n, 22, 15));
+    out.push([`journal/${day(n)}.md`, file({ type: "journal", created: c, modified: c, ...(mood && { mood }) }, body)]);
+  };
+  entry(-1, "calm",
+    "Slow morning, then two hours on the to-do screen of the app. Walked to the market in the evening.\n\n" +
+    "## Learnings\n\nStopping at a good point makes it easy to start again the next day.\n");
+  entry(-2, "hectic",
+    "Class, then the bank, then the bus broke down halfway home.\n\n" +
+    "## Important events\n\n- Handed in the finance assignment.\n\n" +
+    "## Personal notes\n\nI got annoyed in the queue and it did not help at all.\n");
+  entry(-4, "tiring", "Bad night of sleep. Did only the essentials and went to bed early.\n");
+  entry(-7, "good",
+    "Long call with an old friend from work. Good to remember how much I already learned.\n\n" +
+    "## Learnings\n\nAsking for help early saves a week of guessing.\n");
+  entry(-12, "hard", "");
+
   // ---- Trash ----
   const old = at(-12, 9, 0);
   const trashed = `.trash/todo/${stamp(old)}-print-the-boarding-pass.md`;

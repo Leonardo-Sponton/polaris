@@ -17,6 +17,7 @@
   --h2: #daa069;
   --h3: #e0c07a;
   --ok: #8fd3a0;
+  --cyan: #7fd1d8;
   --err: #f0857a;
   color-scheme: dark;
 }
@@ -37,6 +38,7 @@
   --h2: #8f520c;
   --h3: #755c0a;
   --ok: #2c7444;
+  --cyan: #17575e;
   --err: #b0352a;
   color-scheme: light;
 }
@@ -686,6 +688,8 @@ h3 {
 .dialog {
   width: 100%;
   max-width: 460px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .small {
@@ -1780,4 +1784,150 @@ label.contents {
 }
 .fav-on {
   color: var(--h3);
+}
+
+/* ---- Journal (SPEC 5.7, 5.9) ---- */
+.calendar {
+  padding: 0 4px 14px;
+}
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cal-title {
+  color: var(--strong);
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+.cal-wd {
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding: 4px 0;
+}
+.cal-day {
+  position: relative;
+  aspect-ratio: 1;
+  max-height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+.cal-day:hover {
+  background: var(--hover);
+}
+.cal-day.has {
+  color: var(--strong);
+  font-weight: 600;
+}
+.cal-day.today {
+  box-shadow: inset 0 -2px var(--h2);
+}
+.cal-day.sel {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.cal-dot {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+}
+.journal-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.journal-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.journal-date {
+  margin: 0;
+  color: var(--h1);
+  font-size: 1.2rem;
+}
+.moods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip.mood.active {
+  border-color: var(--mood);
+  color: var(--mood);
+  background: color-mix(in srgb, var(--mood) 14%, transparent);
+}
+.journal-empty {
+  min-height: 120px;
+  padding: 8px 4px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: text;
+}
+.journal-text {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+.close-q {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.close-title {
+  color: var(--strong);
+}
+.close-input {
+  resize: vertical;
+  font-family: var(--sans);
+}
+.day-card {
+  flex-wrap: wrap;
+  cursor: default;
+}
+.day-card:hover {
+  background: var(--surface);
+}
+.day-journal {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+.day-journal:hover {
+  background: var(--hover);
+}
+.day-journal .what {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.one-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

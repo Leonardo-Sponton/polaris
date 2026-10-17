@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, Inbox, Lightbulb, Menu, Moon, NotebookPen, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
+import { dayOfPath, MOODS, type Entry } from "../data/journal";
 import { isQuotePath } from "../data/quotes";
 import { markSeen, resurface, type Idea } from "../data/ideas";
 import { isToday, type View } from "../data/todo";
@@ -8,6 +9,8 @@ import { BooksView, useBooks } from "./books/BooksView";
 import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
+import { CloseDay } from "./journal/CloseDay";
+import { JournalView, useJournal } from "./journal/JournalView";
 import { useCapture } from "./useCapture";
 import { SearchView, type SearchState } from "./SearchView";
 import { SettingsView } from "./SettingsView";
@@ -20,14 +23,15 @@ import { useApp } from "./context";
 import { goBack } from "./useBack";
 import { useReminders } from "./useReminders";
 
-// The areas built so far. Journal, Review… join in later stages (SPEC 7).
-export type Area = "today" | "ideas" | "books" | "todo" | "thoughts" | "inbox" | "search" | "trash" | "settings" | "more";
+// The areas built so far. Review and Projects join in later stages (SPEC 7).
+export type Area = "today" | "ideas" | "books" | "todo" | "journal" | "thoughts" | "inbox" | "search" | "trash" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
   { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
   { id: "books", label: "Books", icon: <BookOpen size={20} /> },
   { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
+  { id: "journal", label: "Journal", icon: <NotebookPen size={20} /> },
   { id: "thoughts", label: "Thoughts", icon: <Feather size={20} /> },
   { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
   { id: "search", label: "Search", icon: <Search size={20} /> },
@@ -79,6 +83,37 @@ function ResurfaceCard(props: { idea: Idea; today: string; onOpen(): void; onLat
   );
 }
 
+/** Today's journal and the evening (SPEC 5.1 item 4). */
+function DayCard(props: { entry?: Entry; onJournal(): void; onCloseDay(): void }) {
+  const e = props.entry;
+  const mood = e?.mood && MOODS.find(m => m.id === e.mood);
+  return (
+    <div className="today-card day-card" aria-label="Today's journal">
+      <button className="day-journal" onClick={props.onJournal}>
+        <NotebookPen size={18} />
+        {e ? (
+          <span className="what">
+            <span className="muted small">
+              Journal{mood && <> · <span style={{ color: `var(--${mood.color})` }}>{mood.label}</span></>}
+            </span>
+            <span className="one-line">{e.preview || <span className="muted">(only the mood)</span>}</span>
+          </span>
+        ) : (
+          <span>Write today's journal</span>
+        )}
+      </button>
+      <span className="row" style={{ gap: 4 }}>
+        <button className="btn ghost" disabled title="The evening review comes in stage 4c">
+          Evening review
+        </button>
+        <button className="btn" onClick={props.onCloseDay}>
+          <Moon size={16} /> Close the day
+        </button>
+      </span>
+    </div>
+  );
+}
+
 export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const [area, setArea] = useState<Area>("today");
   const [view, setView] = useState<View>("today");
@@ -89,6 +124,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const books = useBooks();
   const quotes = useQuotes(books);
   const thoughts = useThoughts();
+  const journal = useJournal();
+  const [journalTarget, setJournalTarget] = useState<{ day: string; key: number } | undefined>();
+  const [closing, setClosing] = useState(false);
   // A thought to open in Thoughts (built-in ones have no file, so by id).
   const [thoughtTarget, setThoughtTarget] = useState<{ id: string; key: number } | undefined>();
   const capture = useCapture();
@@ -104,6 +142,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const go = (a: Area) => {
     setTarget(undefined);
     setThoughtTarget(undefined);
+    setJournalTarget(undefined);
     setArea(a);
   };
 
@@ -191,6 +230,14 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
                     <ChevronRight size={18} className="muted" />
                   </button>
                 )}
+                <DayCard
+                  entry={journal.find(e => e.day === today)}
+                  onJournal={() => {
+                    setJournalTarget({ day: today, key: Date.now() });
+                    setArea("journal");
+                  }}
+                  onCloseDay={() => setClosing(true)}
+                />
               </>
             ),
           }}
@@ -202,6 +249,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       break;
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
+      break;
+    case "journal":
+      page = <JournalView entries={journal} openDay={journalTarget} />;
       break;
     case "thoughts":
       page = <ThoughtsView data={thoughts} openId={thoughtTarget} />;
@@ -225,6 +275,12 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
             if (d.area === "thoughts" && /^thoughts\/[^/]+\.md$/.test(d.path)) {
               setThoughtTarget({ id: d.path.slice(9, -3), key: Date.now() });
               setArea("thoughts");
+              return true;
+            }
+            const day = d.area === "journal" && dayOfPath(d.path);
+            if (day) {
+              setJournalTarget({ day, key: Date.now() });
+              setArea("journal");
               return true;
             }
             if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas" && d.area !== "books") return false;
@@ -295,6 +351,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
         ))}
       </nav>
       <main className="main">{page}</main>
+      {closing && <CloseDay day={today} onClose={() => setClosing(false)} />}
       <nav className="bottombar" aria-label="Areas">
         {BOTTOM.map(id => {
           const a = AREAS.find(x => x.id === id);
