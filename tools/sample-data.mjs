@@ -10,14 +10,19 @@
 //   node tools/sample-data.mjs add --phone        add to the phone's data folder over adb
 //   node tools/sample-data.mjs remove --phone
 //
-// Later stages add their own samples here; `add` again brings only new areas.
+// Options for `add`: `--lang pt` writes the samples in Portuguese (default English); `--demo`
+// also sets the app language and leaves out the reminder that fires a few minutes later (used
+// for the README screenshots, in an empty folder). Book covers are downloaded from Open Library
+// when there is a connection; the app itself never goes online.
+// `add` again brings only areas that have no samples yet.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 const ADB = process.env.ADB || path.join(os.homedir(), "Android/Sdk/platform-tools/adb");
-const PHONE_DIR = "/storage/emulated/0/Documents/Polaris";
+// POLARIS_PHONE_DIR: another folder on the phone (the screenshot demo uses its own).
+const PHONE_DIR = process.env.POLARIS_PHONE_DIR || "/storage/emulated/0/Documents/Polaris";
 const MANIFEST = ".polaris/sample-files.json";
 const LISTS = ".polaris/lists.json";
 
@@ -81,8 +86,15 @@ function file(data, body) {
   return `---\n${head}\nsample: true\n---\n${body}`;
 }
 
-function samples() {
+/**
+ * The sample files, in English or Portuguese (`--lang pt`). Section headings use the words the
+ * app writes in that language. `demo` leaves out the reminder that fires a few minutes after
+ * adding (it would sit on Today in the screenshots).
+ */
+function samples(lang = "en", demo = false) {
+  const T = (en, pt) => (lang === "pt" ? pt : en);
   const out = []; // [relative path, text]
+  const covers = []; // [book folder, cover source]
   let sec = 0;
   const task = (created, title, data, notes = "") => {
     const c = new Date(created.getTime() + sec++ * 1000);
@@ -95,55 +107,67 @@ function samples() {
     const c = new Date(created.getTime() + sec++ * 1000);
     out.push([`inbox/${stamp(c)}.md`, file({ type: "inbox", created: isoMinute(c), modified: isoMinute(c) }, body)]);
   };
-
-  // A reminder a few minutes from now, to see one arrive.
-  const soon = new Date(NOW.getTime() + 5 * 60_000);
-  const soonDay = Math.round((new Date(soon.getFullYear(), soon.getMonth(), soon.getDate()) - TODAY) / 86_400_000);
+  const W2H = T(["What", "Why", "Where", "When", "Who", "How", "How much"], ["O quê", "Por quê", "Onde", "Quando", "Quem", "Como", "Quanto"]);
+  const w2h = v => `## 5W2H\n${W2H.map((f, i) => `- **${f}:** ${v[i]}`.trimEnd()).join("\n")}\n`;
 
   // ---- Today ----
-  task(at(-3, 21, 10), "Review chapter 3 of Clean Code", { when: day(0), time: "19:30", list: "study", priority: 1 },
-    "Focus on naming and small functions.\n\n- [x] Read the chapter\n- [x] Write down the main rules\n- [ ] Redo the exercise\n- [ ] Compare with my own code\n");
-  task(at(-5, 9, 0), "Pay the internet bill", { due: day(0), list: "home", priority: 2 });
-  task(at(-1, 18, 40), "Buy bread and coffee", { when: day(0), list: "errands" },
-    "- [ ] Bread\n- [ ] Coffee\n- [ ] Milk\n");
-  task(at(-10, 7, 0), "Stretch for 10 minutes", { when: day(0), evening: true, repeat: "FREQ=DAILY", list: "health" });
-  task(at(-6, 12, 30), "Reply to the course coordinator", { when: day(-2), list: "study", priority: 1 },
-    "About the class schedule.\n");
-  task(at(-9, 8, 15), "Water the plants", { when: day(0), repeat: "FREQ=DAILY;INTERVAL=3", list: "home" });
-  task(at(0, NOW.getHours(), NOW.getMinutes()), "Sample reminder: watch it arrive",
-    { when: day(soonDay), time: `${pad(soon.getHours())}:${pad(soon.getMinutes())}` },
-    "This task reminds a few minutes after the sample data was added.\n");
+  task(at(-3, 21, 10), T("Practice Spanish for 20 minutes", "Praticar espanhol por 20 minutos"),
+    { when: day(0), time: "19:30", list: "study", priority: 1, repeat: "FREQ=DAILY" },
+    T("- [x] Flashcards\n- [ ] One podcast episode\n- [ ] Write five sentences\n",
+      "- [x] Flashcards\n- [ ] Um episódio do podcast\n- [ ] Escrever cinco frases\n"));
+  task(at(-5, 9, 0), T("Pay the electricity bill", "Pagar a conta de luz"), { due: day(0), list: "home", priority: 2 });
+  task(at(-1, 18, 40), T("Groceries for the week", "Compras da semana"), { when: day(0), list: "errands" },
+    T("- [ ] Rice and beans\n- [ ] Coffee\n- [ ] Bananas\n- [ ] Oat milk\n",
+      "- [ ] Arroz e feijão\n- [ ] Café\n- [ ] Banana\n- [ ] Leite de aveia\n"));
+  task(at(-10, 7, 0), T("Stretch for 10 minutes", "Alongar por 10 minutos"), { when: day(0), evening: true, repeat: "FREQ=DAILY", list: "health" });
+  task(at(-6, 12, 30), T("Send the quote to the client", "Enviar o orçamento para o cliente"), { when: day(-2), list: "work", priority: 1 },
+    T("Two options: basic site and site + online shop.\n", "Duas opções: site simples e site + loja virtual.\n"));
+  task(at(-9, 8, 15), T("Water the plants", "Regar as plantas"), { when: day(0), repeat: "FREQ=DAILY;INTERVAL=3", list: "home" });
+  if (!demo) {
+    const soon = new Date(NOW.getTime() + 5 * 60_000);
+    const soonDay = Math.round((new Date(soon.getFullYear(), soon.getMonth(), soon.getDate()) - TODAY) / 86_400_000);
+    task(at(0, NOW.getHours(), NOW.getMinutes()), T("Sample reminder: watch it arrive", "Lembrete de exemplo: veja ele chegar"),
+      { when: day(soonDay), time: `${pad(soon.getHours())}:${pad(soon.getMinutes())}` },
+      T("This task reminds a few minutes after the sample data was added.\n", "Esta tarefa avisa alguns minutos depois que os exemplos foram adicionados.\n"));
+  }
 
   // ---- Upcoming ----
-  task(at(-4, 10, 5), "Dentist appointment", { when: day(1), time: "14:00", remind: `${day(1)}T13:00`, list: "health" },
-    "Reminder one hour before, to have time to get there.\n");
-  task(at(-2, 20, 0), "Submit the course assignment", { when: day(3), due: day(4), list: "study", priority: 1 },
-    "## Checklist\n\n- [ ] Diagrams\n- [ ] Code on GitHub\n- [ ] PDF report\n");
-  task(at(-14, 18, 0), "Weekly review", { when: nextWeekday(0), time: "18:00", repeat: "FREQ=WEEKLY;BYDAY=SU" },
-    "- [ ] Empty the inbox\n- [ ] Look at Upcoming\n- [ ] Pick 3 goals for the week\n");
-  task(at(-1, 11, 20), "Renew the bus card", { when: day(6), list: "errands" });
-  task(at(-20, 9, 0), "Pay the rent", { when: nextMonthDay(5), repeat: "FREQ=MONTHLY;BYMONTHDAY=5", list: "home", priority: 2 });
+  task(at(-4, 10, 5), T("Dentist appointment", "Consulta no dentista"), { when: day(1), time: "14:00", remind: `${day(1)}T13:00`, list: "health" },
+    T("Reminder one hour before, to have time to get there.\n", "Lembrete uma hora antes, para dar tempo de chegar.\n"));
+  task(at(-2, 20, 0), T("Finish the portfolio page", "Terminar a página do portfólio"), { when: day(3), due: day(4), list: "work", priority: 1 },
+    T("## Checklist\n\n- [x] Pick three projects\n- [ ] Screenshots\n- [ ] Short text for each\n",
+      "## Checklist\n\n- [x] Escolher três projetos\n- [ ] Capturas de tela\n- [ ] Um texto curto para cada\n"));
+  task(at(-14, 18, 0), T("Weekly review", "Revisão da semana"), { when: nextWeekday(0), time: "18:00", repeat: "FREQ=WEEKLY;BYDAY=SU" },
+    T("- [ ] Empty the inbox\n- [ ] Look at Upcoming\n- [ ] Pick 3 goals for the week\n",
+      "- [ ] Esvaziar a caixa de entrada\n- [ ] Olhar os Próximos\n- [ ] Escolher 3 metas para a semana\n"));
+  task(at(-1, 11, 20), T("Take the bike to the repair shop", "Levar a bicicleta para a revisão"), { when: day(6), list: "errands" });
+  task(at(-20, 9, 0), T("Pay the rent", "Pagar o aluguel"), { when: nextMonthDay(5), repeat: "FREQ=MONTHLY;BYMONTHDAY=5", list: "home", priority: 2 });
 
   // ---- Anytime ----
-  task(at(-7, 22, 0), "Clean up the Downloads folder", { list: "home" });
-  task(at(-8, 15, 45), "Try the Pomodoro technique for a week", { list: "study", priority: 3 });
-  task(at(-2, 9, 30), "Back up the phone photos", {}, "Use the USB cable; keep a copy on the PC.\n");
+  task(at(-7, 22, 0), T("Clean up the Downloads folder", "Limpar a pasta Downloads"), { list: "home" });
+  task(at(-8, 15, 45), T("Try the Pomodoro technique for a week", "Testar a técnica Pomodoro por uma semana"), { list: "study", priority: 3 });
+  task(at(-2, 9, 30), T("Back up the phone photos", "Fazer backup das fotos do celular"), {},
+    T("Use the USB cable; keep a copy on the PC.\n", "Pelo cabo USB; guardar uma cópia no PC.\n"));
 
   // ---- Someday ----
-  task(at(-30, 23, 0), "Learn to play the guitar", { when: "someday" });
-  task(at(-25, 19, 0), "Visit Ouro Preto", { when: "someday" },
-    "Best in the dry season (May to September).\n\n## 5W2H\n- **What:** A 3-day trip to Ouro Preto\n- **Why:** See the baroque churches and the museums\n- **Where:** Ouro Preto, MG\n- **When:** July, in the holidays\n- **Who:** Me and a friend\n- **How:** Bus to Belo Horizonte, then the local bus\n- **How much:** About 1,200 with the hostel\n");
+  task(at(-30, 23, 0), T("Learn to play the ukulele", "Aprender a tocar ukulele"), { when: "someday" });
+  task(at(-25, 19, 0), T("Trip to Chapada Diamantina", "Viagem para a Chapada Diamantina"), { when: "someday" },
+    T("Best from April to October, after the rains.\n\n", "Melhor de abril a outubro, depois das chuvas.\n\n") +
+    w2h(T(
+      ["A 5-day hiking trip", "See the waterfalls and the Pai Inácio hill", "Lençóis, Bahia", "May", "Two friends and me", "Fly to Salvador, then the bus to Lençóis", "About 2,500 each with the guide"],
+      ["Uma viagem de 5 dias de trilhas", "Ver as cachoeiras e o Morro do Pai Inácio", "Lençóis, Bahia", "Maio", "Eu e dois amigos", "Avião até Salvador, depois ônibus até Lençóis", "Uns 2.500 cada, com o guia"])));
 
   // ---- Logbook ----
-  task(at(-4, 8, 0), "Install Polaris on the tablet", { status: "done", done_at: isoMinute(at(-1, 20, 10)) });
-  task(at(-6, 10, 0), "Call the bank", { status: "canceled", done_at: isoMinute(at(-3, 16, 0)) });
-  task(at(-1, 7, 30), "Read 20 pages", { status: "done", done_at: isoMinute(at(0, 8, 15)), list: "study" });
+  task(at(-4, 8, 0), T("Install Polaris on the tablet", "Instalar o Polaris no tablet"), { status: "done", done_at: isoMinute(at(-1, 20, 10)) });
+  task(at(-6, 10, 0), T("Call the bank", "Ligar para o banco"), { status: "canceled", done_at: isoMinute(at(-3, 16, 0)) });
+  task(at(-1, 7, 30), T("Read 20 pages", "Ler 20 páginas"), { status: "done", done_at: isoMinute(at(0, 8, 15)), list: "study" });
 
   // ---- Inbox ----
-  inbox(at(-1, 23, 12), "# A bookshelf screen with covers\n\nLike a real shelf, sorted by status.\n");
-  inbox(at(0, 7, 45), "Ask about the library opening hours\n");
-  inbox(at(-2, 14, 3), "Song to learn: Clair de Lune, Debussy\n");
-  inbox(at(0, 9, 2), "Does the library open on Saturday?\n");
+  inbox(at(-1, 23, 12), T("# Recipe: lentil soup\n\nThe one from the market stall; ask for the spices.\n",
+    "# Receita: sopa de lentilha\n\nA da barraca da feira; perguntar os temperos.\n"));
+  inbox(at(0, 7, 45), T("Film: Central Station (1998)\n", "Filme: Central do Brasil (1998)\n"));
+  inbox(at(-2, 14, 3), T("Song to learn: Clair de Lune, Debussy\n", "Música para aprender: Clair de Lune, Debussy\n"));
+  inbox(at(0, 9, 2), T("Does the library open on Saturday?\n", "A biblioteca abre no sábado?\n"));
 
   // ---- Ideas ----
   const idea = (created, title, data, rest = "", seen = 0) => {
@@ -153,37 +177,42 @@ function samples() {
     const d = { type: "idea", created: isoMinute(c), modified: isoMinute(c), status: "draft", template: "blank", ...data };
     out.push([rel, file({ ...d, last_seen: day(seen) }, body)]);
   };
-  const w2h = v =>
-    `## 5W2H\n${["What", "Why", "Where", "When", "Who", "How", "How much"].map((f, i) => `- **${f}:** ${v[i]}`.trimEnd()).join("\n")}\n`;
-  idea(at(-2, 22, 40), "Study group app for classmates", {
-    template: "software", tags: "[app, study]",
+  const plantsIdea = T("App that reminds you to water the plants", "App que lembra de regar as plantas");
+  idea(at(-2, 22, 40), plantsIdea, {
+    template: "software", tags: T("[app, home]", "[app, casa]"),
     checklist: { "problem-real": "yes", who: "yes", "would-use": "unsure", "can-build": "yes", "cost-ok": "yes" },
   },
-    "Something to split the subjects and share summaries before the tests.\n\n## Problem\n\nEveryone studies alone and the group chat gets lost.\n\n## For whom\n\nMy class (about 30 people).\n\n" +
-    w2h(["An app to split subjects and share summaries", "The group chat loses everything", "Phone, offline first", "Before the next test week", "Me; for my class", "React + Capacitor, like Polaris", ""]), -2);
-  idea(at(-20, 19, 15), "Sell homemade granola at the fair", {
-    status: "maturing", template: "business", tags: "[money]",
+    T("Each plant with its own rhythm, a photo and a note about light.\n\n## Problem\n\nI forget the ferns and drown the cactus.\n\n## For whom\n\nPeople with many plants at home and little time.\n\n",
+      "Cada planta com seu ritmo, uma foto e uma nota sobre luz.\n\n## Problema\n\nEsqueço as samambaias e afogo o cacto.\n\n## Para quem\n\nQuem tem muitas plantas em casa e pouco tempo.\n\n") +
+    w2h(T(["A plant care app with reminders per plant", "Plants die from too much or too little water", "Phone, offline", "Before spring", "Me, then friends", "React + Capacitor", ""],
+      ["Um app de cuidados com lembrete por planta", "Planta morre por água demais ou de menos", "Celular, offline", "Antes da primavera", "Eu, depois os amigos", "React + Capacitor", ""])), -2);
+  const breadIdea = T("Sourdough bread for the neighbourhood", "Pão de fermentação natural para o bairro");
+  idea(at(-20, 19, 15), breadIdea, {
+    status: "maturing", template: "business", tags: T("[money, food]", "[renda, comida]"),
     checklist: {
       "problem-real": "yes", who: "yes", "would-use": "yes", better: "unsure", "can-build": "yes",
       "cost-ok": "no", "still-want": "yes", "riskiest-known": "yes",
     },
     assumptions: [
-      { text: "People at the fair will pay 25 for a jar", test: "Take 10 jars next Saturday and count the sales", result: "confirmed", notes: "Sold 8 of 10 in two hours" },
-      { text: "I can buy the oats cheaply in bulk", test: "Ask the price at the wholesale market", result: "rejected", notes: "Only cheaper above 25 kg" },
-      { text: "The city lets me sell food without a licence", test: "Call the city hall", result: "untested" },
+      { text: T("Neighbours will pay 18 for a loaf", "Os vizinhos pagam 18 por um pão"), test: T("Bake 10 loaves on Saturday and offer them in the building group", "Assar 10 pães no sábado e oferecer no grupo do prédio"), result: "confirmed", notes: T("Sold all 10 before noon", "Vendi os 10 antes do meio-dia") },
+      { text: T("Flour is cheaper in 25 kg sacks", "A farinha sai mais barata no saco de 25 kg"), test: T("Ask two wholesalers", "Perguntar em dois atacadistas"), result: "rejected", notes: T("Only 8% cheaper; not worth the space", "Só 8% mais barata; não compensa o espaço") },
+      { text: T("Home baking for sale needs no licence at this size", "Vender pão feito em casa nesse tamanho não precisa de licença"), test: T("Ask the city hall", "Perguntar na prefeitura"), result: "untested" },
     ],
   },
-    "Saturday fair near home. Start with 20 jars and see.\n\n## Problem\n\nPeople there ask for healthy snacks and there are none.\n\n## Risks\n\n- Health rules for selling food\n- The cost of the jars\n", -18);
-  idea(at(-1, 8, 5), "Morning routine without the phone", { template: "personal", tags: "[life]" },
-    "First hour of the day: water, stretch, read. Phone only after breakfast.\n", -1);
-  idea(at(-30, 21, 0), "Podcast about everyday science", { tags: "[hobby]" }, "", -28);
-  idea(at(-45, 14, 30), "Bike delivery for the neighbourhood", {
-    status: "archived", template: "business", archived_reason: "The hills here make it too slow, and apps already do it",
-  }, "Deliveries for the small shops on my street.\n", -40);
+    T("Orders until Thursday, delivery on Saturday morning.\n\n## Problem\n\nThe nearest bakery with real sourdough is 40 minutes away.\n\n## Risks\n\n- Health rules for selling food\n- The oven only fits 4 loaves at a time\n",
+      "Pedidos até quinta, entrega no sábado de manhã.\n\n## Problema\n\nA padaria mais perto com fermentação natural fica a 40 minutos.\n\n## Riscos\n\n- Regras sanitárias para vender comida\n- O forno só cabe 4 pães por vez\n"), -18);
+  idea(at(-1, 8, 5), T("Morning routine without the phone", "Manhã sem celular"), { template: "personal", tags: T("[life]", "[vida]") },
+    T("First hour of the day: water, stretch, read. Phone only after breakfast.\n",
+      "Primeira hora do dia: água, alongamento, leitura. Celular só depois do café.\n"), -1);
+  idea(at(-30, 21, 0), T("Podcast about everyday science", "Podcast sobre ciência do dia a dia"), { tags: T("[hobby]", "[hobby]") }, "", -28);
+  idea(at(-45, 14, 30), T("Bike delivery for the neighbourhood", "Entregas de bicicleta no bairro"), {
+    status: "archived", template: "business",
+    archived_reason: T("The hills here make it too slow, and apps already do it", "As ladeiras daqui deixam tudo lento, e os apps já fazem isso"),
+  }, T("Deliveries for the small shops on my street.\n", "Entregas para as lojinhas da minha rua.\n"), -40);
 
-  // ---- Projects (stage 6) ----
+  // ---- Projects ----
   // Linked to two of the sample ideas above, so the project page shows their checklist and
-  // assumptions (the ideas themselves keep their status: they were added in an earlier stage).
+  // assumptions.
   const ideaFile = (created, title) => `${isoDate(created).replace(/-/g, "")}-${slug(title)}`;
   const project = (created, title, data, rest = "") => {
     const c = isoMinute(created);
@@ -193,151 +222,192 @@ function samples() {
     const c = isoMinute(created);
     out.push([`projects/${slug(proj)}/${step}/${stamp(created)}-${slug(title)}.md`, file({ type: "step-note", created: c, modified: c }, `# ${title}\n\n${rest}`)]);
   };
-  // Stage 6b: gate history, one project on hold, and to-dos on the current steps.
-  // Business flow (Sebrae's plan): a real small business, now on the financial plan.
-  project(at(-15, 20, 0), "Granola at the fair", {
-    flow: "business", idea: ideaFile(at(-20, 19, 15), "Sell homemade granola at the fair"), step: "05-financial-plan",
+  // Business flow (Sebrae's plan): a small business, now on the financial plan.
+  const bread = T("Sourdough on Saturdays", "Pão de sábado");
+  project(at(-15, 20, 0), bread, {
+    flow: "business", idea: ideaFile(at(-20, 19, 15), breadIdea), step: "05-financial-plan",
     gates: [
-      { step: "01-business-and-founders", decision: "go", reason: "Just me for now; MEI is enough to start.", date: day(-13) },
-      { step: "02-market-study", decision: "go", reason: "Nobody at the fair sells granola in jars.", date: day(-11) },
-      { step: "03-marketing-plan", decision: "go", reason: "25 per jar sold well in the test.", date: day(-9) },
-      { step: "04-operational-plan", decision: "go", reason: "The food incubator rents the kitchen by the hour; enough to start.", date: day(-7) },
+      { step: "01-business-and-founders", decision: "go", reason: T("Just me for now; MEI is enough to start.", "Só eu por enquanto; MEI basta para começar."), date: day(-13) },
+      { step: "02-market-study", decision: "go", reason: T("No bakery nearby sells sourdough.", "Nenhuma padaria perto vende fermentação natural."), date: day(-11) },
+      { step: "03-marketing-plan", decision: "go", reason: T("18 per loaf sold out in the test.", "18 por pão esgotou no teste."), date: day(-9) },
+      { step: "04-operational-plan", decision: "go", reason: T("A second oven doubles the batch; enough to start.", "Um segundo forno dobra a fornada; basta para começar."), date: day(-7) },
     ],
   },
-    "Saturday fair first; a small shop later if it works.\n");
-  stepNote("Granola at the fair", "01-business-and-founders", at(-14, 21, 0), "Who and how",
-    "## The business\n\nHomemade granola in returnable jars, sold at the Saturday fair near home.\n\n## Founders and roles\n\nJust me: recipes, cooking and the stall.\n\n## Tax regime\n\nMEI (food made at home or in a rented kitchen fits).\n");
-  stepNote("Granola at the fair", "02-market-study", at(-12, 20, 0), "A Saturday at the fair",
-    "## Customers\n\nPeople from the gym next door and families doing the weekly shopping.\n\n## Competitors\n\nThe bakery stall sells granola by weight in plastic bags, cheaper but no jar.\n\n## Suppliers\n\nWholesale market for oats and nuts; bulk only pays off above 25 kg.\n");
-  stepNote("Granola at the fair", "03-marketing-plan", at(-10, 21, 30), "Price and stall",
-    "## Price\n\n25 per jar; 2 off when the jar comes back.\n\n## Promotion\n\nFree tasting cups; a small sign about the returnable jar.\n");
-  stepNote("Granola at the fair", "05-financial-plan", at(-6, 20, 30), "Costs per jar",
-    "Oats, honey and nuts 9, jar 3, label 1: **13 per jar**.\n\n- [ ] Ask two more suppliers\n- [ ] Price the labels\n");
-  stepNote("Granola at the fair", "05-financial-plan", at(-2, 21, 15), "First month",
-    "## Total investment\n\nTrays, scale and cooler 600 + first stock 400 + licences 200 = **1,200**.\n\n" +
-    "## Income statement\n\n- Sales: 80 jars × 25 = 2,000\n- Variable costs: 80 × 13 = 1,040\n- Contribution margin: 960\n" +
-    "- Fixed costs: kitchen 240 + stall 160 + MEI fee 80 = 480\n- **Net profit: 480**\n");
-  project(at(-1, 9, 0), "Study group app", { flow: "software", idea: ideaFile(at(-2, 22, 40), "Study group app for classmates"), step: "01-discovery" });
-  // Tech startup flow (Plano de Voo Empreendedor), on hold.
-  project(at(-30, 19, 0), "Used textbook swap", {
+    T("Saturday orders first; a weekday batch later if it works.\n", "Primeiro os pedidos de sábado; uma fornada na semana depois, se der certo.\n"));
+  stepNote(bread, "01-business-and-founders", at(-14, 21, 0), T("Who and how", "Quem e como"),
+    T("## The business\n\nSourdough loaves to order, delivered on Saturday mornings in the neighbourhood.\n\n## Founders and roles\n\nJust me: starter, baking and deliveries.\n\n## Tax regime\n\nMEI.\n",
+      "## O negócio\n\nPães de fermentação natural por encomenda, entregues no sábado de manhã no bairro.\n\n## Sócios e funções\n\nSó eu: fermento, forno e entregas.\n\n## Enquadramento tributário\n\nMEI.\n"));
+  stepNote(bread, "02-market-study", at(-12, 20, 0), T("Who buys bread here", "Quem compra pão aqui"),
+    T("## Customers\n\nFamilies in the three buildings on the street; people who work from home.\n\n## Competitors\n\nThe supermarket's industrial loaf, cheaper but not the same.\n\n## Suppliers\n\nFlour from the wholesale market; a local mill for whole wheat.\n",
+      "## Clientes\n\nFamílias dos três prédios da rua; quem trabalha em casa.\n\n## Concorrentes\n\nO pão industrial do mercado, mais barato, mas não é a mesma coisa.\n\n## Fornecedores\n\nFarinha do atacado; um moinho da região para a integral.\n"));
+  stepNote(bread, "05-financial-plan", at(-6, 20, 30), T("Cost per loaf", "Custo por pão"),
+    T("Flour, salt and energy 5, bag and label 1: **6 per loaf**.\n\n- [ ] Ask the mill for a price\n- [ ] Price paper bags\n",
+      "Farinha, sal e energia 5, saco e etiqueta 1: **6 por pão**.\n\n- [ ] Pedir preço ao moinho\n- [ ] Orçar sacos de papel\n"));
+  stepNote(bread, "05-financial-plan", at(-2, 21, 15), T("First month", "Primeiro mês"),
+    T("## Total investment\n\nSecond oven 900 + bannetons and scale 250 + first stock 150 = **1,300**.\n\n## Income statement\n\n- Sales: 120 loaves × 18 = 2,160\n- Variable costs: 120 × 6 = 720\n- Contribution margin: 1,440\n- Fixed costs: gas 120 + MEI fee 80 + delivery bag 50 = 250\n- **Net profit: 1,190**\n",
+      "## Investimento total\n\nSegundo forno 900 + cestos e balança 250 + estoque inicial 150 = **1.300**.\n\n## Demonstrativo de resultados\n\n- Vendas: 120 pães × 18 = 2.160\n- Custos variáveis: 120 × 6 = 720\n- Margem de contribuição: 1.440\n- Custos fixos: gás 120 + MEI 80 + bolsa térmica 50 = 250\n- **Lucro líquido: 1.190**\n"));
+  const plants = T("Plant care app", "App de plantas");
+  project(at(-1, 9, 0), plants, { flow: "software", idea: ideaFile(at(-2, 22, 40), plantsIdea), step: "01-discovery" });
+  stepNote(plants, "01-discovery", at(-1, 9, 30), T("Talk to plant people", "Conversar com quem tem plantas"),
+    T("## Interviews\n\n- Ana: 30 plants, uses a paper calendar on the fridge.\n- Bruno: sets phone alarms, then ignores them.\n\n## Insights\n\nThe hard part is knowing each plant's rhythm, not remembering the day.\n",
+      "## Entrevistas\n\n- Ana: 30 plantas, usa um calendário de papel na geladeira.\n- Bruno: põe alarmes no celular e depois ignora.\n\n## Descobertas\n\nO difícil é saber o ritmo de cada planta, não lembrar o dia.\n"));
+  // Tech startup flow, on hold.
+  project(at(-30, 19, 0), T("Tool library for the building", "Biblioteca de ferramentas do prédio"), {
     flow: "startup", step: "01-business-model", status: "on-hold",
     gates: [
-      { step: "00-integrating-environment", decision: "go", reason: "The college incubator takes student projects every semester.", date: day(-25) },
-      { step: "01-business-model", decision: "hold", reason: "Exams first; look again in December.", date: day(-12) },
+      { step: "00-integrating-environment", decision: "go", reason: T("The city's incubator takes community projects every semester.", "A incubadora da cidade aceita projetos comunitários todo semestre."), date: day(-25) },
+      { step: "01-business-model", decision: "hold", reason: T("Wait for the residents' meeting in December.", "Esperar a reunião de condomínio de dezembro."), date: day(-12) },
     ],
-  }, "A page where classmates list the books they no longer need.\n");
-  task(at(-5, 20, 0), "Ask two more oat suppliers for prices", { project: "granola-at-the-fair", step: "05-financial-plan", priority: 2 });
-  task(at(-2, 21, 20), "Price the jar labels", { project: "granola-at-the-fair", step: "05-financial-plan", when: day(2) });
-  task(at(-12, 18, 0), "Visit the food incubator", { project: "granola-at-the-fair", step: "04-operational-plan", status: "done", done_at: `${day(-8)}T16:00` });
-  task(at(-1, 9, 40), "Interview three more classmates", { project: "study-group-app", step: "01-discovery", when: day(1) });
-  stepNote("Study group app", "01-discovery", at(-1, 9, 30), "Talk to classmates",
-    "## Interviews\n\n- Ana: uses the group chat, loses the files.\n- Bruno: prints the summaries.\n\n## Insights\n\nThe problem is finding things later, not writing them.\n");
+  }, T("Neighbours lend drills, ladders and tools through a shared list.\n", "Vizinhos emprestam furadeiras, escadas e ferramentas por uma lista compartilhada.\n"));
+  task(at(-5, 20, 0), T("Ask the mill for a flour price", "Pedir preço da farinha ao moinho"), { project: slug(bread), step: "05-financial-plan", priority: 2 });
+  task(at(-2, 21, 20), T("Price the paper bags", "Orçar os sacos de papel"), { project: slug(bread), step: "05-financial-plan", when: day(2) });
+  task(at(-12, 18, 0), T("Test the second oven", "Testar o segundo forno"), { project: slug(bread), step: "04-operational-plan", status: "done", done_at: `${day(-8)}T16:00` });
+  task(at(-1, 9, 40), T("Interview three more people", "Entrevistar mais três pessoas"), { project: slug(plants), step: "01-discovery", when: day(1) });
 
-  // ---- Books (stage 3) ----
-  // No covers: the shelf shows the colored cards; add a photo to see a real one.
-  const book = (created, data, notes = "") => {
+  // ---- Books ----
+  // Covers come from Open Library (covers.openlibrary.org), by ISBN or cover id, when there is a
+  // connection; without one the shelf shows the colored cards. Page counts are made up.
+  const book = (created, data, notes = "", cover) => {
     const c = isoMinute(created);
-    out.push([`books/${slug(data.title)}/book.md`, file({ type: "book", created: c, modified: c, ...data }, notes)]);
+    const dir = `books/${slug(data.title)}`;
+    out.push([`${dir}/book.md`, file({ type: "book", created: c, modified: c, ...data, ...(cover && { cover: "cover.jpg" }) }, notes)]);
+    if (cover) covers.push([dir, cover]);
   };
-  book(at(-12, 21, 0), { title: "Meditations", author: "Marcus Aurelius", format: "paper", status: "reading", started: day(-12) },
-    "A few pages before sleeping. Book 2 so far.\n");
-  // Quote notes (stage 3b). Text from George Long's public-domain translation (Project Gutenberg
-  // #15877), checked word for word; the page numbers are made up for the sample.
-  const quote = (created, data, text, comment = "") => {
+  const quote = (bookTitle, created, data, text, comment = "") => {
     const c = isoMinute(created);
     const body = `> ${text}\n` + (comment ? `\n${comment}` : "");
-    out.push([`books/meditations/quotes/${stamp(created)}.md`, file({ type: "quote", created: c, modified: c, ...data }, body)]);
+    out.push([`books/${slug(bookTitle)}/quotes/${stamp(created)}.md`, file({ type: "quote", created: c, modified: c, ...data }, body)]);
   };
-  quote(at(-11, 21, 40), { page: 31, chapter: "Book IV, 3", tags: "[change]" }, "The universe is transformation: life is opinion.");
-  quote(at(-10, 22, 5), { page: 33, chapter: "Book IV, 17", tags: "[time, death]", last_reviewed: day(-5) },
-    "Do not act as if thou wert going to live ten thousand years. Death hangs over thee. While thou livest, while it is in thy power, be good.",
-    "Read it again before planning the week.\n");
-  quote(at(-2, 22, 30), { page: 141, chapter: "Book X, 16", tags: "[action]" },
-    "No longer talk at all about the kind of man that a good man ought to be, but be such.");
-  book(at(-5, 20, 10), { title: "Clean Code", author: "Robert C. Martin", year: 2008, format: "ebook", status: "reading", started: day(-5) },
-    "Reading it with the study task on Today.\n");
-  book(at(-40, 10, 0), { title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", year: 1999, status: "want" });
-  book(at(-60, 18, 30), { title: "Sapiens", author: "Yuval Noah Harari", year: 2011, status: "want" });
-  book(at(-90, 9, 0), { title: "Dom Casmurro", author: "Machado de Assis", year: 1899, status: "read", started: day(-80), finished: day(-50), rating: 5, pages: 256 },
-    "Capitu: did she or didn't she? The narrator is the one to doubt.\n");
-  book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4, pages: 328 });
-  // More read books, some last year, so the reading stats (stage 3c) have bars to show. Page
-  // counts here and above are made up for the sample (they depend on the edition).
-  book(at(-200, 19, 0), { title: "Letters from a Stoic", author: "Seneca", status: "read", started: day(-230), finished: day(-200), rating: 5, pages: 254 });
-  book(at(-300, 15, 0), { title: "The Little Prince", author: "Antoine de Saint-Exupéry", year: 1943, status: "read", started: day(-301), finished: day(-300), rating: 4, pages: 96 });
-  book(at(-420, 20, 0), { title: "Animal Farm", author: "George Orwell", year: 1945, format: "ebook", status: "read", started: day(-430), finished: day(-420), pages: 112 });
-  book(at(-70, 22, 0), { title: "Ulysses", author: "James Joyce", year: 1922, status: "dnf", started: day(-70), finished: day(-62),
-    dnf_reason: "Not the right moment; try again some day" });
-  book(at(-3, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist",
-    buy_url: "https://dataintensive.net/" },
-    "Recommended by a classmate. Look for a used copy.\n");
+  const medTitle = T("Meditations", "Meditações");
+  if (lang === "pt") {
+    book(at(-12, 21, 0), { title: "Meditações", author: "Marco Aurélio", format: "paper", status: "reading", started: day(-12), pages: 256 },
+      "Algumas páginas antes de dormir. Livro 4 até agora.\n", { id: 13264786 });
+    book(at(-5, 20, 10), { title: "Hábitos Atômicos", author: "James Clear", year: 2019, format: "ebook", status: "reading", started: day(-5), pages: 320 },
+      "Junto com a tarefa de espanhol no Hoje.\n", { isbn: "9788550807560" });
+    book(at(-40, 10, 0), { title: "Essencialismo", author: "Greg McKeown", year: 2015, status: "want" }, "", { id: 10401970 });
+    book(at(-60, 18, 30), { title: "Capitães da Areia", author: "Jorge Amado", year: 1937, status: "want" }, "", { id: 14832770 });
+    book(at(-90, 9, 0), { title: "Dom Casmurro", author: "Machado de Assis", year: 1899, status: "read", started: day(-80), finished: day(-50), rating: 5, pages: 256 },
+      "Capitu traiu ou não? Quem merece dúvida é o narrador.\n", { id: 10558903 });
+    book(at(-120, 9, 30), { title: "1984", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4, pages: 416 },
+      "", { isbn: "9788535914849" });
+    book(at(-150, 19, 0), { title: "Sapiens", author: "Yuval Noah Harari", year: 2015, status: "read", started: day(-180), finished: day(-150), rating: 4, pages: 472 },
+      "", { id: 14540965 });
+    book(at(-200, 19, 0), { title: "O Alquimista", author: "Paulo Coelho", year: 1988, status: "read", started: day(-205), finished: day(-200), rating: 3, pages: 208 },
+      "", { id: 12372777 });
+    book(at(-300, 15, 0), { title: "O Pequeno Príncipe", author: "Antoine de Saint-Exupéry", year: 1943, status: "read", started: day(-301), finished: day(-300), rating: 5, pages: 96 },
+      "", { id: 15096605 });
+    book(at(-420, 20, 0), { title: "Código Limpo", author: "Robert C. Martin", year: 2009, format: "ebook", status: "read", started: day(-450), finished: day(-420), rating: 4, pages: 440 },
+      "", { id: 12004890 });
+    book(at(-70, 22, 0), { title: "Vidas Secas", author: "Graciliano Ramos", year: 1938, status: "dnf", started: day(-70), finished: day(-62),
+      dnf_reason: "Não era o momento; retomar nas férias" }, "", { id: 14618961 });
+    book(at(-3, 12, 0), { title: "Torto Arado", author: "Itamar Vieira Junior", year: 2019, status: "wishlist", buy_url: "https://todavialivros.com.br/" },
+      "Indicação de uma amiga. Procurar usado.\n", { id: 12369648 });
+    // Texts: the app's own Portuguese translations (data/thoughts.pt.json, same passages).
+    quote(medTitle, at(-11, 21, 40), { page: 41, chapter: "Livro IV, 3", tags: "[mudança]" }, "O universo é mudança; a vida é opinião.");
+    quote(medTitle, at(-10, 22, 5), { page: 44, chapter: "Livro IV, 17", tags: "[tempo, morte]", last_reviewed: day(-5) },
+      "Não vivas como se fosses viver dez mil anos. A morte paira sobre ti. Enquanto vives, enquanto podes, torna-te bom.",
+      "Reler antes de planejar a semana.\n");
+    quote(medTitle, at(-2, 22, 30), { page: 63, chapter: "Livro V, 20", tags: "[obstáculos]" },
+      "A mente converte todo obstáculo à sua atividade em auxílio: o que impede a ação faz a ação avançar, e o que está no caminho nos ajuda a seguir por ele.");
+  } else {
+    book(at(-12, 21, 0), { title: "Meditations", author: "Marcus Aurelius", format: "paper", status: "reading", started: day(-12), pages: 144, publisher: "Dover" },
+      "A few pages before sleeping. Book 4 so far.\n", { isbn: "9780486298238" });
+    book(at(-5, 20, 10), { title: "Atomic Habits", author: "James Clear", year: 2018, format: "ebook", status: "reading", started: day(-5), pages: 320 },
+      "Reading it with the Spanish practice task on Today.\n", { isbn: "9780735211292" });
+    book(at(-40, 10, 0), { title: "Deep Work", author: "Cal Newport", year: 2016, status: "want" }, "", { isbn: "9781455586691" });
+    book(at(-60, 18, 30), { title: "The Pragmatic Programmer", author: "David Thomas and Andrew Hunt", year: 2019, status: "want" }, "", { isbn: "9780135957059" });
+    book(at(-90, 9, 0), { title: "Dune", author: "Frank Herbert", year: 1965, status: "read", started: day(-80), finished: day(-50), rating: 5, pages: 688 },
+      "The desert as a character. Read the appendix on ecology.\n", { isbn: "9780441172719" });
+    book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4, pages: 328 },
+      "", { isbn: "9780451524935" });
+    book(at(-150, 19, 0), { title: "Sapiens", author: "Yuval Noah Harari", year: 2015, status: "read", started: day(-180), finished: day(-150), rating: 4, pages: 464 },
+      "", { isbn: "9780062316097" });
+    book(at(-300, 15, 0), { title: "The Little Prince", author: "Antoine de Saint-Exupéry", year: 1943, status: "read", started: day(-301), finished: day(-300), rating: 5, pages: 96 },
+      "", { isbn: "9780156012195" });
+    book(at(-420, 20, 0), { title: "Clean Code", author: "Robert C. Martin", year: 2008, format: "ebook", status: "read", started: day(-450), finished: day(-420), rating: 4, pages: 464 },
+      "", { isbn: "9780132350884" });
+    book(at(-70, 22, 0), { title: "Ulysses", author: "James Joyce", year: 1922, status: "dnf", started: day(-70), finished: day(-62),
+      dnf_reason: "Not the right moment; try again some day" }, "", { isbn: "9780679722762" });
+    book(at(-3, 12, 0), { title: "Project Hail Mary", author: "Andy Weir", year: 2021, status: "wishlist" },
+      "Recommended by a friend. Look for a used copy.\n", { isbn: "9780593135204" });
+    book(at(-8, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist",
+      buy_url: "https://dataintensive.net/" }, "", { isbn: "9781449373320" });
+    // Text from George Long's public-domain translation (Project Gutenberg #15877), the one in
+    // the Dover edition, checked word for word.
+    quote(medTitle, at(-11, 21, 40), { page: 31, chapter: "Book IV, 3", tags: "[change]" }, "The universe is transformation: life is opinion.");
+    quote(medTitle, at(-10, 22, 5), { page: 33, chapter: "Book IV, 17", tags: "[time, death]", last_reviewed: day(-5) },
+      "Do not act as if thou wert going to live ten thousand years. Death hangs over thee. While thou livest, while it is in thy power, be good.",
+      "Read it again before planning the week.\n");
+    quote(medTitle, at(-2, 22, 30), { page: 141, chapter: "Book X, 16", tags: "[action]" },
+      "No longer talk at all about the kind of man that a good man ought to be, but be such.");
+  }
 
-  // ---- Thoughts (stage 4a) ----
+  // ---- Thoughts ----
   // Own thoughts only: the built-in library already shows checked quotes.
   const thought = (created, data, text) => {
     const c = isoMinute(created);
     out.push([`thoughts/${stamp(created)}.md`, file({ type: "thought", created: c, modified: c, ...data }, `${text}\n`)]);
   };
-  thought(at(-6, 22, 10), { kind: "mine", themes: "[action, work]", favorite: true },
-    "Finishing a small thing today beats planning a big thing for next month.");
-  thought(at(-2, 7, 45), { kind: "mine", themes: "[learning]" },
-    "When I feel behind, it helps to list what I already learned this year.");
+  thought(at(-6, 22, 10), { kind: "mine", themes: T("[action, work]", "[ação, trabalho]"), favorite: true },
+    T("Finishing a small thing today beats planning a big thing for next month.", "Terminar uma coisa pequena hoje vale mais que planejar uma grande para o mês que vem."));
+  thought(at(-2, 7, 45), { kind: "mine", themes: T("[learning]", "[aprendizado]") },
+    T("When I feel behind, it helps to list what I already learned this year.", "Quando me sinto atrasado, ajuda listar o que já aprendi este ano."));
   thought(at(-20, 19, 30), {
-    kind: "uncertain", author: "Plato", themes: "[kindness]",
-    notes: "Shared online as Plato, but it is not in his dialogues. Quote Investigator traces a similar line to Ian Maclaren (1897).",
-  }, "Be kind, for everyone you meet is fighting a hard battle.");
+    kind: "uncertain", author: T("Plato", "Platão"), themes: T("[kindness]", "[gentileza]"),
+    notes: T("Shared online as Plato, but it is not in his dialogues. Quote Investigator traces a similar line to Ian Maclaren (1897).",
+      "Circula como de Platão, mas não está nos diálogos. O Quote Investigator liga uma frase parecida a Ian Maclaren (1897)."),
+  }, T("Be kind, for everyone you meet is fighting a hard battle.", "Seja gentil, pois cada pessoa que você encontra está travando uma dura batalha."));
 
-  // ---- Journal (stage 4b) ----
+  // ---- Journal ----
   // Past days only, so writing today's entry can be tried from an empty page.
+  const LEARN = T("Learnings", "Aprendizados");
   const entry = (n, mood, body) => {
     const c = isoMinute(at(n, 22, 15));
     out.push([`journal/${day(n)}.md`, file({ type: "journal", created: c, modified: c, ...(mood && { mood }) }, body)]);
   };
   entry(-1, "calm",
-    "Slow morning, then two hours on the to-do screen of the app. Walked to the market in the evening.\n\n" +
-    "## Learnings\n\nStopping at a good point makes it easy to start again the next day.\n");
+    T("Slow morning, then two hours on the portfolio. Walked to the market in the evening.\n\n## Learnings\n\nStopping at a good point makes it easy to start again the next day.\n",
+      "Manhã tranquila, depois duas horas no portfólio. Fui a pé ao mercado no fim da tarde.\n\n## Aprendizados\n\nParar num bom ponto facilita recomeçar no dia seguinte.\n"));
   entry(-2, "hectic",
-    "Class, then the bank, then the bus broke down halfway home.\n\n" +
-    "## Important events\n\n- Handed in the finance assignment.\n\n" +
-    "## Personal notes\n\nI got annoyed in the queue and it did not help at all.\n");
-  entry(-4, "tiring", "Bad night of sleep. Did only the essentials and went to bed early.\n");
+    T("Meetings all morning, then the bank, then the bus broke down halfway home.\n\n## Important events\n\n- Sent the quote to the client.\n\n## Personal notes\n\nI got annoyed in the queue and it did not help at all.\n",
+      "Reuniões a manhã toda, depois o banco, e o ônibus quebrou no meio do caminho.\n\n## Acontecimentos importantes\n\n- Enviei o orçamento para o cliente.\n\n## Notas pessoais\n\nFiquei irritado na fila e não adiantou nada.\n"));
+  entry(-4, "tiring", T("Bad night of sleep. Did only the essentials and went to bed early.\n", "Noite mal dormida. Fiz só o essencial e dormi cedo.\n"));
   entry(-7, "good",
-    "Long call with an old friend from work. Good to remember how much I already learned.\n\n" +
-    "## Learnings\n\nAsking for help early saves a week of guessing.\n");
+    T(`Long call with an old friend. Good to remember how much changed in a year.\n\n## ${LEARN}\n\nAsking for help early saves a week of guessing.\n`,
+      `Ligação longa com um amigo antigo. Bom lembrar o quanto mudou em um ano.\n\n## ${LEARN}\n\nPedir ajuda cedo poupa uma semana de tentativa e erro.\n`));
   entry(-12, "hard", "");
 
-  // ---- Review (stage 4c) ----
+  // ---- Review ----
   // Past days only (blank questions are hidden there; "Show the blank questions" brings them back).
   const review = (n, data, body) => {
     const c = isoMinute(at(n, 22, 40));
     out.push([`review/${day(n)}.md`, file({ type: "review", created: c, modified: c, ...data }, body)]);
   };
   review(-1, { virtues: "[wisdom, temperance]", develop: "[courage]" },
-    "## Gratitude\n\nA quiet morning and a walk to the market.\n\n" +
-    "## Done well\n\nStopped working at a good point instead of pushing until late.\n\n" +
-    "## Up to me\n\nHow many hours I spent on the app, and when I stopped.\n\n" +
-    "## Intentions for tomorrow\n\nWrite down the questions for the class before it starts.\n");
+    T("## Gratitude\n\nA quiet morning and a walk to the market.\n\n## Done well\n\nStopped working at a good point instead of pushing until late.\n\n## Up to me\n\nHow many hours I spent on the screen, and when I stopped.\n\n## Intentions for tomorrow\n\nWrite the three portfolio texts before lunch.\n",
+      "## Gratidão\n\nUma manhã tranquila e uma caminhada até o mercado.\n\n## O que fiz bem\n\nParei de trabalhar num bom ponto em vez de ir até tarde.\n\n## Depende de mim\n\nQuantas horas passei na tela, e quando parei.\n\n## Intenções para amanhã\n\nEscrever os três textos do portfólio antes do almoço.\n"));
   review(-2, { develop: "[temperance]" },
-    "## Difficulties\n\nGot annoyed in the bank queue and was short with the clerk.\n\n" +
-    "## Not up to me\n\nThe queue and the bus breaking down.\n\n" +
-    "## Repair\n\nBe kind to the clerk next time; it was not their fault.\n");
+    T("## Difficulties\n\nGot annoyed in the bank queue and was short with the clerk.\n\n## Not up to me\n\nThe queue and the bus breaking down.\n\n## Repair\n\nBe kind to the clerk next time; it was not their fault.\n",
+      "## Dificuldades\n\nFiquei irritado na fila do banco e fui seco com o atendente.\n\n## Não depende de mim\n\nA fila e o ônibus quebrado.\n\n## Reparar\n\nSer gentil com o atendente da próxima vez; a culpa não era dele.\n"));
   review(-7, { virtues: "[justice]" },
-    "## Gratitude\n\nOld friends who still call.\n\n" +
-    "## Done well\n\nAsked for help instead of guessing for another week.\n");
+    T("## Gratitude\n\nOld friends who still call.\n\n## Done well\n\nAsked for help instead of guessing for another week.\n",
+      "## Gratidão\n\nAmigos antigos que ainda ligam.\n\n## O que fiz bem\n\nPedi ajuda em vez de ficar mais uma semana tentando sozinho.\n"));
 
   // ---- Trash ----
   const old = at(-12, 9, 0);
-  const trashed = `.trash/todo/${stamp(old)}-print-the-boarding-pass.md`;
+  const oldTitle = T("Print the boarding pass", "Imprimir o cartão de embarque");
+  const trashed = `.trash/todo/${stamp(old)}-${slug(oldTitle)}.md`;
   out.push([trashed, file({ type: "todo", created: isoMinute(old), modified: isoMinute(old), status: "open", when: day(-11) },
-    "# Print the boarding pass\n")]);
-  return { files: out, trashIndex: { [trashed]: { from: trashed.slice(7), at: isoMinute(at(-1, 19, 0)) } } };
+    `# ${oldTitle}\n`)]);
+  return { files: out, covers, trashIndex: { [trashed]: { from: trashed.slice(7), at: isoMinute(at(-1, 19, 0)) } } };
 }
 
-const SAMPLE_LISTS = [
-  { id: "home", name: "Home", color: "h1" },
-  { id: "study", name: "Study", color: "accent" },
-  { id: "errands", name: "Errands", color: "h3" },
-  { id: "health", name: "Health", color: "ok" },
+const sampleLists = lang => [
+  { id: "home", name: lang === "pt" ? "Casa" : "Home", color: "h1" },
+  { id: "study", name: lang === "pt" ? "Estudo" : "Study", color: "accent" },
+  { id: "work", name: lang === "pt" ? "Trabalho" : "Work", color: "h2" },
+  { id: "errands", name: lang === "pt" ? "Rua" : "Errands", color: "h3" },
+  { id: "health", name: lang === "pt" ? "Saúde" : "Health", color: "ok" },
 ];
 
 // ---- Folder access: this PC, or the phone over adb ----
@@ -418,10 +488,10 @@ const areaOf = rel => rel.split("/")[0];
  * Adds the samples of every area that has none yet, so running `add` again after a new stage
  * only brings that stage's samples (older manifests have no `areas`: taken from their files).
  */
-function add(io) {
+async function add(io, { lang, demo }) {
   const m = readJson(io, MANIFEST, null);
   const had = new Set(m ? (m.areas ?? m.files.map(areaOf)) : []);
-  const { files: all, trashIndex } = samples();
+  const { files: all, covers, trashIndex } = samples(lang, demo);
   const files = all.filter(([rel]) => !had.has(areaOf(rel)));
   if (!files.length) {
     console.log("Sample data is already there. Run `remove` first to make it again with today's dates.");
@@ -432,12 +502,26 @@ function add(io) {
   if (files.some(([rel]) => areaOf(rel) === "todo")) {
     const lists = readJson(io, LISTS, { lists: [] });
     const ids = new Set(lists.lists.map(l => l.id));
-    addedLists = SAMPLE_LISTS.filter(l => !ids.has(l.id));
+    addedLists = sampleLists(lang).filter(l => !ids.has(l.id));
     io.write(LISTS, JSON.stringify({ ...lists, lists: [...lists.lists, ...addedLists] }, null, 2) + "\n");
   }
   if (files.some(([rel]) => areaOf(rel) === ".trash")) {
     const index = readJson(io, ".trash/.deleted.json", {});
     io.write(".trash/.deleted.json", JSON.stringify({ ...index, ...trashIndex }, null, 2) + "\n");
+  }
+  let got = 0;
+  for (const [dir, src] of covers) {
+    if (had.has("books")) break;
+    const data = await fetchCover(src);
+    if (data) {
+      io.write(`${dir}/cover.jpg`, data);
+      got++;
+    }
+  }
+  if (covers.length && !had.has("books")) console.log(`Covers: ${got} of ${covers.length} downloaded.`);
+  if (demo) {
+    const settings = readJson(io, ".polaris/settings.json", { theme: "dark" });
+    io.write(".polaris/settings.json", JSON.stringify({ ...settings, language: lang === "pt" ? "pt-BR" : "en" }, null, 2) + "\n");
   }
   const manifest = {
     files: [...(m?.files ?? []), ...files.map(f => f[0])],
@@ -454,7 +538,12 @@ function remove(io) {
   for (const rel of files) io.remove(rel);
   // A sample book is a folder: drop it too when nothing of the user's is inside.
   for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/quotes\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
-  for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/book\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
+  // Its cover goes with it (the book file is a sample, so the cover is too).
+  for (const rel of files)
+    if (/^(\.trash\/)?books\/[^/]+\/book\.md$/.test(rel)) {
+      io.remove(`${path.posix.dirname(rel)}/cover.jpg`);
+      io.removeDirIfEmpty(path.posix.dirname(rel));
+    }
   // Sample projects too: the step folders, then the project folder.
   for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/project\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
@@ -471,10 +560,27 @@ function remove(io) {
   console.log(`Removed ${files.length} sample files.`);
 }
 
-const [cmd, target] = process.argv.slice(2);
-if (!["add", "remove"].includes(cmd) || !target) {
-  console.log("usage: node tools/sample-data.mjs add|remove <folder>|--phone");
+/** A cover from Open Library ({ isbn } or { id }), or null when offline or missing. */
+async function fetchCover(src) {
+  const url = src.isbn
+    ? `https://covers.openlibrary.org/b/isbn/${src.isbn}-L.jpg?default=false`
+    : `https://covers.openlibrary.org/b/id/${src.id}-L.jpg`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+    return res.ok ? Buffer.from(await res.arrayBuffer()) : null;
+  } catch {
+    return null;
+  }
+}
+
+const args = process.argv.slice(2);
+const [cmd, target] = args.filter((a, i) => args[i - 1] !== "--lang" && (a === "--phone" || !a.startsWith("--")));
+const langAt = args.indexOf("--lang");
+const lang = langAt >= 0 ? args[langAt + 1] : "en";
+if (!["add", "remove"].includes(cmd) || !target || !["en", "pt"].includes(lang)) {
+  console.log("usage: node tools/sample-data.mjs add|remove <folder>|--phone [--lang en|pt] [--demo]");
   process.exit(1);
 }
 const io = target === "--phone" ? phone() : local(path.resolve(target));
-(cmd === "add" ? add : remove)(io);
+if (cmd === "add") await add(io, { lang, demo: args.includes("--demo") });
+else remove(io);

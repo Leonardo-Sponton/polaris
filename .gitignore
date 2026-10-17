@@ -11,3 +11,26 @@ release/
 packaging/arch/src/
 packaging/arch/pkg/
 packaging/arch/*.tar.*
+
+# Planning notes, local only
+docs/KICKOFF.md
+docs/QUESTIONS.md
+docs/SPEC.md
+
+# Builds, signing keys and local files
+*.apk
+*.aab
+*.keystore
+*.jks
+android/keystore.properties
+android/app/release/
+android/capacitor-cordova-android-plugins/
+.env
+.env.*
+*.log
+.vscode/
+.idea/
+.DS_Store
+# Data folders and backups
+Polaris/
+polaris-backup-*.zip
