@@ -648,3 +648,406 @@ h3 {
   width: 100%;
   max-width: 460px;
 }
+
+.small {
+  font-size: 0.8rem;
+}
+
+.field.bad {
+  border-color: var(--err);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--strong);
+  text-align: left;
+  cursor: pointer;
+}
+.menu-item:hover {
+  background: var(--hover);
+}
+.menu-item.active {
+  background: var(--select);
+}
+.menu-item .date-field {
+  width: auto;
+  min-height: 36px;
+  margin-left: auto;
+  padding: 4px 8px;
+}
+
+/* ---- To-do (SPEC 5.3) ---- */
+
+/* List links: under "To-do" in the wide sidebar, as chips above the list otherwise. */
+.sub-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 8px;
+}
+.nav-item.sub {
+  min-height: 34px;
+  padding-left: 24px;
+  font-size: 0.92rem;
+}
+.nav-item.sub svg {
+  width: 16px;
+  height: 16px;
+}
+.nav-item.sub .dot {
+  margin: 0 3px;
+}
+
+.todo-nav {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: transparent;
+  color: var(--text);
+  white-space: nowrap;
+}
+.chip.active {
+  background: var(--select);
+  border-color: var(--accent);
+  color: var(--strong);
+}
+
+@media (min-width: 1001px) {
+  .todo-nav {
+    display: none;
+  }
+}
+@media (max-width: 1000px) {
+  .sub-nav {
+    display: none;
+  }
+}
+
+.empty-note {
+  padding: 8px;
+}
+
+.task-section + .task-section {
+  margin-top: 14px;
+}
+.section-head {
+  padding: 4px 10px 6px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+.section-head.late,
+.late {
+  color: var(--err);
+}
+
+/* Quick add: the text area is transparent; the colored copy behind it shows through. */
+.quick-add {
+  padding: 0 4px 12px;
+}
+.qa-box {
+  position: relative;
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.qa-box:focus-within {
+  border-color: var(--accent);
+}
+.qa-mirror,
+.qa-input {
+  margin: 0;
+  padding: 9px 44px 9px 12px;
+  border: 0;
+  font: inherit;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qa-mirror {
+  position: absolute;
+  inset: 0;
+  color: var(--strong);
+  pointer-events: none;
+  overflow: hidden;
+}
+.qa-mirror mark {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--strong);
+}
+.qa-mirror mark.qa-date,
+.qa-mirror mark.qa-time,
+.qa-mirror mark.qa-evening {
+  background: color-mix(in srgb, var(--h3) 25%, transparent);
+}
+.qa-mirror mark.qa-repeat {
+  background: color-mix(in srgb, var(--ok) 25%, transparent);
+}
+.qa-mirror mark.qa-priority {
+  background: color-mix(in srgb, var(--err) 25%, transparent);
+}
+.qa-input {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  resize: none;
+  field-sizing: content;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--accent);
+  outline: none;
+}
+.qa-input::placeholder {
+  color: var(--muted);
+}
+.qa-add {
+  position: absolute;
+  right: 2px;
+  top: 1px;
+}
+.qa-preview {
+  padding: 6px 4px 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.qa-preview strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* A task row; on touch screens it slides over a colored strip while swiped. */
+.task-li {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.swipe-under {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-weight: 600;
+  color: var(--on-accent);
+}
+.swipe-under.right {
+  background: var(--ok);
+}
+.swipe-under.left {
+  justify-content: flex-end;
+  background: var(--h2);
+}
+.task-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 4px 2px 6px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  touch-action: pan-y;
+}
+@media (max-width: 719px) {
+  .task-row {
+    background: var(--bg);
+  }
+}
+.task-row:hover {
+  background: var(--hover);
+}
+.task-row.active {
+  background: var(--select);
+}
+.task-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 6px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.task-title {
+  color: var(--strong);
+  overflow-wrap: anywhere;
+}
+.task-row.done .task-title {
+  color: var(--muted);
+}
+.canceled {
+  text-decoration: line-through;
+}
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.task-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* The round done box. Priority colors its ring: high, medium, low. */
+.check {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--on-accent);
+}
+.check::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+}
+.check > svg {
+  grid-area: 1 / 1;
+  z-index: 1;
+}
+.check.p1::before {
+  border-color: var(--err);
+}
+.check.p2::before {
+  border-color: var(--h2);
+}
+.check.p3::before {
+  border-color: var(--accent);
+}
+.check.on::before {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+.check.big::before {
+  width: 24px;
+  height: 24px;
+}
+
+/* Task screen */
+.task-page .page-inner {
+  gap: 14px;
+}
+.task-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.task-title-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--h1);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.35;
+  resize: none;
+  field-sizing: content;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+.task-title-input:focus {
+  border-bottom-color: var(--accent);
+}
+.task-closed {
+  margin: -8px 0 0 48px;
+}
+.task-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px 14px;
+}
+.task-fields .field {
+  max-width: 320px;
+}
+.task-fields input[type="date"].field,
+.task-fields input[type="time"].field {
+  width: auto;
+}
+.fl {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.field-btn,
+.task-fields .segmented {
+  justify-self: start;
+}
+@media (max-width: 480px) {
+  .task-fields {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .task-fields .fl:not(:first-child) {
+    margin-top: 8px;
+  }
+}
+.task-notes-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+/* Notes grow with their text inside the scrolling task page. */
+.task-notes .editor {
+  padding: 0;
+  min-height: 120px;
+}
+.task-notes .editor .cm-editor {
+  height: auto;
+}
+.task-notes .editor .cm-editor .cm-scroller {
+  overflow: visible;
+}
+.task-notes .editor .cm-editor .cm-content {
+  padding: 4px 0 24px;
+}
+.task-actions {
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}

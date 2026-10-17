@@ -44,6 +44,10 @@ notes
     expect(out.data).toEqual({ type: "todo", created: "2026-10-17T21:52", due: "2026-10-20" });
   });
 
+  it("quotes times so YAML 1.1 readers do not see numbers", () => {
+    expect(stringify({ time: "17:00", n: "12" }, "")).toBe('---\ntime: "17:00"\nn: "12"\n---\n');
+  });
+
   it("a file without header, or with a broken one, keeps all its text as body", () => {
     expect(parse("# Hi\n").body).toBe("# Hi\n");
     const broken = "---\ntype: [oops\n---\ntext\n";

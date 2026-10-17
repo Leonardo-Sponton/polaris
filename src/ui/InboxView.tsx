@@ -75,7 +75,7 @@ export function InboxView() {
           <NoteEditor
             key={open.path}
             path={open.path}
-            placeholder="Write anything…"
+            placeholder="Write anything… (start the first line with # for a title)"
             onBack={() => setOpen(null)}
             removeIfEmpty
             autoFocus={open.isNew}

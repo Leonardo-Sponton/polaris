@@ -150,8 +150,10 @@ function createWindow() {
   if (process.env.HYPO_SHOT) {
     // Test helper: save a screenshot and quit (used to check the UI without a person watching).
     // HYPO_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
+    // HYPO_SHOT_ZOOM: page zoom, e.g. 0.7 to see the wide layout in a small tiled window.
     mainWindow.webContents.once("did-finish-load", () =>
       setTimeout(async () => {
+        if (process.env.HYPO_SHOT_ZOOM) mainWindow.webContents.setZoomFactor(Number(process.env.HYPO_SHOT_ZOOM));
         if (process.env.HYPO_SHOT_JS) {
           await mainWindow.webContents.executeJavaScript(process.env.HYPO_SHOT_JS).catch(e => console.error(e));
           await new Promise(r => setTimeout(r, Number(process.env.HYPO_SHOT_WAIT || 800)));

@@ -1,7 +1,11 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { CheckSquare, Inbox, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { isoDate } from "../data/dates";
+import { isToday, type View } from "../data/todo";
 import { InboxView } from "./InboxView";
 import { SettingsView } from "./SettingsView";
+import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
+import { useTodo } from "./todo/useTodo";
 
 // The areas built so far. Ideas, Books, Journal… join in later stages (SPEC 7).
 export type Area = "today" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
@@ -49,11 +53,18 @@ function More({ go }: { go: (a: Area) => void }) {
 
 export function Shell() {
   const [area, setArea] = useState<Area>("today");
+  const [view, setView] = useState<View>("today");
+  const todo = useTodo();
+  const today = isoDate();
+  const todayCount = todo.tasks.filter(t => isToday(t, today)).length;
 
   let page: ReactNode;
   switch (area) {
     case "inbox":
       page = <InboxView />;
+      break;
+    case "todo":
+      page = <TodoView view={view} setView={setView} data={todo} />;
       break;
     case "settings":
       page = <SettingsView />;
@@ -67,20 +78,51 @@ export function Shell() {
 
   const inMore = !BOTTOM.includes(area);
 
+  // To-do lists right under "To-do" in the sidebar (wide screens; narrow ones use chips).
+  const todoNav = (
+    <div className="sub-nav" aria-label="To-do lists">
+      {VIEWS.map(v => (
+        <button
+          key={v.id}
+          className={`nav-item sub${sameView(view, v.id) ? " active" : ""}`}
+          onClick={() => setView(v.id)}
+        >
+          {v.icon}
+          <span className="label">{v.label}</span>
+          {v.id === "today" && todayCount > 0 && <span className="count">{todayCount}</span>}
+        </button>
+      ))}
+      {todo.lists.map(l => (
+        <button
+          key={l.id}
+          className={`nav-item sub${sameView(view, { list: l.id }) ? " active" : ""}`}
+          onClick={() => setView({ list: l.id })}
+        >
+          <span className="dot" style={{ background: `var(--${l.color})` }} />
+          <span className="label">{l.name}</span>
+        </button>
+      ))}
+      <NewListButton data={todo} setView={setView} className="nav-item sub muted" />
+    </div>
+  );
+
   return (
     <div className="app">
       <nav className="sidebar" aria-label="Areas">
         <div className="brand">HYPOMNEMATA</div>
         {AREAS.map(a => (
-          <button
-            key={a.id}
-            className={`nav-item${area === a.id ? " active" : ""}`}
-            onClick={() => setArea(a.id)}
-            title={a.label}
-          >
-            {a.icon}
-            <span className="label">{a.label}</span>
-          </button>
+          <Fragment key={a.id}>
+            <button
+              className={`nav-item${area === a.id ? " active" : ""}`}
+              onClick={() => setArea(a.id)}
+              title={a.label}
+            >
+              {a.icon}
+              <span className="label">{a.label}</span>
+              {a.id === "todo" && todayCount > 0 && <span className="count">{todayCount}</span>}
+            </button>
+            {a.id === "todo" && area === "todo" && todoNav}
+          </Fragment>
         ))}
       </nav>
       <main className="main">{page}</main>

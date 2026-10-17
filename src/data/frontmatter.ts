@@ -1,4 +1,4 @@
-import { Document, isMap, parseDocument } from "yaml";
+import { Document, isMap, parseDocument, Scalar } from "yaml";
 
 // A Markdown file with a YAML header ("frontmatter") between two "---" lines.
 // The header is kept as a YAML Document so that keys the app does not know, their order and
@@ -35,6 +35,14 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
  * changed keys are updated in place, untouched keys keep their original formatting.
  * Keys with value undefined are removed too.
  */
+/** Times like 17:00 are quoted: older YAML readers take them for numbers (base 60). */
+function node(value: unknown): unknown {
+  if (typeof value !== "string" || !/^\d+(:\d+)+$/.test(value)) return value;
+  const s = new Scalar(value);
+  s.type = Scalar.QUOTE_DOUBLE;
+  return s;
+}
+
 export function stringify(data: Data, body: string, original?: { doc: Document; raw?: string }): string {
   const doc = original ? (original.doc.clone() as Document) : new Document({});
   const old = (doc.toJS() ?? {}) as Data;
@@ -45,7 +53,7 @@ export function stringify(data: Data, body: string, original?: { doc: Document; 
   }
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) continue;
-    if (!(key in old) || !same(old[key], value)) doc.set(key, value);
+    if (!(key in old) || !same(old[key], value)) doc.set(key, node(value));
   }
   const yaml = Object.keys(data).some(k => data[k] !== undefined)
     ? doc.toString({ lineWidth: 0, flowCollectionPadding: false })
