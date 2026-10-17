@@ -129,8 +129,11 @@ h3 {
   color: var(--strong);
 }
 
-.btn:hover {
-  background: var(--hover);
+/* Hover only where there is a mouse: on touch it sticks to the last tapped item. */
+@media (hover: hover) {
+  .btn:hover {
+    background: var(--hover);
+  }
 }
 
 .btn.primary {
@@ -216,8 +219,10 @@ h3 {
   color: var(--text);
 }
 
-.nav-item:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .nav-item:hover {
+    background: var(--hover);
+  }
 }
 
 .nav-item.active {
@@ -442,8 +447,10 @@ h3 {
   text-align: left;
 }
 
-.list-item:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .list-item:hover {
+    background: var(--hover);
+  }
 }
 
 .list-item.active {
@@ -475,8 +482,10 @@ h3 {
   text-align: left;
   cursor: pointer;
 }
-.today-card:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .today-card:hover {
+    background: var(--hover);
+  }
 }
 .today-card .count {
   margin-left: auto;
@@ -720,11 +729,41 @@ h3 {
   text-align: left;
   cursor: pointer;
 }
-.menu-item:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .menu-item:hover {
+    background: var(--hover);
+  }
 }
 .menu-item.active {
   background: var(--select);
+}
+/* Hold More in the bottom bar. */
+.more-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+.more-pop {
+  position: fixed;
+  right: 8px;
+  bottom: calc(var(--bar) + env(safe-area-inset-bottom) + 8px);
+  z-index: 21;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  user-select: none;
+}
+.more-pop .count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 .menu-item.danger {
   color: var(--err);
@@ -955,8 +994,10 @@ h3 {
     background: var(--bg);
   }
 }
-.task-row:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .task-row:hover {
+    background: var(--hover);
+  }
 }
 .task-row.active {
   background: var(--select);
@@ -1371,8 +1412,10 @@ label.contents {
   text-align: left;
   color: inherit;
 }
-.book-card:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .book-card:hover {
+    background: var(--hover);
+  }
 }
 .book-card.active {
   background: var(--select);
@@ -1475,8 +1518,10 @@ label.contents {
   cursor: default;
   gap: 8px;
 }
-.quote-review:hover {
-  background: var(--surface);
+@media (hover: hover) {
+  .quote-review:hover {
+    background: var(--surface);
+  }
 }
 .qr-head {
   display: flex;
@@ -1560,8 +1605,10 @@ label.contents {
   text-align: left;
   cursor: pointer;
 }
-.quote-item:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .quote-item:hover {
+    background: var(--hover);
+  }
 }
 .qi-text {
   font-style: italic;
@@ -1820,8 +1867,10 @@ label.contents {
   font-family: var(--mono);
   font-size: 0.85rem;
 }
-.cal-day:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .cal-day:hover {
+    background: var(--hover);
+  }
 }
 .cal-day.has {
   color: var(--strong);
@@ -1901,8 +1950,10 @@ label.contents {
   flex-wrap: wrap;
   cursor: default;
 }
-.day-card:hover {
-  background: var(--surface);
+@media (hover: hover) {
+  .day-card:hover {
+    background: var(--surface);
+  }
 }
 .day-journal {
   flex: 1;
@@ -1918,8 +1969,10 @@ label.contents {
   font: inherit;
   text-align: left;
 }
-.day-journal:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .day-journal:hover {
+    background: var(--hover);
+  }
 }
 .day-journal .what {
   display: flex;

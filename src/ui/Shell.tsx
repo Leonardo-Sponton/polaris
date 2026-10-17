@@ -20,7 +20,8 @@ import { TrashView } from "./TrashView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
 import { useApp } from "./context";
-import { goBack } from "./useBack";
+import { goBack, useBack } from "./useBack";
+import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
 
 // The areas built so far. Review and Projects join in later stages (SPEC 7).
@@ -57,6 +58,68 @@ function More({ go }: { go: (a: Area) => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// Hold More (right-click on PC) for these without leaving the current page.
+const QUICK: Area[] = ["journal", "thoughts", "inbox"];
+
+/** Small window above the More button. While the finger that opened it is still down, sliding
+ *  onto an item and lifting picks it; otherwise it stays open to be tapped. */
+function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
+  const [over, setOver] = useState<Area>();
+  const overRef = useRef<Area>(undefined);
+  const down = useRef(true);
+  // The click that follows the lift lands later; only a new touch may close the window.
+  const touched = useRef(false);
+  useBack(true, props.onClose);
+
+  useEffect(() => {
+    const pick = (e: PointerEvent) => {
+      const el = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-pick]");
+      overRef.current = el?.dataset.pick as Area | undefined;
+      setOver(overRef.current);
+    };
+    const move = (e: PointerEvent) => down.current && pick(e);
+    const up = (e: PointerEvent) => {
+      if (!down.current) return;
+      pick(e);
+      down.current = false;
+      if (overRef.current) props.go(overRef.current);
+    };
+    const press = () => (touched.current = !down.current);
+    addEventListener("pointermove", move);
+    addEventListener("pointerup", up);
+    addEventListener("pointerdown", press, true);
+    return () => {
+      removeEventListener("pointermove", move);
+      removeEventListener("pointerup", up);
+      removeEventListener("pointerdown", press, true);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className="more-backdrop" onClick={() => touched.current && props.onClose()} />
+      <div className="more-pop" role="menu" aria-label="Quick areas">
+        {QUICK.map(id => {
+          const a = AREAS.find(x => x.id === id)!;
+          return (
+            <button
+              key={id}
+              data-pick={id}
+              role="menuitem"
+              className={`menu-item${over === id ? " active" : ""}`}
+              onClick={() => props.go(id)}
+            >
+              {a.icon}
+              <span>{a.label}</span>
+              {id === "inbox" && props.inbox > 0 && <span className="count">{props.inbox}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -301,6 +364,8 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   }
 
   const inMore = !BOTTOM.includes(area);
+  const [morePop, setMorePop] = useState(false);
+  const moreHold = useHold(() => setMorePop(true));
 
   // To-do lists right under "To-do" in the sidebar (wide screens; narrow ones use chips).
   const todoNav = (
@@ -357,13 +422,28 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           const a = AREAS.find(x => x.id === id);
           const active = id === "more" ? inMore : area === id;
           return (
-            <button key={id} className={`nav-item${active ? " active" : ""}`} onClick={() => go(id)}>
+            <button
+              key={id}
+              className={`nav-item${active ? " active" : ""}`}
+              onClick={() => !(id === "more" && moreHold.eaten()) && go(id)}
+              {...(id === "more" ? { ...moreHold.handlers, style: { touchAction: "none" } } : {})}
+            >
               {a ? a.icon : <Menu size={20} />}
               <span>{a ? a.label : "More"}</span>
             </button>
           );
         })}
       </nav>
+      {morePop && (
+        <MorePop
+          inbox={inbox.length}
+          go={a => {
+            setMorePop(false);
+            go(a);
+          }}
+          onClose={() => setMorePop(false)}
+        />
+      )}
     </div>
   );
 }
