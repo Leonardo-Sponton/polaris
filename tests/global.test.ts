@@ -84,7 +84,7 @@ describe("search", () => {
     await s.write("inbox/2.md", "---\ntype: inbox\nmodified: 2026-01-02T10:00\n---\nA long note that mentions Ana somewhere in the middle of the text.\n");
     await s.write("ideas/3.md", "---\nmodified: 2026-10-17T08:00\n---\n# Café app\n");
     await s.write(".trash/todo/4.md", "# Ana in the trash\n");
-    await s.write(".hypomnemata/settings.json", "{}");
+    await s.write(".polaris/settings.json", "{}");
     return loadDocs(notes);
   };
 
@@ -130,7 +130,7 @@ describe("backup", () => {
     await s.write("todo/a.md", "A");
     await s.writeBinary("books/x/cover.jpg", new Uint8Array([1, 2, 3]));
     await s.write(SETTINGS_PATH, '{"theme":"light"}');
-    await s.write(".hypomnemata/lists.json", "[1]");
+    await s.write(".polaris/lists.json", "[1]");
     await s.write(".trash/inbox/z.md", "Z");
     return s;
   };
@@ -140,16 +140,16 @@ describe("backup", () => {
     const b = readBackup(await exportBackup(s, SAT));
     expect(b.created).toBe("2026-10-17T09:30");
     expect([...b.files.keys()].sort()).toEqual(
-      [".hypomnemata/lists.json", SETTINGS_PATH, ".trash/inbox/z.md", "books/x/cover.jpg", "todo/a.md"].sort(),
+      [".polaris/lists.json", SETTINGS_PATH, ".trash/inbox/z.md", "books/x/cover.jpg", "todo/a.md"].sort(),
     );
     expect([...b.files.get("books/x/cover.jpg")!]).toEqual([1, 2, 3]);
   });
 
   it("refuses files that are not backups", () => {
     expect(() => readBackup(new Uint8Array([1, 2, 3]))).toThrow(BackupError);
-    expect(() => readBackup(zipSync({ "a.md": new Uint8Array([65]) }))).toThrow(/not a Hypomnemata backup/);
-    const manifest = new TextEncoder().encode('{"app":"hypomnemata"}');
-    expect(() => readBackup(zipSync({ "hypomnemata-backup.json": manifest, "../evil.md": new Uint8Array([65]) }))).toThrow(
+    expect(() => readBackup(zipSync({ "a.md": new Uint8Array([65]) }))).toThrow(/not a Polaris backup/);
+    const manifest = new TextEncoder().encode('{"app":"polaris"}');
+    expect(() => readBackup(zipSync({ "polaris-backup.json": manifest, "../evil.md": new Uint8Array([65]) }))).toThrow(
       /unsafe path/,
     );
   });
@@ -164,11 +164,11 @@ describe("backup", () => {
     await restoreBackup(s, b);
     expect(await text(s, "todo/a.md")).toBe("A");
     expect(await s.stat("todo/new.md")).toBeNull();
-    expect(await text(s, ".hypomnemata/lists.json")).toBe("[1]");
+    expect(await text(s, ".polaris/lists.json")).toBe("[1]");
     expect(await text(s, SETTINGS_PATH)).toBe('{"theme":"dark"}');
     expect(await text(s, `${BEFORE_RESTORE}/todo/a.md`)).toBe("changed");
     expect(await text(s, `${BEFORE_RESTORE}/todo/new.md`)).toBe("N");
-    expect(await text(s, `${BEFORE_RESTORE}/.hypomnemata/lists.json`)).toBe("[1]");
+    expect(await text(s, `${BEFORE_RESTORE}/.polaris/lists.json`)).toBe("[1]");
     // A second restore replaces the old before-restore and never puts it in a backup.
     const again = readBackup(await exportBackup(s));
     expect([...again.files.keys()].some(p => p.startsWith(BEFORE_RESTORE))).toBe(false);

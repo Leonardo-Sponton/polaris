@@ -1,7 +1,7 @@
 import type { Storage } from "../storage/types";
 import { slugify } from "./dates";
 
-// User to-do lists (#home, #work…) in .hypomnemata/lists.json (SPEC 5.3). A task names its list
+// User to-do lists (#home, #work…) in .polaris/lists.json (SPEC 5.3). A task names its list
 // by id in `list:`; the name and color here are only for display, so renaming touches no task.
 
 export interface TodoList {
@@ -11,7 +11,7 @@ export interface TodoList {
   color: string;
 }
 
-export const LISTS_PATH = ".hypomnemata/lists.json";
+export const LISTS_PATH = ".polaris/lists.json";
 
 /** Theme color names (CSS variables), so lists stay readable in both themes. */
 export const LIST_COLORS = ["accent", "h1", "h2", "h3", "ok", "err"];

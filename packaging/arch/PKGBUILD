@@ -1,26 +1,26 @@
 # Arch package made from the Linux build of this repo (`npm run dist` → release/*.tar.gz).
 # Build and install:  cd packaging/arch && makepkg -si
-pkgname=hypomnemata
+pkgname=polaris
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Offline notes, to-do, ideas and books in plain Markdown files"
 arch=('x86_64')
-url="https://github.com/Leonardo-Sponton/hypomnemata"
+url="https://github.com/Leonardo-Sponton/polaris"
 license=('MIT')
 depends=('gtk3' 'nss' 'alsa-lib' 'libnotify')
 optdepends=('libappindicator-gtk3: tray icon on some desktops')
 options=('!strip' '!debug')
-source=("hypomnemata-${pkgver}-x64.tar.gz::file://${startdir}/../../release/hypomnemata-${pkgver}-x64.tar.gz"
-        "hypomnemata.desktop")
+source=("polaris-${pkgver}-x64.tar.gz::file://${startdir}/../../release/polaris-${pkgver}-x64.tar.gz"
+        "polaris.desktop")
 sha256sums=('SKIP' 'SKIP')
 
 package() {
-  install -d "$pkgdir/opt/hypomnemata"
-  cp -a "hypomnemata-${pkgver}-x64/." "$pkgdir/opt/hypomnemata/"
+  install -d "$pkgdir/opt/polaris"
+  cp -a "polaris-${pkgver}-x64/." "$pkgdir/opt/polaris/"
   install -d "$pkgdir/usr/bin"
-  chmod 4755 "$pkgdir/opt/hypomnemata/chrome-sandbox"
-  ln -s /opt/hypomnemata/hypomnemata "$pkgdir/usr/bin/hypomnemata"
-  install -Dm644 hypomnemata.desktop "$pkgdir/usr/share/applications/hypomnemata.desktop"
-  install -Dm644 "${startdir}/../../resources/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/hypomnemata.png"
-  install -Dm644 "$pkgdir/opt/hypomnemata/LICENSE.electron.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.electron.txt"
+  chmod 4755 "$pkgdir/opt/polaris/chrome-sandbox"
+  ln -s /opt/polaris/polaris "$pkgdir/usr/bin/polaris"
+  install -Dm644 polaris.desktop "$pkgdir/usr/share/applications/polaris.desktop"
+  install -Dm644 "${startdir}/../../resources/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/polaris.png"
+  install -Dm644 "$pkgdir/opt/polaris/LICENSE.electron.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.electron.txt"
 }

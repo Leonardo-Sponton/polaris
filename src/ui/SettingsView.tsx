@@ -172,7 +172,7 @@ function RemindersCard() {
       <section className="card stack">
         <h2>{t.settings.reminders}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          {t.settings.remindersPc1} <span className="mono">hypomnemata --background</span>.
+          {t.settings.remindersPc1} <span className="mono">polaris --background</span>.
         </p>
       </section>
     );

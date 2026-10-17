@@ -82,7 +82,7 @@ async function deviceHashes(serial, root) {
     `cd ${q(dir)} || exit 3; find . -path ./.trash -prune -o -type f -exec sha256sum {} +`,
     { timeout: 300_000 },
   ).catch(e => {
-    if (e.code === 3) throw new Error(`The folder ${dir} was not found on the device. Open Hypomnemata there once.`);
+    if (e.code === 3) throw new Error(`The folder ${dir} was not found on the device. Open Polaris there once.`);
     throw e;
   });
   const files = {};
@@ -117,7 +117,7 @@ async function localHashes(dataDir) {
   return files;
 }
 
-const tmpFile = () => path.join(os.tmpdir(), `hypomnemata-sync-${process.pid}-${crypto.randomBytes(6).toString("hex")}`);
+const tmpFile = () => path.join(os.tmpdir(), `polaris-sync-${process.pid}-${crypto.randomBytes(6).toString("hex")}`);
 
 // The Storage interface (src/storage/types.ts) over adb, for one device folder.
 const deviceFs = {

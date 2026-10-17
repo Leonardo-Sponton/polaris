@@ -38,16 +38,16 @@ export const en = {
   },
 
   boot: {
-    welcome: "Welcome to Hypomnemata",
+    welcome: "Welcome to Polaris",
     intro:
       "Your notes are plain Markdown files in a folder you choose. You can open them with any editor and copy the folder to back them up.",
     dataFolder: "Data folder",
     choose: "Choose…",
     useFolder: "Use this folder",
-    existing: "If the folder already has Hypomnemata files, they are used as they are.",
+    existing: "If the folder already has Polaris files, they are used as they are.",
     accessTitle: "Allow access to your notes folder",
     accessText1:
-      "Hypomnemata keeps your notes in a normal folder so the PC can copy them over USB. Android only lets an app read files it did not create itself when you turn on",
+      "Polaris keeps your notes in a normal folder so the PC can copy them over USB. Android only lets an app read files it did not create itself when you turn on",
     accessAll: "All files access",
     offline: "The app works offline and never sends anything anywhere.",
     openSettings: "Open settings",
@@ -55,11 +55,11 @@ export const en = {
   },
 
   capture: {
-    title: "Hypomnemata capture",
+    title: "Polaris capture",
     placeholder: "Capture anything…",
     hint: "Enter saves · Esc closes · t = to-do, or add a date, #list",
     addedTo: (where: string) => `Added to ${where}`,
-    notReady: "Open Hypomnemata once to choose the data folder, then capture works.",
+    notReady: "Open Polaris once to choose the data folder, then capture works.",
   },
 
   area: {
@@ -115,7 +115,7 @@ export const en = {
       `Backup from ${created || "an unknown date"}, ${n} files. It replaces your current data; the current data is first moved to ${before}/ so nothing is lost.`,
     reminders: "Reminders",
     remindersPc1:
-      "Reminders show while Hypomnemata runs. Closing the window keeps it running in the tray; use Quit in the tray menu to stop it. To have reminders right after logging in, start it with",
+      "Reminders show while Polaris runs. Closing the window keeps it running in the tray; use Quit in the tray menu to stop it. To have reminders right after logging in, start it with",
     notificationsOn: "Notifications allowed",
     notificationsOff: "Notifications are off",
     allow: "Allow",
@@ -125,7 +125,7 @@ export const en = {
   },
 
   tray: {
-    open: "Open Hypomnemata",
+    open: "Open Polaris",
     capture: "Quick capture",
     quit: "Quit",
     reminder: "Reminder",
@@ -192,7 +192,7 @@ export const en = {
     deviceFolderTitle: "Data folder on the device",
     mustStartSlash: "The folder must start with /",
     noFolder: (dir: string, model: string) =>
-      `No Hypomnemata data folder at ${dir} on the ${model}. Open the app there once, or change the device folder below.`,
+      `No Polaris data folder at ${dir} on the ${model}. Open the app there once, or change the device folder below.`,
     starting: "Starting…",
     sent: (n: number, model: string) => `${n} sent to the ${model}`,
     received: (n: number, model: string) => `${n} received from the ${model}`,
@@ -209,7 +209,7 @@ export const en = {
     keepCable: "Keep the cable connected.",
     withPc: (name: string) => `With ${name}`,
     startedOnPc:
-      'Sync is started on the PC: connect this device with a USB cable (USB debugging on), open Hypomnemata on the PC and choose Sync → Sync now. While it runs, this app waits on a "Syncing from PC" screen.',
+      'Sync is started on the PC: connect this device with a USB cable (USB debugging on), open Polaris on the PC and choose Sync → Sync now. While it runs, this app waits on a "Syncing from PC" screen.',
     linuxAndroid: "Sync works between the Linux app and the Android app.",
     thePc: "the PC",
     syncingFromPc: "Syncing from PC",
@@ -253,7 +253,7 @@ export const en = {
     readsBack: (p: string) => `Saving ${p} failed: the file reads back different`,
     exists: (p: string) => `${p} already exists`,
     notZip: "This file is not a .zip, or it is damaged.",
-    notBackup: "This .zip is not a Hypomnemata backup.",
+    notBackup: "This .zip is not a Polaris backup.",
     unsafePath: (p: string) => `The backup has an unsafe path: ${p}`,
     writeFailed: (p: string) => `Writing ${p} failed`,
     noDataFolder: "No data folder chosen",
@@ -371,7 +371,7 @@ export const en = {
     remindAutoOff: "At the task time (set a date and time)",
     remindOther: "Other time…",
     remindTime: "Reminder time",
-    notificationsOff: "Notifications are off for Hypomnemata.",
+    notificationsOff: "Notifications are off for Polaris.",
     // quick add
     quickCapture: "Quick capture",
     newTask: "New task",

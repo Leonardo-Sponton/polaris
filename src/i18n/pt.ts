@@ -39,16 +39,16 @@ export const pt: Messages = {
   },
 
   boot: {
-    welcome: "Boas-vindas ao Hypomnemata",
+    welcome: "Boas-vindas ao Polaris",
     intro:
       "Suas notas são arquivos Markdown comuns numa pasta que você escolhe. Dá para abri-los em qualquer editor e copiar a pasta para fazer backup.",
     dataFolder: "Pasta de dados",
     choose: "Escolher…",
     useFolder: "Usar esta pasta",
-    existing: "Se a pasta já tiver arquivos do Hypomnemata, eles são usados como estão.",
+    existing: "Se a pasta já tiver arquivos do Polaris, eles são usados como estão.",
     accessTitle: "Permita o acesso à pasta das notas",
     accessText1:
-      "O Hypomnemata guarda as notas numa pasta comum para o PC poder copiá-las pelo USB. O Android só deixa um app ler arquivos que ele mesmo não criou quando você liga o",
+      "O Polaris guarda as notas numa pasta comum para o PC poder copiá-las pelo USB. O Android só deixa um app ler arquivos que ele mesmo não criou quando você liga o",
     accessAll: "Acesso a todos os arquivos",
     offline: "O app funciona offline e nunca envia nada para lugar nenhum.",
     openSettings: "Abrir configurações",
@@ -56,11 +56,11 @@ export const pt: Messages = {
   },
 
   capture: {
-    title: "Captura do Hypomnemata",
+    title: "Captura do Polaris",
     placeholder: "Anote qualquer coisa…",
     hint: "Enter salva · Esc fecha · t = tarefa, ou ponha uma data, #lista",
     addedTo: (where: string) => `Adicionado em ${where}`,
-    notReady: "Abra o Hypomnemata uma vez para escolher a pasta de dados; depois a captura funciona.",
+    notReady: "Abra o Polaris uma vez para escolher a pasta de dados; depois a captura funciona.",
   },
 
   area: {
@@ -116,7 +116,7 @@ export const pt: Messages = {
       `Backup de ${created || "data desconhecida"}, ${n} arquivos. Ele substitui os dados atuais; antes, os dados atuais vão para ${before}/, então nada se perde.`,
     reminders: "Lembretes",
     remindersPc1:
-      "Os lembretes aparecem enquanto o Hypomnemata está aberto. Fechar a janela o mantém rodando na bandeja; use Sair no menu da bandeja para encerrar. Para ter lembretes logo depois de entrar no sistema, inicie-o com",
+      "Os lembretes aparecem enquanto o Polaris está aberto. Fechar a janela o mantém rodando na bandeja; use Sair no menu da bandeja para encerrar. Para ter lembretes logo depois de entrar no sistema, inicie-o com",
     notificationsOn: "Notificações permitidas",
     notificationsOff: "As notificações estão desligadas",
     allow: "Permitir",
@@ -126,7 +126,7 @@ export const pt: Messages = {
   },
 
   tray: {
-    open: "Abrir o Hypomnemata",
+    open: "Abrir o Polaris",
     capture: "Captura rápida",
     quit: "Sair",
     reminder: "Lembrete",
@@ -193,7 +193,7 @@ export const pt: Messages = {
     deviceFolderTitle: "Pasta de dados no aparelho",
     mustStartSlash: "A pasta precisa começar com /",
     noFolder: (dir: string, model: string) =>
-      `Não há pasta de dados do Hypomnemata em ${dir} no ${model}. Abra o app lá uma vez, ou altere a pasta do aparelho abaixo.`,
+      `Não há pasta de dados do Polaris em ${dir} no ${model}. Abra o app lá uma vez, ou altere a pasta do aparelho abaixo.`,
     starting: "Começando…",
     sent: (n: number, model: string) => `${n} enviado${s(n)} ao ${model}`,
     received: (n: number, model: string) => `${n} recebido${s(n)} do ${model}`,
@@ -210,7 +210,7 @@ export const pt: Messages = {
     keepCable: "Mantenha o cabo conectado.",
     withPc: (name: string) => `Com ${name}`,
     startedOnPc:
-      "A sincronização começa pelo PC: ligue este aparelho com um cabo USB (depuração USB ativa), abra o Hypomnemata no PC e escolha Sincronizar → Sincronizar agora. Enquanto ela roda, este app espera numa tela \"Sincronizando pelo PC\".",
+      "A sincronização começa pelo PC: ligue este aparelho com um cabo USB (depuração USB ativa), abra o Polaris no PC e escolha Sincronizar → Sincronizar agora. Enquanto ela roda, este app espera numa tela \"Sincronizando pelo PC\".",
     linuxAndroid: "A sincronização funciona entre o app de Linux e o app de Android.",
     thePc: "o PC",
     syncingFromPc: "Sincronizando pelo PC",
@@ -252,7 +252,7 @@ export const pt: Messages = {
     readsBack: (p: string) => `Falha ao salvar ${p}: o arquivo lido de volta está diferente`,
     exists: (p: string) => `${p} já existe`,
     notZip: "Este arquivo não é um .zip, ou está danificado.",
-    notBackup: "Este .zip não é um backup do Hypomnemata.",
+    notBackup: "Este .zip não é um backup do Polaris.",
     unsafePath: (p: string) => `O backup tem um caminho inseguro: ${p}`,
     writeFailed: (p: string) => `Falha ao gravar ${p}`,
     noDataFolder: "Nenhuma pasta de dados escolhida",
@@ -364,7 +364,7 @@ export const pt: Messages = {
     remindAutoOff: "Na hora da tarefa (defina data e hora)",
     remindOther: "Outro horário…",
     remindTime: "Hora do lembrete",
-    notificationsOff: "As notificações do Hypomnemata estão desligadas.",
+    notificationsOff: "As notificações do Polaris estão desligadas.",
     quickCapture: "Captura rápida",
     newTask: "Nova tarefa",
     capture: "Capturar",

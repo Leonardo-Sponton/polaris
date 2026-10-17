@@ -7,8 +7,8 @@ import type { Reminder } from "../data/reminders";
 import type { FileInfo, Storage } from "../storage/types";
 import type { Platform } from "./types";
 
-// Native side: android/app/src/main/java/.../HypoFilesPlugin.java
-interface HypoFiles {
+// Native side: android/app/src/main/java/.../PolarisFilesPlugin.java
+interface PolarisFiles {
   hasAccess(): Promise<{ granted: boolean }>;
   openAccessSettings(): Promise<void>;
   openAppSettings(): Promise<void>;
@@ -26,8 +26,8 @@ interface HypoFiles {
   addListener(event: "capture", cb: () => void): Promise<{ remove(): Promise<void> }>;
 }
 
-const Native = registerPlugin<HypoFiles>("HypoFiles");
-const KEY = "hypomnemata.dataDir";
+const Native = registerPlugin<PolarisFiles>("PolarisFiles");
+const KEY = "polaris.dataDir";
 
 function toBase64(data: Uint8Array) {
   let s = "";
@@ -95,7 +95,7 @@ export function androidPlatform(): Platform {
     name: "android",
     storage,
     getDataDir: async () => localStorage.getItem(KEY),
-    defaultDataDir: async () => `${(await Native.storageRoot()).path}/Documents/Hypomnemata`,
+    defaultDataDir: async () => `${(await Native.storageRoot()).path}/Documents/Polaris`,
     setDataDir: async dir => localStorage.setItem(KEY, dir.replace(/\/+$/, "")),
     hasFileAccess: async () => (await Native.hasAccess()).granted,
     openFileAccessSettings: () => Native.openAccessSettings(),

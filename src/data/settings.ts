@@ -1,7 +1,7 @@
 import type { Storage } from "../storage/types";
 import type { LangSetting } from "../i18n";
 
-// Per-device settings in .hypomnemata/settings.json (not synced, SPEC 6.2).
+// Per-device settings in .polaris/settings.json (not synced, SPEC 6.2).
 
 export type Theme = "dark" | "light" | "system";
 
@@ -13,7 +13,7 @@ export interface Settings {
   syncDeviceDir?: string;
 }
 
-export const SETTINGS_PATH = ".hypomnemata/settings.json";
+export const SETTINGS_PATH = ".polaris/settings.json";
 
 const defaults: Settings = { theme: "dark" };
 

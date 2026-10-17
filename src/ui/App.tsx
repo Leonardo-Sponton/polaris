@@ -10,7 +10,7 @@ import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
 import { SyncLock } from "./SyncView";
 import { lang, setLang, t } from "../i18n";
 
-// `#capture`: the small quick capture window (Linux, `hypomnemata --capture`).
+// `#capture`: the small quick capture window (Linux, `polaris --capture`).
 const CAPTURE_ONLY = location.hash === "#capture";
 const setTitle = () => CAPTURE_ONLY && (document.title = t.capture.title);
 setTitle();

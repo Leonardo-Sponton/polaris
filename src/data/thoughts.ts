@@ -8,7 +8,7 @@ import type { Note, Notes } from "./notes";
 
 // Thoughts (SPEC 5.10): a built-in library shipped with the app (data/thoughts.json, read-only)
 // plus the user's own, one file each in thoughts/. Favorites of built-in thoughts and the
-// thought picked for a day live in .hypomnemata/thoughts-state.json; an own thought keeps its
+// thought picked for a day live in .polaris/thoughts-state.json; an own thought keeps its
 // `favorite` in its header.
 
 export type Kind = "mine" | "verified" | "uncertain";
@@ -41,7 +41,7 @@ export interface Thought {
 }
 
 export const THOUGHTS_DIR = "thoughts";
-export const STATE_PATH = ".hypomnemata/thoughts-state.json";
+export const STATE_PATH = ".polaris/thoughts-state.json";
 export const MAX_TEXT = 1500;
 
 const str = (v: unknown) => (v === undefined || v === null ? "" : String(v));

@@ -7,8 +7,8 @@
         android:icon="@drawable/ic_shortcut_capture"
         android:shortcutShortLabel="@string/shortcut_capture">
         <intent
-            android:action="io.github.leonardo_sponton.hypomnemata.CAPTURE"
-            android:targetPackage="io.github.leonardo_sponton.hypomnemata"
-            android:targetClass="io.github.leonardo_sponton.hypomnemata.MainActivity" />
+            android:action="io.github.leonardo_sponton.polaris.CAPTURE"
+            android:targetPackage="io.github.leonardo_sponton.polaris"
+            android:targetClass="io.github.leonardo_sponton.polaris.MainActivity" />
     </shortcut>
 </shortcuts>

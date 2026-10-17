@@ -433,7 +433,7 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
   return (
     <div className="app">
       <nav className="sidebar" aria-label={t.shell.areas}>
-        <div className="brand">HYPOMNEMATA</div>
+        <div className="brand">POLARIS</div>
         {AREAS.map(a => (
           <Fragment key={a.id}>
             <button

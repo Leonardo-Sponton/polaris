@@ -60,8 +60,8 @@ describe("sync plan (SPEC 6.2)", () => {
 
   it("leaves per-device files out", () => {
     expect(isSynced("todo/a.md")).toBe(true);
-    expect(isSynced(".hypomnemata/lists.json")).toBe(true);
-    for (const p of [".trash/todo/a.md", ".hypomnemata/settings.json", LOCK_PATH, DEVICE_LAST, ".hypomnemata/sync/R5.json", ".hypomnemata/before-restore/todo/a.md", "todo/a.md.tmp-123"])
+    expect(isSynced(".polaris/lists.json")).toBe(true);
+    for (const p of [".trash/todo/a.md", ".polaris/settings.json", LOCK_PATH, DEVICE_LAST, ".polaris/sync/R5.json", ".polaris/before-restore/todo/a.md", "todo/a.md.tmp-123"])
       expect(isSynced(p)).toBe(false);
   });
 });
@@ -74,7 +74,7 @@ describe("sync run", () => {
     await dev.writeBinary("books/x/cover.jpg", new Uint8Array([1, 2, 3]));
     await pc.write("ideas/i.md", "pc version");
     await dev.write("ideas/i.md", "device version");
-    await dev.write(".hypomnemata/settings.json", '{"theme":"light"}');
+    await dev.write(".polaris/settings.json", '{"theme":"light"}');
 
     const r = await sync(pc, dev);
     expect(r.counts).toEqual({ toDevice: 1, toPC: 2, trashDevice: 0, trashPC: 0 });
@@ -86,7 +86,7 @@ describe("sync run", () => {
     expect(await pc.read("ideas/i.md")).toBe("pc version");
     expect(await dev.read("ideas/i.md")).toBe("device version");
     // Settings are per device.
-    expect(await pc.stat(".hypomnemata/settings.json")).toBeNull();
+    expect(await pc.stat(".polaris/settings.json")).toBeNull();
     // The lock is gone; both sides know the sync happened; a conflict is not in the state.
     expect(await dev.stat(LOCK_PATH)).toBeNull();
     const last = (await loadLast(pc, "R5"))!;
@@ -240,7 +240,7 @@ describe("sync conflicts (SPEC 6.2)", () => {
 
   it("knows which files can be kept twice", () => {
     for (const p of ["todo/a.md", "inbox/a.md", "ideas/a.md", "thoughts/a.md", "books/x/quotes/1.md", "projects/p/01-step/a.md"]) expect(canKeepBoth(p)).toBe(true);
-    for (const p of ["books/x/book.md", "books/x/cover.jpg", "journal/2026-10-17.md", "review/2026-10-17.md", ".hypomnemata/lists.json", "projects/p/project.md"])
+    for (const p of ["books/x/book.md", "books/x/cover.jpg", "journal/2026-10-17.md", "review/2026-10-17.md", ".polaris/lists.json", "projects/p/project.md"])
       expect(canKeepBoth(p)).toBe(false);
   });
 

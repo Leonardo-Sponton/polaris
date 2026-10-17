@@ -1,13 +1,13 @@
 {
-  "appId": "io.github.leonardo_sponton.hypomnemata",
-  "appName": "Hypomnemata",
+  "appId": "io.github.leonardo_sponton.polaris",
+  "appName": "Polaris",
   "webDir": "dist",
   "android": {
     "allowMixedContent": false
   },
   "plugins": {
     "LocalNotifications": {
-      "smallIcon": "ic_stat_hypo",
+      "smallIcon": "ic_stat_polaris",
       "iconColor": "#A67CFF"
     }
   }

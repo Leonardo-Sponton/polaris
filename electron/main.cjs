@@ -52,7 +52,7 @@ async function atomicWrite(rel, data) {
 const info = (name, st) => ({ name, isDir: st.isDirectory(), size: st.size, mtime: Math.floor(st.mtimeMs) });
 
 const handlers = {
-  "config:get": () => ({ dataDir, defaultDataDir: path.join(os.homedir(), "Hypomnemata"), platform: "electron" }),
+  "config:get": () => ({ dataDir, defaultDataDir: path.join(os.homedir(), "Polaris"), platform: "electron" }),
   "config:setDataDir": async (_e, dir) => {
     if (typeof dir !== "string" || !path.isAbsolute(dir)) throw new Error("Folder must be an absolute path");
     await fsp.mkdir(dir, { recursive: true });
@@ -174,7 +174,7 @@ const ICON = path.join(__dirname, "../resources/icon.png");
 let tray = null;
 let quitting = false;
 // Words of the tray menu and notifications, sent by the page in the app's language.
-const labels = { open: "Open Hypomnemata", capture: "Quick capture", quit: "Quit", reminder: "Reminder" };
+const labels = { open: "Open Polaris", capture: "Quick capture", quit: "Quit", reminder: "Reminder" };
 
 function setLabels(l) {
   if (!l || typeof l !== "object") return;
@@ -198,7 +198,7 @@ function createTray() {
     tray = null; // no tray on this desktop: closing the window quits, as before
     return;
   }
-  tray.setToolTip("Hypomnemata");
+  tray.setToolTip("Polaris");
   tray.setContextMenu(trayMenu());
   tray.on("click", showMain);
 }
@@ -246,22 +246,22 @@ function lockDown(win) {
 }
 
 function attachShot(win) {
-  if (!process.env.HYPO_SHOT) return;
+  if (!process.env.POLARIS_SHOT) return;
   // Test helper: save a screenshot and quit (used to check the UI without a person watching).
-  // HYPO_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
-  // HYPO_SHOT_ZOOM: page zoom, e.g. 0.7 to see the wide layout in a small tiled window.
+  // POLARIS_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
+  // POLARIS_SHOT_ZOOM: page zoom, e.g. 0.7 to see the wide layout in a small tiled window.
   win.webContents.once("did-finish-load", () =>
     setTimeout(async () => {
-      if (process.env.HYPO_SHOT_ZOOM) win.webContents.setZoomFactor(Number(process.env.HYPO_SHOT_ZOOM));
-      if (process.env.HYPO_SHOT_JS) {
-        await win.webContents.executeJavaScript(process.env.HYPO_SHOT_JS).catch(e => console.error(e));
-        await new Promise(r => setTimeout(r, Number(process.env.HYPO_SHOT_WAIT || 800)));
+      if (process.env.POLARIS_SHOT_ZOOM) win.webContents.setZoomFactor(Number(process.env.POLARIS_SHOT_ZOOM));
+      if (process.env.POLARIS_SHOT_JS) {
+        await win.webContents.executeJavaScript(process.env.POLARIS_SHOT_JS).catch(e => console.error(e));
+        await new Promise(r => setTimeout(r, Number(process.env.POLARIS_SHOT_WAIT || 800)));
       }
-      // HYPO_SHOT=close: close the window the way the window manager does (tests saving on close).
-      if (process.env.HYPO_SHOT === "close") return win.isDestroyed() || win.close();
-      if (!win.isDestroyed()) fs.writeFileSync(process.env.HYPO_SHOT, (await win.webContents.capturePage()).toPNG());
+      // POLARIS_SHOT=close: close the window the way the window manager does (tests saving on close).
+      if (process.env.POLARIS_SHOT === "close") return win.isDestroyed() || win.close();
+      if (!win.isDestroyed()) fs.writeFileSync(process.env.POLARIS_SHOT, (await win.webContents.capturePage()).toPNG());
       app.quit();
-    }, Number(process.env.HYPO_SHOT_DELAY || 1500)),
+    }, Number(process.env.POLARIS_SHOT_DELAY || 1500)),
   );
 }
 
@@ -280,7 +280,7 @@ function createCaptureWindow() {
     minimizable: false,
     maximizable: false,
     backgroundColor: "#010a29",
-    title: "Hypomnemata capture",
+    title: "Polaris capture",
     autoHideMenuBar: true,
     webPreferences: webPreferences(),
   });
@@ -314,7 +314,7 @@ function createWindow({ hidden = false } = {}) {
     minWidth: 360,
     minHeight: 480,
     backgroundColor: "#010a29",
-    title: "Hypomnemata",
+    title: "Polaris",
     autoHideMenuBar: true,
     webPreferences: webPreferences(),
   });
@@ -351,7 +351,7 @@ function createWindow({ hidden = false } = {}) {
   });
 }
 
-if (process.env.HYPO_CONFIG_DIR) app.setPath("userData", process.env.HYPO_CONFIG_DIR);
+if (process.env.POLARIS_CONFIG_DIR) app.setPath("userData", process.env.POLARIS_CONFIG_DIR);
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -359,7 +359,7 @@ if (!app.requestSingleInstanceLock()) {
   // A second launch hands its command line to this running instance and exits.
   app.on("second-instance", (_e, argv) => {
     if (wantsCapture(argv)) return createCaptureWindow();
-    if (!process.env.HYPO_SHOT) createTray();
+    if (!process.env.POLARIS_SHOT) createTray();
     if (wantsBackground(argv) && tray) return;
     showMain();
   });
@@ -369,8 +369,8 @@ if (!app.requestSingleInstanceLock()) {
     startWatch();
     setInterval(checkReminders, 20_000);
     if (wantsCapture(process.argv)) return createCaptureWindow();
-    // Test runs (HYPO_SHOT) never leave a tray process behind.
-    if (!process.env.HYPO_SHOT) createTray();
+    // Test runs (POLARIS_SHOT) never leave a tray process behind.
+    if (!process.env.POLARIS_SHOT) createTray();
     createWindow({ hidden: wantsBackground(process.argv) && !!tray });
   });
   // Without a tray (or when started only for a quick capture) the last closed window ends the app.

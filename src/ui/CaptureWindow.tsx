@@ -6,7 +6,7 @@ import { QuickAdd } from "./todo/QuickAdd";
 import { useCapture, whereLabel } from "./useCapture";
 import { t } from "../i18n";
 
-// The small window opened by `hypomnemata --capture` (SPEC 5.2): type, Enter, gone.
+// The small window opened by `polaris --capture` (SPEC 5.2): type, Enter, gone.
 
 export function CaptureWindow() {
   const { platform } = useApp();

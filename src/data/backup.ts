@@ -7,10 +7,10 @@ import { SETTINGS_PATH } from "./settings";
 
 // Backup (SPEC 4.4): the whole data folder in one .zip, and restoring it.
 // Restoring checks the zip first, then moves the current data aside to
-// .hypomnemata/before-restore/ (nothing is erased), then writes the backup's files.
+// .polaris/before-restore/ (nothing is erased), then writes the backup's files.
 
-const MANIFEST = "hypomnemata-backup.json";
-export const BEFORE_RESTORE = ".hypomnemata/before-restore";
+const MANIFEST = "polaris-backup.json";
+export const BEFORE_RESTORE = ".polaris/before-restore";
 
 export interface Backup {
   created: string;
@@ -21,7 +21,7 @@ export class BackupError extends Error {}
 
 const inBeforeRestore = (p: string) => p === BEFORE_RESTORE || p.startsWith(BEFORE_RESTORE + "/");
 
-export const backupName = (at = new Date()) => `hypomnemata-backup-${stamp(at)}.zip`;
+export const backupName = (at = new Date()) => `polaris-backup-${stamp(at)}.zip`;
 
 export async function exportBackup(s: Storage, at = new Date()): Promise<Uint8Array> {
   const zip: Zippable = {};
@@ -30,7 +30,7 @@ export async function exportBackup(s: Storage, at = new Date()): Promise<Uint8Ar
     // Text compresses well; images (covers) are already compressed.
     zip[p] = [await s.readBinary(p), { level: /\.(md|json|txt)$/.test(p) ? 6 : 0 }];
   }
-  const manifest = { app: "hypomnemata", format: 1, created: isoMinute(at), files: paths.length };
+  const manifest = { app: "polaris", format: 1, created: isoMinute(at), files: paths.length };
   zip[MANIFEST] = new TextEncoder().encode(JSON.stringify(manifest, null, 2) + "\n");
   return zipSync(zip);
 }
@@ -49,7 +49,7 @@ export function readBackup(data: Uint8Array): Backup {
   } catch {
     manifest = {};
   }
-  if (manifest.app !== "hypomnemata") throw new BackupError(t.errors.notBackup);
+  if (manifest.app !== "polaris") throw new BackupError(t.errors.notBackup);
   const files = new Map<string, Uint8Array>();
   for (const [p, bytes] of Object.entries(entries)) {
     if (p === MANIFEST || p.endsWith("/")) continue;
@@ -65,15 +65,15 @@ export function readBackup(data: Uint8Array): Backup {
 
 /**
  * Replaces the data with a backup. The settings of this device are kept (they are per device).
- * The old data ends up in .hypomnemata/before-restore/ (only the latest one is kept).
+ * The old data ends up in .polaris/before-restore/ (only the latest one is kept).
  */
 export async function restoreBackup(s: Storage, b: Backup) {
   await s.remove(BEFORE_RESTORE);
   for (const f of await s.list("")) {
-    if (f.name !== ".hypomnemata") await s.move(f.name, `${BEFORE_RESTORE}/${f.name}`);
+    if (f.name !== ".polaris") await s.move(f.name, `${BEFORE_RESTORE}/${f.name}`);
   }
-  for (const f of await s.list(".hypomnemata")) {
-    const p = `.hypomnemata/${f.name}`;
+  for (const f of await s.list(".polaris")) {
+    const p = `.polaris/${f.name}`;
     if (p === BEFORE_RESTORE) continue;
     if (p === SETTINGS_PATH) await s.writeBinary(`${BEFORE_RESTORE}/${p}`, await s.readBinary(p));
     else await s.move(p, `${BEFORE_RESTORE}/${p}`);

@@ -18,5 +18,5 @@ export async function walkFiles(s: Storage, dir = "", skip?: (path: string) => b
 /** The area a file belongs to: the first folder of its path (todo, inbox, ideas…). */
 export const areaOf = (path: string) => path.split("/")[0];
 
-/** App folders that are not content: .trash, .hypomnemata, and any other hidden folder. */
+/** App folders that are not content: .trash, .polaris, and any other hidden folder. */
 export const isHidden = (path: string) => areaOf(path).startsWith(".");

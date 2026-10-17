@@ -57,7 +57,7 @@ function PcSync() {
       const pc = { storage: platform.storage, hashes: () => sync.localHashes() };
       const device = { storage: sync.deviceStorage(d.serial, dir), hashes: () => sync.deviceHashes(d.serial, dir) };
       // Only a folder the app has set up: a wrong path must not receive a copy of everything.
-      if (!(await device.storage.stat(".hypomnemata"))) {
+      if (!(await device.storage.stat(".polaris"))) {
         throw new Error(t.sync.noFolder(dir, d.model));
       }
       // Conflicts are decided while the device is still locked.

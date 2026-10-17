@@ -3,7 +3,7 @@ import type { FileInfo, Storage } from "../storage/types";
 import type { Device, Platform, SyncBridge } from "./types";
 
 // Functions exposed by electron/preload.cjs.
-interface HypoBridge {
+interface PolarisBridge {
   config: {
     get(): Promise<{ dataDir: string | null; defaultDataDir: string }>;
     setDataDir(dir: string): Promise<string>;
@@ -40,15 +40,15 @@ interface HypoBridge {
 
 declare global {
   interface Window {
-    hypo?: HypoBridge;
+    polaris?: PolarisBridge;
   }
 }
 
 export function isElectron() {
-  return !!window.hypo;
+  return !!window.polaris;
 }
 
-function syncBridge(b: HypoBridge): SyncBridge {
+function syncBridge(b: PolarisBridge): SyncBridge {
   const map = (o: Record<string, string>) => new Map(Object.entries(o));
   return {
     devices: () => b.sync.devices(),
@@ -72,7 +72,7 @@ function syncBridge(b: HypoBridge): SyncBridge {
 }
 
 export function electronPlatform(): Platform {
-  const b = window.hypo!;
+  const b = window.polaris!;
   const storage: Storage = { ...b.fs };
   return {
     name: "electron",

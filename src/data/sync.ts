@@ -11,13 +11,13 @@ import { t } from "../i18n";
 /** path → sha256 of the content (hex). */
 export type Hashes = Map<string, string>;
 
-export const SYNC_DIR = ".hypomnemata/sync";
+export const SYNC_DIR = ".polaris/sync";
 /** On the device while a sync runs: the app saves, then blocks editing (SPEC 6.3). */
-export const LOCK_PATH = ".hypomnemata/sync.lock";
+export const LOCK_PATH = ".polaris/sync.lock";
 /** On the device: when and with which PC it last synced. */
 export const DEVICE_LAST = `${SYNC_DIR}/last.json`;
 /** Default Android data folder (SPEC 2.3). */
-export const DEVICE_DIR = "/storage/emulated/0/Documents/Hypomnemata";
+export const DEVICE_DIR = "/storage/emulated/0/Documents/Polaris";
 /** How long the PC waits after writing the lock, so the device app sees it and saves first. */
 export const LOCK_WAIT_MS = 3000;
 /** How often the device app looks for the lock. */
@@ -25,8 +25,8 @@ export const LOCK_POLL_MS = 1500;
 
 // Per device, never copied: the trash, the sync state, this device's settings, a restore's
 // leftovers, the sample-data record and half-written temp files.
-const NOT_SYNCED = [".trash/", `${SYNC_DIR}/`, ".hypomnemata/before-restore/"];
-const NOT_SYNCED_FILES = [LOCK_PATH, SETTINGS_PATH, ".hypomnemata/sample-files.json"];
+const NOT_SYNCED = [".trash/", `${SYNC_DIR}/`, ".polaris/before-restore/"];
+const NOT_SYNCED_FILES = [LOCK_PATH, SETTINGS_PATH, ".polaris/sample-files.json"];
 
 export function isSynced(path: string): boolean {
   if (NOT_SYNCED.some(p => path.startsWith(p)) || NOT_SYNCED_FILES.includes(path)) return false;

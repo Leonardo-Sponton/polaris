@@ -3,7 +3,7 @@
 // and the reminders always have something. Each file carries `sample: true` (the app keeps that
 // line when it saves, also in the next copy of a repeating task), and `remove` deletes every
 // file that has it, in the trash too. Delete the line from a file to keep that file.
-// .hypomnemata/sample-files.json records that samples were added and which lists are theirs.
+// .polaris/sample-files.json records that samples were added and which lists are theirs.
 //
 //   node tools/sample-data.mjs add <folder>       add to a data folder on this PC
 //   node tools/sample-data.mjs remove <folder>
@@ -17,9 +17,9 @@ import os from "node:os";
 import path from "node:path";
 
 const ADB = process.env.ADB || path.join(os.homedir(), "Android/Sdk/platform-tools/adb");
-const PHONE_DIR = "/storage/emulated/0/Documents/Hypomnemata";
-const MANIFEST = ".hypomnemata/sample-files.json";
-const LISTS = ".hypomnemata/lists.json";
+const PHONE_DIR = "/storage/emulated/0/Documents/Polaris";
+const MANIFEST = ".polaris/sample-files.json";
+const LISTS = ".polaris/lists.json";
 
 const pad = n => String(n).padStart(2, "0");
 const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -135,7 +135,7 @@ function samples() {
     "Best in the dry season (May to September).\n\n## 5W2H\n- **What:** A 3-day trip to Ouro Preto\n- **Why:** See the baroque churches and the museums\n- **Where:** Ouro Preto, MG\n- **When:** July, in the holidays\n- **Who:** Me and a friend\n- **How:** Bus to Belo Horizonte, then the local bus\n- **How much:** About 1,200 with the hostel\n");
 
   // ---- Logbook ----
-  task(at(-4, 8, 0), "Install Hypomnemata on the tablet", { status: "done", done_at: isoMinute(at(-1, 20, 10)) });
+  task(at(-4, 8, 0), "Install Polaris on the tablet", { status: "done", done_at: isoMinute(at(-1, 20, 10)) });
   task(at(-6, 10, 0), "Call the bank", { status: "canceled", done_at: isoMinute(at(-3, 16, 0)) });
   task(at(-1, 7, 30), "Read 20 pages", { status: "done", done_at: isoMinute(at(0, 8, 15)), list: "study" });
 
@@ -160,7 +160,7 @@ function samples() {
     checklist: { "problem-real": "yes", who: "yes", "would-use": "unsure", "can-build": "yes", "cost-ok": "yes" },
   },
     "Something to split the subjects and share summaries before the tests.\n\n## Problem\n\nEveryone studies alone and the group chat gets lost.\n\n## For whom\n\nMy class (about 30 people).\n\n" +
-    w2h(["An app to split subjects and share summaries", "The group chat loses everything", "Phone, offline first", "Before the next test week", "Me; for my class", "React + Capacitor, like Hypomnemata", ""]), -2);
+    w2h(["An app to split subjects and share summaries", "The group chat loses everything", "Phone, offline first", "Before the next test week", "Me; for my class", "React + Capacitor, like Polaris", ""]), -2);
   idea(at(-20, 19, 15), "Sell homemade granola at the fair", {
     status: "maturing", template: "business", tags: "[money]",
     checklist: {
@@ -378,7 +378,7 @@ function local(dir) {
 function phone() {
   const adb = (...args) => execFileSync(ADB, args, { encoding: "utf8" });
   const q = rel => `'${PHONE_DIR}/${rel.replace(/'/g, "")}'`;
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hypo-sample-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "polaris-sample-"));
   return {
     read: rel => {
       try {

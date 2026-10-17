@@ -1,4 +1,4 @@
-package io.github.leonardo_sponton.hypomnemata;
+package io.github.leonardo_sponton.polaris;
 
 import android.Manifest;
 import android.content.Context;
@@ -39,11 +39,11 @@ import java.util.stream.Stream;
  * Every path from the web side is relative to that folder and may never leave it.
  * Writes are atomic: the text goes to a temp file, which is then renamed over the target.
  */
-@CapacitorPlugin(name = "HypoFiles")
-public class HypoFilesPlugin extends Plugin {
+@CapacitorPlugin(name = "PolarisFiles")
+public class PolarisFilesPlugin extends Plugin {
 
     /** Action of the "Capture" home-screen shortcut (res/xml/shortcuts.xml). */
-    static final String ACTION_CAPTURE = "io.github.leonardo_sponton.hypomnemata.CAPTURE";
+    static final String ACTION_CAPTURE = "io.github.leonardo_sponton.polaris.CAPTURE";
 
     // ---- "Capture" shortcut (SPEC 5.2) ----
 

@@ -1,7 +1,7 @@
 {
- "format": "hypomnemata-thoughts",
+ "format": "polaris-thoughts",
  "version": 1,
- "note": "Built-in library of Hypomnemata. Each quote was checked in a public-domain English translation (named in “translation”, with a link in “source”), or translated by the project from the original when no public-domain English translation was at hand. Items marked “uncertain” were not confirmed in the primary source. Seeded from the MyNotes library; checked 2026-10-17.",
+ "note": "Built-in library of Polaris. Each quote was checked in a public-domain English translation (named in “translation”, with a link in “source”), or translated by the project from the original when no public-domain English translation was at hand. Items marked “uncertain” were not confirmed in the primary source. Seeded from the MyNotes library; checked 2026-10-17.",
  "thoughts": [
   {
    "id": "sen-ep1-3a",

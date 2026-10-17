@@ -1,5 +1,5 @@
 {
-  "name": "hypomnemata",
+  "name": "polaris",
   "version": "0.1.0",
   "description": "Personal notebook: to-do, ideas, books, journal and review. Offline, plain Markdown files.",
   "license": "MIT",
@@ -50,8 +50,8 @@
     "email": "230742162+Leonardo-Sponton@users.noreply.github.com"
   },
   "build": {
-    "appId": "io.github.leonardo_sponton.hypomnemata",
-    "productName": "Hypomnemata",
+    "appId": "io.github.leonardo_sponton.polaris",
+    "productName": "Polaris",
     "directories": {
       "output": "release",
       "buildResources": "resources"
@@ -71,19 +71,19 @@
       ],
       "icon": "resources/icon.png",
       "category": "Office",
-      "executableName": "hypomnemata",
+      "executableName": "polaris",
       "synopsis": "Offline notes, to-do, ideas and books",
       "desktop": {
         "entry": {
-          "StartupWMClass": "Hypomnemata"
+          "StartupWMClass": "Polaris"
         }
       },
       "syncDesktopName": true
     },
     "appImage": {
-      "artifactName": "Hypomnemata-${version}-${arch}.AppImage"
+      "artifactName": "Polaris-${version}-${arch}.AppImage"
     },
-    "artifactName": "hypomnemata-${version}-${arch}.${ext}"
+    "artifactName": "polaris-${version}-${arch}.${ext}"
   },
-  "desktopName": "hypomnemata.desktop"
+  "desktopName": "polaris.desktop"
 }

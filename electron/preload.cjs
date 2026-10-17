@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 const call = name => (...args) => ipcRenderer.invoke(name, ...args);
 
-contextBridge.exposeInMainWorld("hypo", {
+contextBridge.exposeInMainWorld("polaris", {
   config: { get: call("config:get"), setDataDir: call("config:setDataDir") },
   pickFolder: call("dialog:pickFolder"),
   openFolder: call("shell:openFolder"),
