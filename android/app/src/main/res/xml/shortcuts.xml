@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static app shortcuts: shown when the app icon is held on the home screen. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="capture"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_capture"
+        android:shortcutShortLabel="@string/shortcut_capture">
+        <intent
+            android:action="io.github.leonardo_sponton.hypomnemata.CAPTURE"
+            android:targetPackage="io.github.leonardo_sponton.hypomnemata"
+            android:targetClass="io.github.leonardo_sponton.hypomnemata.MainActivity" />
+    </shortcut>
+</shortcuts>

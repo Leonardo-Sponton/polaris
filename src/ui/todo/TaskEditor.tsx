@@ -31,7 +31,7 @@ export function TaskEditor(props: Props) {
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon" onClick={props.onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={props.onBack} aria-label="Back">
           <ArrowLeft size={20} />
         </button>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">

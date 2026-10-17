@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckSquare, Lightbulb, Pencil, Plus, Trash2 } from "lucide-react";
 import { titleOf } from "../data/frontmatter";
-import { stamp } from "../data/dates";
+import { createInboxItem, inboxToIdea, inboxToTodo, loadInbox, undoMove, type Moved } from "../data/inbox";
 import type { Note } from "../data/notes";
+import { flushAll } from "../data/pending";
+import { moveToTrash, restoreFromTrash } from "../data/trash";
+import { Dialog } from "./Dialog";
 import { NoteEditor } from "./NoteEditor";
 import { useApp } from "./context";
+import { useHold } from "./useHold";
 
-// Inbox, first version: a list of items and the editor. Quick capture and the
-// "→ To-do / → Idea" actions arrive in stage 1d (SPEC 5.2).
+// Inbox (SPEC 5.2): captured items wait here until they become a to-do or an idea.
 
 /** What a list row shows: the title, or else the first line without Markdown symbols. */
 export function previewOf(body: string): string {
@@ -17,31 +20,106 @@ export function previewOf(body: string): string {
   return first.replace(/^\s*(#+|>|[-*+]( \[[ xX]\])?|\d+\.)\s*/, "").replace(/[*_~`]/g, "").trim();
 }
 
-export function InboxView() {
-  const { notes, version, bump, toast } = useApp();
+/** Inbox items, newest first, reloaded whenever data on disk changes. */
+export function useInbox(): Note[] {
+  const { notes, version, toast } = useApp();
   const [items, setItems] = useState<Note[]>([]);
-  const [open, setOpen] = useState<{ path: string; isNew: boolean } | null>(null);
-
   useEffect(() => {
     let alive = true;
-    notes
-      .loadDir("inbox", p => toast({ text: `Could not read ${p}`, error: true }))
-      .then(list => alive && setItems(list.sort((a, b) => b.path.localeCompare(a.path))));
+    loadInbox(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setItems(list));
     return () => {
       alive = false;
     };
   }, [notes, version, toast]);
+  return items;
+}
+
+type Action = "todo" | "idea" | "delete";
+
+function ItemRow({
+  note,
+  active,
+  onOpen,
+  onMenu,
+  onTodo,
+}: {
+  note: Note;
+  active: boolean;
+  onOpen(): void;
+  onMenu(): void;
+  onTodo(): void;
+}) {
+  const hold = useHold(onMenu);
+  return (
+    <li className="inbox-li" {...hold.handlers}>
+      <button className={`list-item${active ? " active" : ""}`} onClick={() => !hold.eaten() && onOpen()}>
+        <span className="list-title">{previewOf(note.body) || <span className="muted">(empty)</span>}</span>
+        <span className="list-meta mono">{String(note.data.created ?? "").replace("T", " ")}</span>
+      </button>
+      <button className="btn ghost icon" title="Make it a to-do" aria-label="Make it a to-do" onClick={onTodo}>
+        <CheckSquare size={18} />
+      </button>
+    </li>
+  );
+}
+
+export function InboxView({ items }: { items: Note[] }) {
+  const { notes, bump, toast } = useApp();
+  const [open, setOpen] = useState<{ path: string; isNew: boolean } | null>(null);
+  const [menu, setMenu] = useState<Note | null>(null);
+
+  const fail = useCallback(
+    (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true }),
+    [toast],
+  );
 
   const create = async () => {
     try {
-      const path = await notes.freePath("inbox", stamp());
-      await notes.create(path, { type: "inbox" }, "");
-      setOpen({ path, isNew: true });
+      const n = await createInboxItem(notes, "");
+      setOpen({ path: n.path, isNew: true });
       bump();
     } catch (e) {
-      toast({ text: e instanceof Error ? e.message : String(e), error: true });
+      fail(e);
     }
   };
+
+  const act = async (path: string, action: Action) => {
+    try {
+      await flushAll(); // the open editor writes its last edits first
+      if (open?.path === path) setOpen(null);
+      if (action === "delete") {
+        const trashed = await moveToTrash(notes.storage, path);
+        bump();
+        toast({
+          text: "Item deleted",
+          action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+        });
+        return;
+      }
+      const m: Moved = action === "todo" ? await inboxToTodo(notes, path) : await inboxToIdea(notes, path);
+      bump();
+      toast({
+        // The Ideas screen arrives in stage 2; until then ideas wait in the ideas/ folder.
+        text: action === "todo" ? "Moved to To-do · Anytime" : "Moved to Ideas (the Ideas screen comes in stage 2)",
+        action: { label: "Undo", run: () => undoMove(notes, m).then(bump, fail) },
+      });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const item = (label: string, icon: React.ReactNode, run: () => void, cls = "") => (
+    <button
+      className={`menu-item${cls}`}
+      onClick={() => {
+        setMenu(null);
+        run();
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
 
   return (
     <div className={`split${open ? " has-detail" : ""}`}>
@@ -53,19 +131,18 @@ export function InboxView() {
           </button>
         </div>
         {items.length === 0 ? (
-          <p className="muted">Nothing here. Press New to write something down.</p>
+          <p className="muted empty-note">Empty. Things you capture on Today land here.</p>
         ) : (
           <ul className="list">
             {items.map(n => (
-              <li key={n.path}>
-                <button
-                  className={`list-item${open?.path === n.path ? " active" : ""}`}
-                  onClick={() => setOpen({ path: n.path, isNew: false })}
-                >
-                  <span className="list-title">{previewOf(n.body) || <span className="muted">(empty)</span>}</span>
-                  <span className="list-meta mono">{String(n.data.created ?? "").replace("T", " ")}</span>
-                </button>
-              </li>
+              <ItemRow
+                key={n.path}
+                note={n}
+                active={open?.path === n.path}
+                onOpen={() => setOpen({ path: n.path, isNew: false })}
+                onMenu={() => setMenu(n)}
+                onTodo={() => act(n.path, "todo")}
+              />
             ))}
           </ul>
         )}
@@ -79,11 +156,34 @@ export function InboxView() {
             onBack={() => setOpen(null)}
             removeIfEmpty
             autoFocus={open.isNew}
+            actions={
+              <>
+                <button className="btn ghost icon" title="Make it a to-do" aria-label="Make it a to-do" onClick={() => act(open.path, "todo")}>
+                  <CheckSquare size={18} />
+                </button>
+                <button className="btn ghost icon" title="Make it an idea" aria-label="Make it an idea" onClick={() => act(open.path, "idea")}>
+                  <Lightbulb size={18} />
+                </button>
+                <button className="btn ghost icon" title="Delete" aria-label="Delete item" onClick={() => act(open.path, "delete")}>
+                  <Trash2 size={18} />
+                </button>
+              </>
+            }
           />
         ) : (
           <div className="detail-empty muted">Pick an item or press New.</div>
         )}
       </div>
+      {menu && (
+        <Dialog title={previewOf(menu.body) || "(empty)"} onClose={() => setMenu(null)}>
+          <div className="stack" style={{ gap: 2 }}>
+            {item("Open", <Pencil size={18} />, () => setOpen({ path: menu.path, isNew: false }))}
+            {item("Make it a to-do", <CheckSquare size={18} />, () => act(menu.path, "todo"))}
+            {item("Make it an idea", <Lightbulb size={18} />, () => act(menu.path, "idea"))}
+            {item("Delete", <Trash2 size={18} />, () => act(menu.path, "delete"), " danger")}
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }

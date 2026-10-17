@@ -1,6 +1,7 @@
 package io.github.leonardo_sponton.hypomnemata;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -8,6 +9,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Base64;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -39,6 +41,45 @@ import java.util.stream.Stream;
  */
 @CapacitorPlugin(name = "HypoFiles")
 public class HypoFilesPlugin extends Plugin {
+
+    /** Action of the "Capture" home-screen shortcut (res/xml/shortcuts.xml). */
+    static final String ACTION_CAPTURE = "io.github.leonardo_sponton.hypomnemata.CAPTURE";
+
+    // ---- "Capture" shortcut (SPEC 5.2) ----
+
+    /**
+     * Capacitor hands every intent to the plugins, also the one that started the app. The event
+     * is kept until the web side listens, so a cold start through the shortcut is not missed.
+     */
+    @Override
+    protected void handleOnNewIntent(Intent intent) {
+        if (intent == null || !ACTION_CAPTURE.equals(intent.getAction())) return;
+        intent.setAction(Intent.ACTION_MAIN); // handled once, not again after a reload
+        notifyListeners("capture", new JSObject(), true);
+    }
+
+    /**
+     * Opens the keyboard for the focused field: WebView focus() alone does not, without a tap.
+     * Coming back from the home screen the window gets its focus a moment after the intent, and
+     * the keyboard is refused until then, so it retries for up to about a second.
+     */
+    @PluginMethod
+    public void showKeyboard(PluginCall call) {
+        android.view.View v = getBridge().getWebView();
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        Runnable[] tryShow = new Runnable[1];
+        int[] left = { 10 };
+        tryShow[0] = () -> {
+            if (v.hasWindowFocus()) {
+                v.requestFocus();
+                imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
+            } else if (--left[0] > 0) {
+                v.postDelayed(tryShow[0], 100);
+            }
+        };
+        v.post(tryShow[0]);
+        call.resolve();
+    }
 
     // ---- "All files access" (SPEC 2.3) ----
 

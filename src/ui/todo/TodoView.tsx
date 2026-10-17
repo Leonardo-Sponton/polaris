@@ -4,6 +4,7 @@ import { isoDate, slugify } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
 import { LIST_COLORS } from "../../data/lists";
 import { flushAll } from "../../data/pending";
+import type { Capture } from "../../data/inbox";
 import type { QuickAdd as Parsed } from "../../data/quickadd";
 import {
   createTask,
@@ -57,10 +58,14 @@ interface Props {
   view: View;
   setView(v: View): void;
   data: TodoData;
+  /** The Today start screen (SPEC 5.1): the capture field instead of task entry, no list chips. */
+  home?: { onCapture(c: Capture): Promise<boolean>; footer?: ReactNode; focusKey?: number };
 }
 
-export function TodoView({ view, setView, data }: Props) {
-  const { notes, bump, toast } = useApp();
+const LONG_DATE = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
+
+export function TodoView({ view, setView, data, home }: Props) {
+  const { notes, bump, toast, platform } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState<Task | null>(null);
   const [menu, setMenu] = useState<Task | null>(null);
@@ -87,6 +92,14 @@ export function TodoView({ view, setView, data }: Props) {
   }, []);
 
   useEffect(() => setLimit(LOGBOOK_PAGE), [view]);
+
+  // The Android "Capture" shortcut asks for the field (focusKey changes each time).
+  useEffect(() => {
+    if (!home?.focusKey) return;
+    setOpen(null);
+    qa.current?.focus();
+    platform.showKeyboard?.();
+  }, [home?.focusKey, platform]);
 
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
@@ -214,6 +227,7 @@ export function TodoView({ view, setView, data }: Props) {
   return (
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
+        {!home && (
         <nav className="todo-nav" aria-label="To-do lists">
           {VIEWS.map(v => (
             <button key={v.id} className={`chip${sameView(view, v.id) ? " active" : ""}`} onClick={() => setView(v.id)}>
@@ -232,9 +246,17 @@ export function TodoView({ view, setView, data }: Props) {
           ))}
           <NewListButton data={data} setView={setView} className="chip" />
         </nav>
+        )}
 
         <div className="list-head">
-          <h1>{label}</h1>
+          {home ? (
+            <div>
+              <h1>Today</h1>
+              <div className="muted mono head-sub">{LONG_DATE.format(now)}</div>
+            </div>
+          ) : (
+            <h1>{label}</h1>
+          )}
           {list && (
             <div className="row" style={{ gap: 2 }}>
               <button
@@ -268,7 +290,11 @@ export function TodoView({ view, setView, data }: Props) {
           )}
         </div>
 
-        {view !== "logbook" && <QuickAdd ref={qa} placeholder={placeholder} onAdd={add} />}
+        {home ? (
+          <QuickAdd ref={qa} placeholder="Capture… (t = to-do, #list, date)" onCapture={home.onCapture} />
+        ) : (
+          view !== "logbook" && <QuickAdd ref={qa} placeholder={placeholder} onAdd={add} />
+        )}
 
         {data.loaded && count === 0 && <p className="muted empty-note">{EMPTY[list ? "list" : (view as string)]}</p>}
 
@@ -300,6 +326,7 @@ export function TodoView({ view, setView, data }: Props) {
             </section>
           );
         })}
+        {home?.footer}
         {view === "logbook" && count > limit && (
           <button className="btn ghost" onClick={() => setLimit(l => l + LOGBOOK_PAGE)}>
             Show more

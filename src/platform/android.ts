@@ -15,6 +15,8 @@ interface HypoFiles {
   writeBase64(o: { root: string; path: string; data: string }): Promise<void>;
   move(o: { root: string; from: string; to: string }): Promise<void>;
   remove(o: { root: string; path: string }): Promise<void>;
+  showKeyboard(): Promise<void>;
+  addListener(event: "capture", cb: () => void): Promise<{ remove(): Promise<void> }>;
 }
 
 const Native = registerPlugin<HypoFiles>("HypoFiles");
@@ -58,5 +60,10 @@ export function androidPlatform(): Platform {
     setDataDir: async dir => localStorage.setItem(KEY, dir.replace(/\/+$/, "")),
     hasFileAccess: async () => (await Native.hasAccess()).granted,
     openFileAccessSettings: () => Native.openAccessSettings(),
+    showKeyboard: () => Native.showKeyboard(),
+    onCaptureRequest: cb => {
+      const handle = Native.addListener("capture", cb);
+      return () => void handle.then(h => h.remove());
+    },
   };
 }

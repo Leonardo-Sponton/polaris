@@ -90,6 +90,31 @@ export class Notes {
     return this.writeChecked(path, stringify({ ...data, modified: isoMinute() }, body, note));
   }
 
+  /**
+   * Moves a note to a new path with a new header and body (inbox item → to-do / idea).
+   * The new file is written and read back before the old one is removed.
+   */
+  async relocate(note: Note, to: string, data: Data, body: string): Promise<Note> {
+    if (await this.exists(to)) throw new SaveError(`${to} already exists`);
+    let disk: string | null = null;
+    try {
+      disk = await this.storage.read(note.path);
+    } catch {
+      disk = null;
+    }
+    if (disk !== note.text) throw new ConflictError(note.path, disk);
+    const moved = await this.writeChecked(to, stringify({ ...data, modified: isoMinute() }, body, note));
+    await this.storage.remove(note.path);
+    return moved;
+  }
+
+  /** Puts back the exact text of a note that was relocated (undo). */
+  async unrelocate(original: Note, moved: Note) {
+    if (await this.exists(original.path)) throw new SaveError(`${original.path} already exists`);
+    await this.writeChecked(original.path, original.text);
+    await this.storage.remove(moved.path);
+  }
+
   /** A free path like dir/name.md, adding -2, -3… when the name is taken. */
   async freePath(dir: string, name: string, ext = ".md"): Promise<string> {
     let path = `${dir}/${name}${ext}`;

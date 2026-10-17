@@ -1,8 +1,9 @@
-import { Fragment, useState, type ReactNode } from "react";
-import { CheckSquare, Inbox, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { ChevronRight, CheckSquare, Inbox, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { isToday, type View } from "../data/todo";
-import { InboxView } from "./InboxView";
+import { InboxView, useInbox } from "./InboxView";
+import { useCapture } from "./useCapture";
 import { SettingsView } from "./SettingsView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
@@ -51,17 +52,46 @@ function More({ go }: { go: (a: Area) => void }) {
   );
 }
 
-export function Shell() {
+export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const [area, setArea] = useState<Area>("today");
   const [view, setView] = useState<View>("today");
+  const [homeView, setHomeView] = useState<View>("today");
   const todo = useTodo();
+  const inbox = useInbox();
+  const capture = useCapture();
   const today = isoDate();
   const todayCount = todo.tasks.filter(t => isToday(t, today)).length;
 
+  // The Android "Capture" shortcut: go to Today, where the field gets the focus.
+  useEffect(() => {
+    if (captureKey) setArea("today");
+  }, [captureKey]);
+
   let page: ReactNode;
   switch (area) {
+    case "today":
+      page = (
+        <TodoView
+          view={homeView}
+          setView={setHomeView}
+          data={todo}
+          home={{
+            onCapture: capture,
+            focusKey: captureKey,
+            footer: inbox.length > 0 && (
+              <button className="today-card" onClick={() => setArea("inbox")}>
+                <Inbox size={18} />
+                <span>Inbox</span>
+                <span className="count">{inbox.length}</span>
+                <ChevronRight size={18} className="muted" />
+              </button>
+            ),
+          }}
+        />
+      );
+      break;
     case "inbox":
-      page = <InboxView />;
+      page = <InboxView items={inbox} />;
       break;
     case "todo":
       page = <TodoView view={view} setView={setView} data={todo} />;
@@ -120,6 +150,7 @@ export function Shell() {
               {a.icon}
               <span className="label">{a.label}</span>
               {a.id === "todo" && todayCount > 0 && <span className="count">{todayCount}</span>}
+              {a.id === "inbox" && inbox.length > 0 && <span className="count">{inbox.length}</span>}
             </button>
             {a.id === "todo" && area === "todo" && todoNav}
           </Fragment>

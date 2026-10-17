@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Editor } from "../editor/Editor";
 import { STATUS_TEXT, useNoteFile } from "./useNoteFile";
@@ -13,22 +14,25 @@ interface Props {
   /** Deletes the file when it is left empty (new items the user did not write in). */
   removeIfEmpty?: boolean;
   autoFocus?: boolean;
+  /** Buttons at the right of the top bar. */
+  actions?: ReactNode;
 }
 
-export function NoteEditor({ path, placeholder, onBack, removeIfEmpty, autoFocus }: Props) {
+export function NoteEditor({ path, placeholder, onBack, removeIfEmpty, autoFocus, actions }: Props) {
   const f = useNoteFile(path, { removeIfEmpty: removeIfEmpty ? body => body.trim() === "" : undefined });
 
   return (
     <div className="note-editor">
       <div className="note-bar">
         {onBack && (
-          <button className="btn ghost icon" onClick={onBack} aria-label="Back">
+          <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
             <ArrowLeft size={20} />
           </button>
         )}
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
           {f.note ? STATUS_TEXT[f.status] : ""}
         </span>
+        {f.note && actions}
       </div>
       {f.gone ? (
         <div className="page">

@@ -18,4 +18,10 @@ export interface Platform {
   onFileChanged?(cb: (path: string) => void): () => void;
   /** Desktop: the window is closing; `flush` writes unsaved edits first. */
   onClosing?(flush: () => Promise<void>): void;
+  /** Desktop: closes this window (the quick capture window). */
+  closeWindow?(): Promise<void>;
+  /** Android: the "Capture" home-screen shortcut was used. Returns a function that stops it. */
+  onCaptureRequest?(cb: () => void): () => void;
+  /** Android: opens the keyboard for the focused field (focus() alone does not without a tap). */
+  showKeyboard?(): Promise<void>;
 }

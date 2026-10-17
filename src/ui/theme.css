@@ -448,6 +448,45 @@ h3 {
   background: var(--select);
 }
 
+.inbox-li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.inbox-li .list-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.today-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.today-card:hover {
+  background: var(--hover);
+}
+.today-card .count {
+  margin-left: auto;
+  font-family: var(--mono);
+  color: var(--accent);
+}
+
+.head-sub {
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
 .list-title {
   color: var(--strong);
   overflow-wrap: anywhere;
@@ -495,7 +534,7 @@ h3 {
 }
 
 @media (min-width: 720px) {
-  .note-bar .icon {
+  .note-bar .back {
     display: none;
   }
 }
@@ -845,6 +884,24 @@ h3 {
   color: var(--text);
   font-weight: 600;
 }
+.qa-dest {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--select);
+  color: var(--accent);
+  font-weight: 600;
+}
+.qa-link {
+  margin-left: 10px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 /* A task row; on touch screens it slides over a colored strip while swiped. */
 .task-li {
@@ -1057,4 +1114,26 @@ h3 {
   justify-content: space-between;
   border-top: 1px solid var(--line);
   padding-top: 12px;
+}
+
+/* ---- Quick capture window (Linux --capture) ---- */
+
+.capture-window {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px 20px;
+  background: var(--bg);
+}
+.capture-hint {
+  margin: 10px 4px 0;
+  font-size: 0.75rem;
+}
+.capture-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  color: var(--ok);
 }

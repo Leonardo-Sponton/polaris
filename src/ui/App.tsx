@@ -6,6 +6,11 @@ import { flushAll } from "../data/pending";
 import { Ctx, type AppCtx, type Toast } from "./context";
 import { FileAccess, FirstRun } from "./FirstRun";
 import { Shell } from "./Shell";
+import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
+
+// `#capture`: the small quick capture window (Linux, `hypomnemata --capture`).
+const CAPTURE_ONLY = location.hash === "#capture";
+if (CAPTURE_ONLY) document.title = "Hypomnemata capture";
 
 type Boot =
   | { step: "loading" }
@@ -23,6 +28,7 @@ export function App({ platform }: { platform: Platform }) {
   const [boot, setBoot] = useState<Boot>({ step: "loading" });
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [version, setVersion] = useState(0);
+  const [captureKey, setCaptureKey] = useState(0);
   const nextId = useRef(1);
   const notes = useMemo(() => new Notes(platform.storage), [platform]);
 
@@ -71,6 +77,8 @@ export function App({ platform }: { platform: Platform }) {
     return () => document.removeEventListener("visibilitychange", onHide);
   }, [platform]);
 
+  useEffect(() => platform.onCaptureRequest?.(() => setCaptureKey(k => k + 1)), [platform]);
+
   const bump = useCallback(() => setVersion(v => v + 1), []);
 
   const toast = useCallback((t: Omit<Toast, "id">) => {
@@ -92,6 +100,7 @@ export function App({ platform }: { platform: Platform }) {
         </div>
       </div>
     );
+  if (CAPTURE_ONLY && (boot.step === "choose" || boot.step === "access")) return <CaptureNotReady />;
   if (boot.step === "choose") return <FirstRun platform={platform} onDone={start} />;
   if (boot.step === "access") return <FileAccess platform={platform} onCheck={start} />;
 
@@ -112,7 +121,7 @@ export function App({ platform }: { platform: Platform }) {
 
   return (
     <Ctx.Provider value={ctx}>
-      <Shell />
+      {CAPTURE_ONLY ? <CaptureWindow /> : <Shell captureKey={captureKey} />}
       <div className="toasts" aria-live="polite">
         {toasts.map(t => (
           <div key={t.id} className={`toast${t.error ? " error" : ""}`}>

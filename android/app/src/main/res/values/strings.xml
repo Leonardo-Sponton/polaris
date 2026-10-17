@@ -4,4 +4,5 @@
     <string name="title_activity_main">Hypomnemata</string>
     <string name="package_name">io.github.leonardo_sponton.hypomnemata</string>
     <string name="custom_url_scheme">io.github.leonardo_sponton.hypomnemata</string>
+    <string name="shortcut_capture">Capture</string>
 </resources>

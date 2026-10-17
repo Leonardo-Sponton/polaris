@@ -106,10 +106,79 @@ const handlers = {
   },
   "fs:remove": (_e, rel) => fsp.rm(resolve(rel), { recursive: true, force: true }),
   "shell:openFolder": () => dataDir && shell.openPath(dataDir),
+  "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
 };
 
 let watcher = null;
 let mainWindow = null;
+let captureWindow = null;
+
+const wantsCapture = argv => argv.includes("--capture");
+
+const PAGE = path.join(__dirname, "../dist/index.html");
+
+function load(win, hash) {
+  if (process.env.VITE_DEV_URL) win.loadURL(process.env.VITE_DEV_URL + (hash ? `#${hash}` : ""));
+  else win.loadFile(PAGE, hash ? { hash } : undefined);
+}
+
+const webPreferences = () => ({
+  preload: path.join(__dirname, "preload.cjs"),
+  contextIsolation: true,
+  nodeIntegration: false,
+  sandbox: true,
+});
+
+// 100% offline: never open or load anything from the network.
+function lockDown(win) {
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  win.webContents.on("will-navigate", e => e.preventDefault());
+}
+
+function attachShot(win) {
+  if (!process.env.HYPO_SHOT) return;
+  // Test helper: save a screenshot and quit (used to check the UI without a person watching).
+  // HYPO_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
+  // HYPO_SHOT_ZOOM: page zoom, e.g. 0.7 to see the wide layout in a small tiled window.
+  win.webContents.once("did-finish-load", () =>
+    setTimeout(async () => {
+      if (process.env.HYPO_SHOT_ZOOM) win.webContents.setZoomFactor(Number(process.env.HYPO_SHOT_ZOOM));
+      if (process.env.HYPO_SHOT_JS) {
+        await win.webContents.executeJavaScript(process.env.HYPO_SHOT_JS).catch(e => console.error(e));
+        await new Promise(r => setTimeout(r, Number(process.env.HYPO_SHOT_WAIT || 800)));
+      }
+      // HYPO_SHOT=close: close the window the way the window manager does (tests saving on close).
+      if (process.env.HYPO_SHOT === "close") return win.isDestroyed() || win.close();
+      if (!win.isDestroyed()) fs.writeFileSync(process.env.HYPO_SHOT, (await win.webContents.capturePage()).toPNG());
+      app.quit();
+    }, Number(process.env.HYPO_SHOT_DELAY || 1500)),
+  );
+}
+
+// Quick capture (SPEC 5.2): a small window with only the capture field. Its fixed size makes
+// Hyprland float it. It has nothing unsaved to protect, so it closes at once.
+function createCaptureWindow() {
+  if (captureWindow) {
+    captureWindow.show();
+    captureWindow.focus();
+    return;
+  }
+  captureWindow = new BrowserWindow({
+    width: 560,
+    height: 200,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    backgroundColor: "#010a29",
+    title: "Hypomnemata capture",
+    autoHideMenuBar: true,
+    webPreferences: webPreferences(),
+  });
+  lockDown(captureWindow);
+  load(captureWindow, "capture");
+  attachShot(captureWindow);
+  captureWindow.on("closed", () => (captureWindow = null));
+}
 
 // Tells the page when a file changes outside the app (another editor, sync…).
 function startWatch() {
@@ -135,36 +204,11 @@ function createWindow() {
     backgroundColor: "#010a29",
     title: "Hypomnemata",
     autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
+    webPreferences: webPreferences(),
   });
-  // 100% offline: never open or load anything from the network.
-  mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  mainWindow.webContents.on("will-navigate", e => e.preventDefault());
-  if (process.env.VITE_DEV_URL) mainWindow.loadURL(process.env.VITE_DEV_URL);
-  else mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
-  if (process.env.HYPO_SHOT) {
-    // Test helper: save a screenshot and quit (used to check the UI without a person watching).
-    // HYPO_SHOT_JS: a script run in the page first (clicks, typing), awaited if it returns a promise.
-    // HYPO_SHOT_ZOOM: page zoom, e.g. 0.7 to see the wide layout in a small tiled window.
-    mainWindow.webContents.once("did-finish-load", () =>
-      setTimeout(async () => {
-        if (process.env.HYPO_SHOT_ZOOM) mainWindow.webContents.setZoomFactor(Number(process.env.HYPO_SHOT_ZOOM));
-        if (process.env.HYPO_SHOT_JS) {
-          await mainWindow.webContents.executeJavaScript(process.env.HYPO_SHOT_JS).catch(e => console.error(e));
-          await new Promise(r => setTimeout(r, Number(process.env.HYPO_SHOT_WAIT || 800)));
-        }
-        // HYPO_SHOT=close: close the window the way the window manager does (tests saving on close).
-        if (process.env.HYPO_SHOT === "close") return mainWindow.close();
-        fs.writeFileSync(process.env.HYPO_SHOT, (await mainWindow.webContents.capturePage()).toPNG());
-        app.quit();
-      }, Number(process.env.HYPO_SHOT_DELAY || 1500)),
-    );
-  }
+  lockDown(mainWindow);
+  load(mainWindow);
+  attachShot(mainWindow);
   // Closing: give the page up to 3 s to write unsaved edits (SPEC 2.4), then close.
   let closing = false;
   mainWindow.on("close", e => {
@@ -184,17 +228,19 @@ if (process.env.HYPO_CONFIG_DIR) app.setPath("userData", process.env.HYPO_CONFIG
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
+  // A second launch hands its command line to this running instance and exits.
+  app.on("second-instance", (_e, argv) => {
+    if (wantsCapture(argv)) return createCaptureWindow();
+    if (!mainWindow) return createWindow();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
   });
   app.whenReady().then(() => {
     dataDir = readConfig().dataDir || null;
     for (const [name, fn] of Object.entries(handlers)) ipcMain.handle(name, fn);
     startWatch();
-    createWindow();
+    if (wantsCapture(process.argv)) createCaptureWindow();
+    else createWindow();
   });
   app.on("window-all-closed", () => app.quit());
 }

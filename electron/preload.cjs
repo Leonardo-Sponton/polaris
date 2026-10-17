@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("hypo", {
   config: { get: call("config:get"), setDataDir: call("config:setDataDir") },
   pickFolder: call("dialog:pickFolder"),
   openFolder: call("shell:openFolder"),
+  closeWindow: call("capture:close"),
   fs: {
     list: call("fs:list"),
     stat: call("fs:stat"),
