@@ -5,6 +5,23 @@ import { useEffect, useRef } from "react";
 
 const HOLD = 500;
 
+// The menu opens under a finger that is still down, and Android's own long press then selects
+// whatever text is nearest (menu title, nav labels). Block that until the finger lifts.
+function blockSelectionUntilLift() {
+  const block = (e: Event) => e.preventDefault();
+  const done = () => {
+    removeEventListener("selectstart", block, true);
+    removeEventListener("contextmenu", block, true);
+    removeEventListener("pointerup", done, true);
+    removeEventListener("pointercancel", done, true);
+  };
+  addEventListener("selectstart", block, true);
+  addEventListener("contextmenu", block, true);
+  addEventListener("pointerup", done, true);
+  addEventListener("pointercancel", done, true);
+  setTimeout(done, 3000); // never left on by a lost pointerup
+}
+
 export function useHold(onMenu: () => void) {
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -23,6 +40,7 @@ export function useHold(onMenu: () => void) {
         timer.current = setTimeout(() => {
           ate.current = true;
           navigator.vibrate?.(20);
+          blockSelectionUntilLift();
           onMenu();
         }, HOLD);
       },

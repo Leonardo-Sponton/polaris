@@ -1,9 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
-import { STATUSES, TEMPLATES, createIdea, loadIdeas, markSeen, type Idea, type Template } from "../../data/ideas";
+import {
+  STATUSES,
+  TEMPLATES,
+  archivePatch,
+  createIdea,
+  loadIdeas,
+  markSeen,
+  reopenPatch,
+  updateIdea,
+  type Idea,
+  type Template,
+} from "../../data/ideas";
+import type { Data } from "../../data/frontmatter";
+import { flushAll } from "../../data/pending";
+import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText } from "../Dialog";
 import { useApp } from "../context";
+import { useHold } from "../useHold";
 import { IdeaEditor } from "./IdeaEditor";
+import { IdeaMenu } from "./IdeaMenu";
 
 // Ideas (SPEC 5.4): the list grouped by status, filtered by template or tag, and the idea screen
 // on the right (one at a time on the phone).
@@ -24,12 +40,35 @@ export function useIdeas(): Idea[] {
 
 type Filter = { template?: Template; tag?: string };
 
+function IdeaRow({ idea: i, active, onOpen, onMenu }: { idea: Idea; active: boolean; onOpen(): void; onMenu(): void }) {
+  const hold = useHold(onMenu);
+  return (
+    <li className="idea-li" {...hold.handlers}>
+      <button className={`list-item${active ? " active" : ""}`} onClick={() => !hold.eaten() && onOpen()}>
+        <span className="list-title">{i.title || <span className="muted">(untitled)</span>}</span>
+        <span className="list-meta mono">
+          {[
+            i.template !== "blank" && TEMPLATES.find(t => t.id === i.template)!.label,
+            ...i.tags.map(t => `#${t}`),
+            i.modified.slice(0, 10),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
+        {i.status === "archived" && i.archivedReason && <span className="list-meta">{i.archivedReason}</span>}
+      </button>
+    </li>
+  );
+}
+
 export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { path: string; key: number } }) {
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [filter, setFilter] = useState<Filter>({});
   const [showArchived, setShowArchived] = useState(false);
+  const [menu, setMenu] = useState<Idea | null>(null);
+  const [archiving, setArchiving] = useState<Idea | null>(null);
 
   const fail = useCallback(
     (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true }),
@@ -71,6 +110,33 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
       const n = await createIdea(notes, title, filter.template ?? "blank");
       bump();
       setOpen(n.path);
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  // Header changes from the hold menu, with Undo.
+  const change = async (i: Idea, patch: Data, text: string) => {
+    try {
+      await flushAll(); // an open idea screen writes its last edits first
+      const old = await updateIdea(notes, i.path, patch);
+      bump();
+      toast({ text, action: { label: "Undo", run: () => updateIdea(notes, i.path, old).then(bump, fail) } });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const remove = async (i: Idea) => {
+    try {
+      await flushAll();
+      if (open === i.path) setOpen(null);
+      const trashed = await moveToTrash(notes.storage, i.path);
+      bump();
+      toast({
+        text: "Idea deleted",
+        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, i.path).then(bump, fail) },
+      });
     } catch (e) {
       fail(e);
     }
@@ -135,26 +201,13 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
                 {!folded && (
                   <ul className="list">
                     {group.map(i => (
-                      <li key={i.path}>
-                        <button
-                          className={`list-item${open === i.path ? " active" : ""}`}
-                          onClick={() => openIdea(i.path)}
-                        >
-                          <span className="list-title">{i.title || <span className="muted">(untitled)</span>}</span>
-                          <span className="list-meta mono">
-                            {[
-                              i.template !== "blank" && TEMPLATES.find(t => t.id === i.template)!.label,
-                              ...i.tags.map(t => `#${t}`),
-                              i.modified.slice(0, 10),
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </span>
-                          {i.status === "archived" && i.archivedReason && (
-                            <span className="list-meta">{i.archivedReason}</span>
-                          )}
-                        </button>
-                      </li>
+                      <IdeaRow
+                        key={i.path}
+                        idea={i}
+                        active={open === i.path}
+                        onOpen={() => openIdea(i.path)}
+                        onMenu={() => setMenu(i)}
+                      />
                     ))}
                   </ul>
                 )}
@@ -170,6 +223,30 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
           <div className="detail-empty muted">Pick an idea or press New.</div>
         )}
       </div>
+      {menu && (
+        <IdeaMenu
+          idea={menu}
+          onClose={() => setMenu(null)}
+          onOpen={() => openIdea(menu.path)}
+          onStatus={st => change(menu, { status: st }, st === "draft" ? "Back to Draft" : "Moved to Maturing")}
+          onTemplate={t => change(menu, { template: t }, `Template: ${TEMPLATES.find(x => x.id === t)!.label}`)}
+          onArchive={() => setArchiving(menu)}
+          onReopen={() => change(menu, reopenPatch(), "Reopened · Maturing")}
+          onDelete={() => remove(menu)}
+        />
+      )}
+      {archiving && (
+        <AskText
+          title="Why didn't it work?"
+          placeholder="e.g. Too expensive to build alone"
+          okLabel="Archive"
+          onClose={() => setArchiving(null)}
+          onOk={reason => {
+            setArchiving(null);
+            change(archiving, archivePatch(reason), "Archived");
+          }}
+        />
+      )}
       {asking && (
         <AskText
           title="New idea"

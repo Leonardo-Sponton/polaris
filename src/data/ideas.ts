@@ -1,5 +1,5 @@
 import { addDays, isoDate, parseLocal, slugify } from "./dates";
-import { titleOf } from "./frontmatter";
+import { titleOf, type Data } from "./frontmatter";
 import type { Note, Notes } from "./notes";
 import { joinTitle } from "./todo";
 
@@ -109,6 +109,16 @@ export function parseTags(text: string): string[] {
 export const archivePatch = (reason: string) => ({ status: "archived", archived_reason: reason.trim() });
 /** Reopening an archived idea sends it back to Maturing and drops the reason. */
 export const reopenPatch = () => ({ status: "maturing", archived_reason: undefined });
+
+/** Changes an idea's header from outside its screen (the hold menu). Returns the old values of the
+ *  changed keys, so passing them back undoes it. */
+export async function updateIdea(notes: Notes, path: string, patch: Data): Promise<Data> {
+  const n = await notes.load(path);
+  const old: Data = {};
+  for (const k of Object.keys(patch)) old[k] = n.data[k];
+  await notes.save(n, { ...n.data, ...patch }, n.body);
+  return old;
+}
 
 /** Opening an idea counts as seeing it (used by "resurface old ideas"). Does not touch `modified`. */
 export async function markSeen(notes: Notes, path: string, today = isoDate()): Promise<boolean> {

@@ -939,6 +939,13 @@ h3 {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+/* Same for the other rows that open a menu when held. */
+.inbox-li,
+.idea-li {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
 @media (max-width: 719px) {
   .task-row {
     background: var(--bg);

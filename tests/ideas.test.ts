@@ -18,6 +18,7 @@ import {
   score,
   sectionsOf,
   toIdea,
+  updateIdea,
 } from "../src/data/ideas";
 import { createInboxItem, inboxToIdea } from "../src/data/inbox";
 
@@ -81,6 +82,18 @@ describe("ideas", () => {
     expect(n.data.status).toBe("maturing");
     expect("archived_reason" in n.data).toBe(false);
     expect(n.body).toBe("# Food truck\ndraft\n");
+  });
+
+  it("updateIdea returns the old values, which undo it", async () => {
+    const notes = new Notes(new MemoryStorage());
+    const n = await createIdea(notes, "Food truck", "business", SAT);
+    const old = await updateIdea(notes, n.path, archivePatch("No money"));
+    expect((await notes.load(n.path)).data).toMatchObject({ status: "archived", archived_reason: "No money" });
+    await updateIdea(notes, n.path, old);
+    const back = await notes.load(n.path);
+    expect(back.data.status).toBe("draft");
+    expect("archived_reason" in back.data).toBe(false);
+    expect(back.body).toBe(n.body);
   });
 
   it("opening marks the idea as seen without changing `modified`", async () => {
