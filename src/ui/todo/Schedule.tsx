@@ -1,4 +1,5 @@
 import { Archive, CalendarDays, Moon, Star, Sunrise, X } from "lucide-react";
+import { t } from "../../i18n";
 import { addDays, isoDate } from "../../data/dates";
 import { Dialog } from "../Dialog";
 
@@ -33,26 +34,26 @@ export function ScheduleDialog({
   );
   const isDay = current.when && current.when !== "someday";
   return (
-    <Dialog title="When" onClose={onClose}>
+    <Dialog title={t.todo.whenTitle} onClose={onClose}>
       <div className="stack" style={{ gap: 2 }}>
-        {opt("Today", <Star size={18} />, { when: today, evening: false }, current.when === today && !current.evening)}
+        {opt(t.dates.today, <Star size={18} />, { when: today, evening: false }, current.when === today && !current.evening)}
         {opt(
-          "This Evening",
+          t.todo.sections.evening,
           <Moon size={18} />,
           { when: today, evening: true },
           current.when === today && !!current.evening,
         )}
         {opt(
-          "Tomorrow",
+          t.dates.tomorrow,
           <Sunrise size={18} />,
           { when: isoDate(addDays(now, 1)) },
           current.when === isoDate(addDays(now, 1)),
         )}
-        {opt("Next week", <CalendarDays size={18} />, { when: nextMonday }, current.when === nextMonday)}
-        {opt("Someday", <Archive size={18} />, { when: "someday" }, current.when === "someday")}
+        {opt(t.todo.nextWeek, <CalendarDays size={18} />, { when: nextMonday }, current.when === nextMonday)}
+        {opt(t.todo.views.someday, <Archive size={18} />, { when: "someday" }, current.when === "someday")}
         <label className="menu-item">
           <CalendarDays size={18} />
-          Pick a date
+          {t.todo.pickDate}
           <input
             type="date"
             className="field date-field"
@@ -60,7 +61,7 @@ export function ScheduleDialog({
             onChange={e => e.target.value && pick({ when: e.target.value, evening: false })}
           />
         </label>
-        {current.when && opt("No date", <X size={18} />, { when: undefined, evening: undefined }, false)}
+        {current.when && opt(t.todo.noDate, <X size={18} />, { when: undefined, evening: undefined }, false)}
       </div>
     </Dialog>
   );

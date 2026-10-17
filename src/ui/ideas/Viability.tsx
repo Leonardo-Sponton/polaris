@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { t } from "../../i18n";
 import { ChevronDown, ChevronRight, Plus, X } from "lucide-react";
 import type { Data } from "../../data/frontmatter";
 import {
@@ -17,11 +18,7 @@ import { useApp } from "../context";
 // The idea's homework (SPEC 5.4): the viability checklist with its score and the riskiest
 // assumptions. Both start folded so a fresh draft stays a plain page.
 
-const ANSWERS: { id: Answer; label: string }[] = [
-  { id: "yes", label: "Yes" },
-  { id: "no", label: "No" },
-  { id: "unsure", label: "Unsure" },
-];
+const ANSWERS: Answer[] = ["yes", "no", "unsure"];
 
 function Fold(props: { title: string; meta: ReactNode; children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -45,30 +42,30 @@ export function Viability({ data, patch }: { data: Data; patch(p: Data): void })
   return (
     <>
       <Fold
-        title="Viability checklist"
+        title={t.ideas.checklist}
         meta={
           s.answered ? (
             <>
               {s.yes}/{s.total}
-              {s.viable && <span className="viable"> · Maybe viable</span>}
+              {s.viable && <span className="viable">{t.ideas.maybeViable}</span>}
             </>
           ) : (
-            "not answered"
+            t.ideas.notAnswered
           )
         }
       >
         <ol className="checklist">
           {QUESTIONS.map(q => (
             <li key={q.id}>
-              <span>{q.text}</span>
+              <span>{t.ideas.questions[q.id]}</span>
               <div className="segmented">
                 {ANSWERS.map(a => (
                   <button
-                    key={a.id}
-                    aria-pressed={answers[q.id] === a.id}
-                    onClick={() => patch(answerPatch(data, q.id, a.id))}
+                    key={a}
+                    aria-pressed={answers[q.id] === a}
+                    onClick={() => patch(answerPatch(data, q.id, a))}
                   >
-                    {a.label}
+                    {t.ideas.answers[a]}
                   </button>
                 ))}
               </div>
@@ -76,12 +73,12 @@ export function Viability({ data, patch }: { data: Data; patch(p: Data): void })
           ))}
         </ol>
         <p className="muted small">
-          Score = number of “yes”. Tap a chosen answer again to clear it.
-          {s.viable && " All yes: maybe viable. Test the riskiest assumption next."}
+          {t.ideas.scoreHint}
+          {s.viable && t.ideas.allYes}
         </p>
       </Fold>
 
-      <Fold title="Riskiest assumptions" meta={list.length ? `${tested}/${list.length} tested` : "none yet"}>
+      <Fold title={t.ideas.riskiest} meta={list.length ? t.ideas.tested(tested, list.length) : t.ideas.noneYet}>
         <Assumptions list={list} patch={patch} />
       </Fold>
     </>
@@ -98,17 +95,14 @@ function Assumptions({ list, patch }: { list: Assumption[]; patch(p: Data): void
     const old = list;
     save(list.filter((_, j) => j !== i));
     if (old[i].text || old[i].test || old[i].notes) {
-      toast({ text: "Assumption removed", action: { label: "Undo", run: () => save(old) } });
+      toast({ text: t.ideas.assumptionRemoved, action: { label: t.common.undo, run: () => save(old) } });
     }
   };
 
   return (
     <>
       {list.length === 0 && (
-        <p className="muted small">
-          What must be true for this idea to work? Write the riskiest first, with a small, cheap way
-          to test it.
-        </p>
+        <p className="muted small">{t.ideas.assumptionIntro}</p>
       )}
       {list.map((a, i) => (
         <div key={i} className={`assumption r-${a.result}`}>
@@ -116,34 +110,34 @@ function Assumptions({ list, patch }: { list: Assumption[]; patch(p: Data): void
             <input
               className="field grow"
               value={a.text}
-              placeholder="e.g. People will pay for it"
-              aria-label="Assumption"
+              placeholder={t.ideas.assumptionEg}
+              aria-label={t.ideas.assumption}
               autoFocus={i === added}
               onChange={e => set(i, { text: e.target.value })}
             />
-            <button className="btn ghost icon" aria-label="Remove assumption" title="Remove" onClick={() => remove(i)}>
+            <button className="btn ghost icon" aria-label={t.ideas.removeAssumption} title={t.common.remove} onClick={() => remove(i)}>
               <X size={16} />
             </button>
           </div>
           <input
             className="field"
             value={a.test}
-            placeholder="How to test: e.g. ask 5 friends to pre-order"
-            aria-label="How to test"
+            placeholder={t.ideas.testEg}
+            aria-label={t.ideas.howToTest}
             onChange={e => set(i, { test: e.target.value })}
           />
           <div className="segmented">
             {RESULTS.map(r => (
               <button key={r.id} aria-pressed={a.result === r.id} onClick={() => set(i, { result: r.id })}>
-                {r.label}
+                {t.ideas.results[r.id]}
               </button>
             ))}
           </div>
           <input
             className="field"
             value={a.notes}
-            placeholder="Notes: what happened"
-            aria-label="Notes"
+            placeholder={t.ideas.notesEg}
+            aria-label={t.ideas.notes}
             onChange={e => set(i, { notes: e.target.value })}
           />
         </div>
@@ -156,7 +150,7 @@ function Assumptions({ list, patch }: { list: Assumption[]; patch(p: Data): void
             save([...list, { text: "", test: "", result: "untested", notes: "" }]);
           }}
         >
-          <Plus size={16} /> Assumption
+          <Plus size={16} /> {t.ideas.assumption}
         </button>
       </div>
     </>

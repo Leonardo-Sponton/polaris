@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, ChevronRight, Flag, Lightbulb, Play, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
-import { RESULTS, answersOf, assumptionsOf, score, toIdea, type Idea } from "../../data/ideas";
+import { answersOf, assumptionsOf, score, toIdea, type Idea } from "../../data/ideas";
 import type { Data } from "../../data/frontmatter";
 import type { Note } from "../../data/notes";
-import { STATUSES, extraSteps, gatePatch, projectTasks, toProject, type Decision, type Project } from "../../data/projects";
+import { extraSteps, gatePatch, projectTasks, toProject, type Decision, type Project } from "../../data/projects";
 import type { Task } from "../../data/todo";
 import { joinTitle, splitTitle } from "../../data/todo";
 import { useApp } from "../context";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 import { GateDialog, GateHistory } from "./Gate";
 import { useStepNotes } from "./StepView";
 
@@ -32,17 +33,17 @@ export function ProjectEditor({ path, tasks, onBack, onDelete, onOpenStep, onOpe
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && (
           <button
             className="btn ghost icon"
-            aria-label="Delete project"
-            title="Delete the project and its notes"
+            aria-label={t.projects.deleteProject}
+            title={t.projects.deleteHint}
             onClick={() => f.saveNow().then(() => onDelete(toProject(f.note!)))}
           >
             <Trash2 size={18} />
@@ -84,27 +85,27 @@ function useIdea(path?: string): Idea | null | undefined {
 function FromIdea({ path, onOpen }: { path: string; onOpen(): void }) {
   const idea = useIdea(path);
   if (idea === undefined) return null;
-  if (idea === null) return <p className="muted small">The idea it came from ({path}) is no longer there.</p>;
+  if (idea === null) return <p className="muted small">{t.projects.ideaGone(path)}</p>;
   const s = score(answersOf(idea.note.data));
   const list = assumptionsOf(idea.note.data);
   return (
-    <section className="from-idea" aria-label="From the idea">
+    <section className="from-idea" aria-label={t.projects.fromIdea}>
       <button className="list-item" onClick={onOpen}>
         <span className="list-title">
-          <Lightbulb size={16} /> {idea.title || "(untitled idea)"}
+          <Lightbulb size={16} /> {idea.title || t.shell.untitledIdea}
         </span>
         <span className="list-meta mono">
-          Checklist {s.answered ? `${s.yes}/${s.total}` : "not answered"}
-          {s.viable && " · Maybe viable"}
-          {list.length > 0 && ` · ${list.length} assumption${list.length > 1 ? "s" : ""}`}
+          {t.projects.checklist(s.answered ? `${s.yes}/${s.total}` : t.ideas.notAnswered)}
+          {s.viable && t.ideas.maybeViable}
+          {list.length > 0 && t.projects.assumptions(list.length)}
         </span>
       </button>
       {list.length > 0 && (
         <ul className="from-idea-assumptions">
           {list.map((a, i) => (
             <li key={i}>
-              <span className={`result ${a.result}`}>{RESULTS.find(r => r.id === a.result)!.label}</span>
-              <span>{a.text || <span className="muted">(empty)</span>}</span>
+              <span className={`result ${a.result}`}>{t.ideas.results[a.result]}</span>
+              <span>{a.text || <span className="muted">{t.common.empty}</span>}</span>
             </li>
           ))}
         </ul>
@@ -135,8 +136,8 @@ function ProjectForm(props: {
   const p = toProject({ ...note, data: d });
   const stepNotes = useStepNotes(p.dir);
   const count = (id: string) => stepNotes.filter(n => n.step === id).length;
-  const open = projectTasks(props.tasks, p.slug).filter(t => t.status === "open");
-  const todos = (id: string) => open.filter(t => t.step === id).length;
+  const open = projectTasks(props.tasks, p.slug).filter(k => k.status === "open");
+  const todos = (id: string) => open.filter(k => k.step === id).length;
   const [gate, setGate] = useState<Decision | null>(null);
   const { toast } = useApp();
   const decide = (decision: Decision, reason: string, to?: string) => {
@@ -158,8 +159,8 @@ function ProjectForm(props: {
           className="task-title-input"
           rows={1}
           value={title}
-          placeholder="Project name"
-          aria-label="Name"
+          placeholder={t.projects.name}
+          aria-label={t.projects.nameLabel}
           onChange={e => {
             const v = e.target.value.replace(/\n/g, " ");
             setTitle(v);
@@ -170,18 +171,18 @@ function ProjectForm(props: {
         />
 
         <div className="task-fields">
-          <span className="fl">Status</span>
-          <span>{STATUSES.find(s => s.id === p.status)!.label}</span>
-          <span className="fl">Flow</span>
+          <span className="fl">{t.projects.fStatus}</span>
+          <span>{t.projects.status[p.status]}</span>
+          <span className="fl">{t.projects.flow}</span>
           <span>{p.flow.name}</span>
         </div>
 
         {p.idea && <FromIdea path={p.idea} onOpen={() => props.onOpenIdea(p.idea!)} />}
 
         <div className="task-notes-head">
-          <span className="fl">Steps</span>
+          <span className="fl">{t.projects.steps}</span>
         </div>
-        <ol className="steps" aria-label="Steps">
+        <ol className="steps" aria-label={t.projects.steps}>
           {p.flow.steps.map((s, i) => {
             const n = count(s.id);
             const state = i < current ? "past" : i === current ? "current" : "later";
@@ -191,11 +192,11 @@ function ProjectForm(props: {
                   <span className="step-num mono">{i + 1}</span>
                   <span className="step-name">
                     {s.name}
-                    {state === "current" && <span className="step-now small"> · current</span>}
+                    {state === "current" && <span className="step-now small">{t.projects.current}</span>}
                   </span>
                   {todos(s.id) > 0 && (
-                    <span className="step-todos small mono" title="Open to-dos">
-                      {todos(s.id)} to-do
+                    <span className="step-todos small mono" title={t.projects.openTodos}>
+                      {t.projects.stepTodos(todos(s.id))}
                     </span>
                   )}
                   {n > 0 && <span className="count">{n}</span>}
@@ -216,31 +217,29 @@ function ProjectForm(props: {
           ))}
         </ol>
 
-        <section className="gate-box" aria-label="Decision">
+        <section className="gate-box" aria-label={t.projects.decision}>
           {p.status === "active" ? (
             <>
-              <span className="small">
-                When step {current + 1} is done, decide what comes next: go, hold, kill or recycle.
-              </span>
+              <span className="small">{t.projects.whenDone(current + 1)}</span>
               <button className="btn" onClick={() => setGate("go")}>
-                <Flag size={16} /> Finish this step…
+                <Flag size={16} /> {t.projects.finishStep}
               </button>
             </>
           ) : (
             <>
               <span className="small">
-                <strong>{STATUSES.find(s => s.id === p.status)!.label}</strong>
+                <strong>{t.projects.status[p.status]}</strong>
                 {lastReason && ` · ${lastReason}`}
               </span>
               <div className="row" style={{ gap: 6 }}>
                 {p.status === "on-hold" && (
                   <button className="btn" onClick={() => setGate("kill")}>
-                    Kill…
+                    {t.projects.killDots}
                   </button>
                 )}
                 <button className="btn" onClick={() => patch({ status: "active" })}>
                   {p.status === "on-hold" ? <Play size={16} /> : <RotateCcw size={16} />}
-                  {p.status === "on-hold" ? "Resume" : "Reopen"}
+                  {p.status === "on-hold" ? t.projects.resume : t.projects.reopen}
                 </button>
               </div>
             </>
@@ -249,19 +248,19 @@ function ProjectForm(props: {
         {p.gates.length > 0 && (
           <>
             <div className="task-notes-head">
-              <span className="fl">Decisions</span>
+              <span className="fl">{t.projects.decisionsTitle}</span>
             </div>
             <GateHistory project={p} />
           </>
         )}
 
         <div className="task-notes-head">
-          <span className="fl">Notes</span>
+          <span className="fl">{t.projects.notes}</span>
         </div>
         <div className="task-notes">
           <Editor
             text={split.rest}
-            placeholder="Anything about the project as a whole…"
+            placeholder={t.projects.notesPlaceholder}
             onSaveNow={f.saveNow}
             onChange={text => {
               restRef.current = text;
@@ -270,7 +269,7 @@ function ProjectForm(props: {
           />
         </div>
         <div className="row task-actions">
-          <span className="muted small mono">Started {String(note.data.created ?? "").replace("T", " ")}</span>
+          <span className="muted small mono">{t.projects.started(String(note.data.created ?? "").replace("T", " "))}</span>
         </div>
       </div>
       {gate && <GateDialog project={p} initial={gate} onOk={decide} onClose={() => setGate(null)} />}

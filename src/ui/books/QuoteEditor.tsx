@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, Send, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import type { Data } from "../../data/frontmatter";
@@ -8,7 +9,7 @@ import { joinQuote, splitQuote, toQuote } from "../../data/quotes";
 import { createThought, loadThoughts, parseThemes } from "../../data/thoughts";
 import { useApp } from "../context";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 import { numberOrText } from "./BookEditor";
 
 // A quote note (SPEC 5.6): the quote, page, chapter, tags and my comment. Saved as you go; a quote
@@ -29,15 +30,15 @@ export function QuoteEditor({ path, bookTitle, bookAuthor, onBack, onDelete }: P
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back to the book">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.books.backToBook}>
           <ArrowLeft size={20} />
         </button>
         <span className="quote-book muted small">{bookTitle}</span>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && (
-          <button className="btn ghost icon" aria-label="Delete quote" title="Delete" onClick={() => onDelete(path)}>
+          <button className="btn ghost icon" aria-label={t.books.deleteQuote} title={t.common.delete} onClick={() => onDelete(path)}>
             <Trash2 size={18} />
           </button>
         )}
@@ -86,7 +87,7 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
   const [sent, setSent] = useState(false);
   useEffect(() => {
     let alive = true;
-    loadThoughts(notes).then(r => alive && setSent(r.all.some(t => t.quote === note.path)));
+    loadThoughts(notes).then(r => alive && setSent(r.all.some(x => x.quote === note.path)));
     return () => {
       alive = false;
     };
@@ -94,7 +95,7 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
 
   const send = async () => {
     const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
-    if (!book.author.trim()) return fail("Add the book's author first: a quote in Thoughts needs one.");
+    if (!book.author.trim()) return fail(t.books.needAuthor);
     try {
       const { all } = await loadThoughts(notes);
       const page = value("page");
@@ -103,13 +104,13 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
         text: textRef.current,
         author: book.author,
         work: book.title,
-        reference: [page && `p. ${page}`, value("chapter")].filter(Boolean).join(", "),
-        source: `My copy of ${book.title || "the book"}`,
+        reference: [page && t.books.page(page), value("chapter")].filter(Boolean).join(", "),
+        source: t.books.myCopyOf(book.title),
         themes: parseThemes(tagText),
         quote: note.path,
       });
       bump();
-      toast({ text: "Sent to Thoughts" });
+      toast({ text: t.books.sentThoughts });
     } catch (e) {
       fail(e);
     }
@@ -125,8 +126,8 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
           rows={3}
           value={text}
           autoFocus={!split.text && !split.comment}
-          placeholder="The quote, as written in the book"
-          aria-label="Quote"
+          placeholder={t.books.quotePlaceholder}
+          aria-label={t.books.quote}
           onChange={e => {
             setText(e.target.value);
             textRef.current = e.target.value;
@@ -135,26 +136,26 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
         />
 
         <div className="task-fields">
-          <span className="fl">Page</span>
+          <span className="fl">{t.books.fPage}</span>
           <input
             className="field quote-page"
             value={value("page")}
             inputMode="numeric"
-            placeholder="e.g. 42"
+            placeholder={t.books.pageEg}
             onChange={e => edit({ page: numberOrText(e.target.value) })}
           />
-          <span className="fl">Chapter</span>
+          <span className="fl">{t.books.chapter}</span>
           <input
             className="field"
             value={value("chapter")}
-            placeholder="Optional"
+            placeholder={t.books.optional}
             onChange={e => edit({ chapter: e.target.value.trim() ? e.target.value : undefined })}
           />
-          <span className="fl">Tags</span>
+          <span className="fl">{t.ideas.fTags}</span>
           <input
             className="field"
             value={tagText}
-            placeholder="e.g. time, courage"
+            placeholder={t.books.tagsEg}
             onChange={e => setTagText(e.target.value)}
             onBlur={commitTags}
             onKeyDown={e => e.key === "Enter" && (e.target as HTMLElement).blur()}
@@ -162,12 +163,12 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
         </div>
 
         <div className="task-notes-head">
-          <span className="fl">My comment</span>
+          <span className="fl">{t.books.myComment}</span>
         </div>
         <div className="task-notes">
           <Editor
             text={split.comment}
-            placeholder="What it makes you think…"
+            placeholder={t.books.commentPlaceholder}
             onSaveNow={f.saveNow}
             onChange={c => {
               commentRef.current = c;
@@ -177,10 +178,10 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
         </div>
         <div className="row task-actions">
           <button className="btn" disabled={sent || !text.trim()} onClick={send}>
-            <Send size={16} /> {sent ? "In Thoughts" : "Send to Thoughts"}
+            <Send size={16} /> {sent ? t.books.inThoughts : t.books.sendThoughts}
           </button>
           <span className="muted small mono" style={{ marginLeft: "auto" }}>
-            Added {String(d.created ?? "").replace("T", " ")}
+            {t.books.added(String(d.created ?? "").replace("T", " "))}
           </span>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { unzipSync, zipSync, type Zippable } from "fflate";
+import { t } from "../i18n";
 import { checkPath, type Storage } from "../storage/types";
 import { isoMinute, stamp } from "./dates";
 import { walkFiles } from "./files";
@@ -40,7 +41,7 @@ export function readBackup(data: Uint8Array): Backup {
   try {
     entries = unzipSync(data);
   } catch {
-    throw new BackupError("This file is not a .zip, or it is damaged.");
+    throw new BackupError(t.errors.notZip);
   }
   let manifest: { app?: string; created?: string };
   try {
@@ -48,14 +49,14 @@ export function readBackup(data: Uint8Array): Backup {
   } catch {
     manifest = {};
   }
-  if (manifest.app !== "hypomnemata") throw new BackupError("This .zip is not a Hypomnemata backup.");
+  if (manifest.app !== "hypomnemata") throw new BackupError(t.errors.notBackup);
   const files = new Map<string, Uint8Array>();
   for (const [p, bytes] of Object.entries(entries)) {
     if (p === MANIFEST || p.endsWith("/")) continue;
     try {
       checkPath(p);
     } catch {
-      throw new BackupError(`The backup has an unsafe path: ${p}`);
+      throw new BackupError(t.errors.unsafePath(p));
     }
     if (!inBeforeRestore(p)) files.set(p, bytes);
   }
@@ -80,6 +81,6 @@ export async function restoreBackup(s: Storage, b: Backup) {
   for (const [p, bytes] of b.files) {
     if (p === SETTINGS_PATH) continue;
     await s.writeBinary(p, bytes);
-    if ((await s.stat(p))?.size !== bytes.length) throw new BackupError(`Writing ${p} failed`);
+    if ((await s.stat(p))?.size !== bytes.length) throw new BackupError(t.errors.writeFailed(p));
   }
 }

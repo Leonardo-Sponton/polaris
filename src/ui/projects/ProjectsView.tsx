@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import type { FlowId } from "../../data/flows";
 import { flushAll } from "../../data/pending";
@@ -39,7 +40,7 @@ export function useProjects(): Project[] {
   const [projects, setProjects] = useState<Project[]>([]);
   useEffect(() => {
     let alive = true;
-    loadProjects(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setProjects(list));
+    loadProjects(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(list => alive && setProjects(list));
     return () => {
       alive = false;
     };
@@ -87,7 +88,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
       const before = Object.fromEntries(Object.keys(patch).map(k => [k, p.note.data[k]]));
       await notes.patchHeader(p.path, patch);
       bump();
-      toast({ text, action: { label: "Undo", run: () => notes.patchHeader(p.path, before).then(bump, fail) } });
+      toast({ text, action: { label: t.common.undo, run: () => notes.patchHeader(p.path, before).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
@@ -97,9 +98,9 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
     setGate(null);
     try {
       const patch = gatePatch(p, d, reason, to);
-      const where = patch.step ? `Now on: ${p.flow.steps.find(s => s.id === patch.step)!.name}` : "";
-      const label = { active: "", "on-hold": "On hold", done: "Project done", killed: "Project killed" }[String(patch.status)];
-      change(p, patch, label || where || "Decided");
+      const where = patch.step ? t.projects.nowOn(p.flow.steps.find(s => s.id === patch.step)!.name) : "";
+      const label = t.projects.toastStatus[String(patch.status)];
+      change(p, patch, label || where || t.projects.decided);
     } catch (e) {
       fail(e);
     }
@@ -156,8 +157,8 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
       const trashed = await moveToTrash(notes.storage, p.dir);
       bump();
       toast({
-        text: "Project deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, p.dir).then(bump, fail) },
+        text: t.projects.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, p.dir).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -170,7 +171,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
       setNotePath(null);
       const trashed = await moveToTrash(notes.storage, path);
       bump();
-      toast({ text: "Note deleted", action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) } });
+      toast({ text: t.projects.noteDeleted, action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
@@ -182,15 +183,13 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Projects</h1>
+          <h1>{t.projects.title}</h1>
           <button className="btn primary" onClick={() => setAdding(true)}>
-            <Plus size={18} /> New
+            <Plus size={18} /> {t.common.new}
           </button>
         </div>
         {projects.length === 0 ? (
-          <p className="muted empty-note">
-            No projects yet. Open an idea and press “Make it a project”, or press New to start one from scratch.
-          </p>
+          <p className="muted empty-note">{t.projects.none}</p>
         ) : (
           STATUSES.map(s => {
             const group = projects.filter(p => p.status === s.id);
@@ -201,11 +200,11 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
                 {closed(s.id) ? (
                   <button className="section-head fold" onClick={() => setShowClosed(v => !v)}>
                     {folded ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                    {s.label} <span className="mono muted">{group.length}</span>
+                    {t.projects.status[s.id]} <span className="mono muted">{group.length}</span>
                   </button>
                 ) : (
                   <div className="section-head">
-                    {s.label} <span className="mono muted">{group.length}</span>
+                    {t.projects.status[s.id]} <span className="mono muted">{group.length}</span>
                   </div>
                 )}
                 {!folded && (
@@ -215,7 +214,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
                         key={p.path}
                         project={p}
                         active={open === p.path}
-                        todos={todo.tasks.filter(t => t.project === p.slug && t.status === "open").length}
+                        todos={todo.tasks.filter(k => k.project === p.slug && k.status === "open").length}
                         onOpen={() => show(p.path)}
                         onMenu={() => setMenu(p)}
                       />
@@ -272,7 +271,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
             onOpenIdea={onOpenIdea}
           />
         ) : (
-          <div className="detail-empty muted">Pick a project or press New.</div>
+          <div className="detail-empty muted">{t.projects.pick}</div>
         )}
       </div>
       {menu && (
@@ -280,7 +279,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
           project={menu}
           onOpen={() => show(menu.path)}
           onGate={d => setGate({ project: menu, decision: d })}
-          onResume={() => change(menu, { status: "active" }, menu.status === "on-hold" ? "Resumed" : "Reopened")}
+          onResume={() => change(menu, { status: "active" }, menu.status === "on-hold" ? t.projects.resumed : t.projects.reopened)}
           onDelete={() => remove(menu)}
           onClose={() => setMenu(null)}
         />
@@ -293,9 +292,9 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
           onClose={() => setGate(null)}
         />
       )}
-      {adding && <NewProject title="New project" onOk={create} onClose={() => setAdding(false)} />}
+      {adding && <NewProject title={t.projects.newProject} onOk={create} onClose={() => setAdding(false)} />}
       {newNote && (
-        <AskText title="New note" placeholder="e.g. Interviews" okLabel="Create" onClose={() => setNewNote(false)} onOk={addNote} />
+        <AskText title={t.projects.newNote} placeholder={t.projects.newNoteEg} okLabel={t.projects.create} onClose={() => setNewNote(false)} onOk={addNote} />
       )}
     </div>
   );
@@ -307,10 +306,10 @@ function ProjectRow(props: { project: Project; active: boolean; todos: number; o
   return (
     <li className="project-li" {...hold.handlers}>
       <button className={`list-item${props.active ? " active" : ""}`} onClick={() => !hold.eaten() && props.onOpen()}>
-        <span className="list-title">{p.title || <span className="muted">(untitled)</span>}</span>
+        <span className="list-title">{p.title || <span className="muted">{t.common.untitled}</span>}</span>
         <span className="list-meta mono">
           {p.flow.name} · {stepNumber(p.flow, p.step.id)}/{p.flow.steps.length} {p.step.name}
-          {props.todos > 0 && ` · ${props.todos} to-do`}
+          {props.todos > 0 && t.projects.todoCount(props.todos)}
         </span>
       </button>
     </li>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { allLists, loadLists, newList, saveLists, type TodoList } from "../../data/lists";
 import { loadTasks, type Task } from "../../data/todo";
 import { useApp } from "../context";
@@ -24,11 +25,11 @@ export function useTodo(): TodoData {
   useEffect(() => {
     let alive = true;
     Promise.all([
-      loadTasks(notes, p => toast({ text: `Could not read ${p}`, error: true })),
+      loadTasks(notes, p => toast({ text: t.common.couldNotRead(p), error: true })),
       loadLists(notes.storage),
-    ]).then(([t, l]) => {
+    ]).then(([list, l]) => {
       if (!alive) return;
-      setTasks(t);
+      setTasks(list);
       setSaved(l);
       setLoaded(true);
     });
@@ -59,7 +60,7 @@ export function useTodo(): TodoData {
     tasks,
     lists: allLists(
       saved,
-      tasks.map(t => t.list),
+      tasks.map(k => k.list),
     ),
     loaded,
     ensureList,

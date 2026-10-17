@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft } from "lucide-react";
 import { KINDS, ThoughtError, createThought, parseThemes, problems, saveThought, type Fields, type Kind, type Thought } from "../../data/thoughts";
 import { useApp } from "../context";
@@ -65,14 +66,14 @@ export function ThoughtForm({ all, thought, onDone }: Props) {
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={cancel} aria-label="Cancel">
+        <button className="btn ghost icon back" onClick={cancel} aria-label={t.common.cancel}>
           <ArrowLeft size={20} />
         </button>
-        <span className="muted small">{thought ? "Edit thought" : "New thought"}</span>
+        <span className="muted small">{thought ? t.thoughts.editThought : t.thoughts.newThought}</span>
       </div>
       <div className="page task-page">
         <div className="page-inner stack">
-          <div className="chips" role="radiogroup" aria-label="Kind">
+          <div className="chips" role="radiogroup" aria-label={t.thoughts.kind}>
             {KINDS.map(k => (
               <button
                 key={k.id}
@@ -81,28 +82,28 @@ export function ThoughtForm({ all, thought, onDone }: Props) {
                 className={`chip${kind === k.id ? " active" : ""}`}
                 onClick={() => setKind(k.id)}
               >
-                {k.label}
+                {t.thoughts.kinds[k.id][0]}
               </button>
             ))}
           </div>
           <p className="muted small" style={{ margin: 0 }}>
-            {KINDS.find(k => k.id === kind)!.hint}
+            {t.thoughts.kinds[kind][1]}
           </p>
           <textarea
             className="quote-input"
             rows={4}
             value={text}
             autoFocus={!thought}
-            placeholder={kind === "mine" ? "Your thought" : "The quote, word for word"}
-            aria-label="Text"
+            placeholder={kind === "mine" ? t.thoughts.yourThought : t.thoughts.wordForWord}
+            aria-label={t.thoughts.text}
             onChange={e => setText(e.target.value)}
           />
           <div className="task-fields">
-            {kind !== "mine" && input("Author", author, setAuthor, kind === "uncertain" ? "Usually attributed to" : "e.g. Seneca", true)}
-            {kind !== "mine" && input("Work", work, setWork, "e.g. Letters to Lucilius")}
-            {kind !== "mine" && input("Reference", reference, setReference, "e.g. Letter 1, §3 or p. 42")}
-            {kind === "verified" && input("Source", source, setSource, "Where you checked it: edition, page, link", true)}
-            {input("Themes", themes, setThemes, "e.g. time, courage")}
+            {kind !== "mine" && input(t.thoughts.author, author, setAuthor, kind === "uncertain" ? t.thoughts.attributedTo : t.thoughts.authorEg, true)}
+            {kind !== "mine" && input(t.thoughts.work, work, setWork, t.thoughts.workEg)}
+            {kind !== "mine" && input(t.thoughts.reference, reference, setReference, t.thoughts.referenceEg)}
+            {kind === "verified" && input(t.thoughts.source, source, setSource, t.thoughts.sourceEg, true)}
+            {input(t.thoughts.themes, themes, setThemes, t.thoughts.themesEg)}
           </div>
           {errors.length > 0 && (
             <ul className="err small th-errors" role="alert">
@@ -113,10 +114,10 @@ export function ThoughtForm({ all, thought, onDone }: Props) {
           )}
           <div className="row task-actions" style={{ justifyContent: "flex-end" }}>
             <button className="btn" onClick={cancel}>
-              Cancel
+              {t.common.cancel}
             </button>
             <button className="btn primary" disabled={busy} onClick={save}>
-              Save
+              {t.common.save}
             </button>
           </div>
         </div>

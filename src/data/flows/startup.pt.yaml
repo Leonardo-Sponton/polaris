@@ -1,0 +1,70 @@
+# Portuguese words of startup.yaml (same step ids). Names as in the "Plano de Voo".
+name: Startup de tecnologia
+steps:
+  - id: 00-integrating-environment
+    name: Ambiente integrador
+    guidance: >-
+      Escolha uma incubadora e uma aceleradora que combinem com a ideia, e escreva por quê. Elas
+      variam em foco, critérios e recursos: mentoria, networking, infraestrutura, acesso a
+      investimento e validação com o mercado.
+    sections: [Incubadora, Aceleradora]
+  - id: 01-business-model
+    name: Modelo de negócios (Canvas) + viabilidade financeira
+    guidance: >-
+      Canvas: como o negócio funciona (parcerias, atividades, recursos, proposta de valor,
+      relacionamento, canais, segmentos de clientes, custos, receitas). Viabilidade: se ele se
+      paga (DRE, preço, custo unitário, vendas médias, investimento, ponto de equilíbrio, prazo de
+      retorno).
+    sections:
+      - Parcerias principais
+      - Atividades principais
+      - Recursos principais
+      - Proposta de valor
+      - Relacionamento com clientes
+      - Canais
+      - Segmentos de clientes
+      - Estrutura de custos
+      - Fontes de receita
+      - Viabilidade financeira
+  - id: 02-prototype-mvp
+    name: Protótipo / MVP
+    guidance: >-
+      Tire a ideia do papel e teste antes de investir muito. Protótipo: uma primeira versão para
+      ver, testar e melhorar. MVP (Produto Mínimo Viável): a versão mais simples com o essencial,
+      mostrada a clientes reais para conferir o interesse. Objetivos: validação, feedback, menos
+      risco.
+    sections: [Protótipo, MVP, Validação, Feedback]
+  - id: 03-agile-methods
+    name: Metodologias ágeis
+    guidance: >-
+      Escolha como trabalhar. Lean Startup: construir → medir → aprender, com MVPs para testar
+      hipóteses. Scrum: ciclos curtos (sprints) com tarefas, responsáveis e entregas. Kanban: um
+      quadro A fazer → Fazendo → Feito.
+    sections: [Lean Startup, Scrum, Kanban]
+  - id: 04-sustainability
+    name: Sustentabilidade
+    guidance: >-
+      Avalie o impacto e proponha adaptações. Ambiental (energia, dados, aparelhos antigos), social
+      (problema real, facilidade de uso, acessibilidade, preço), privacidade e segurança (quais
+      dados pessoais, proteção, exclusão da conta; LGPD), econômica (custos, modelo de receita,
+      ponto de equilíbrio, sem depender sempre de investimento de fora). Transforme a análise em
+      indicadores.
+    sections: [Ambiental, Social, Privacidade e segurança, Econômica, Indicadores]
+  - id: 05-pitch
+    name: Pitch
+    guidance: >-
+      Uma apresentação curta que conta a trajetória da ideia e as evidências da oportunidade:
+      problema, solução, clientes, como gera receita, o que foi validado e os próximos passos.
+    sections:
+      - Abertura
+      - Problema
+      - Público-alvo
+      - Solução
+      - Proposta de valor
+      - Modelo de negócio
+      - Protótipo
+      - Metodologias utilizadas
+      - Viabilidade financeira
+      - Sustentabilidade
+      - Próximos passos
+      - Encerramento

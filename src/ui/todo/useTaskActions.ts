@@ -1,4 +1,5 @@
 import { flushAll } from "../../data/pending";
+import { t } from "../../i18n";
 import { dayLabel, finishTask, reopenTask, undoFinish, updateTask, type Task } from "../../data/todo";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { useApp } from "../context";
@@ -24,10 +25,10 @@ export function useTaskActions(onRemoved?: (path: string) => void) {
     finish: (path: string, status: "done" | "canceled") =>
       run(async () => {
         const c = await finishTask(notes, path, status);
-        const next = c.next ? ` · next ${dayLabel(String(c.next.data.when))}` : "";
+        const next = c.next ? t.todo.nextOn(dayLabel(String(c.next.data.when))) : "";
         toast({
-          text: `${status === "done" ? "Done" : "Canceled"}${next}`,
-          action: { label: "Undo", run: () => undoFinish(notes, c).then(bump, fail) },
+          text: `${status === "done" ? t.todo.done : t.todo.canceled}${next}`,
+          action: { label: t.common.undo, run: () => undoFinish(notes, c).then(bump, fail) },
         });
       }),
     reopen: (path: string) => run(() => reopenTask(notes, path)),
@@ -36,12 +37,12 @@ export function useTaskActions(onRemoved?: (path: string) => void) {
         const trashed = await moveToTrash(notes.storage, path);
         onRemoved?.(path);
         toast({
-          text: "Task deleted",
-          action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+          text: t.todo.deleted,
+          action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
         });
       }),
-    schedule: (t: Task, w: { when?: string; evening?: boolean }) =>
-      run(() => updateTask(notes, t.path, { when: w.when, evening: w.evening || undefined })),
-    move: (t: Task, to: string | undefined) => run(() => updateTask(notes, t.path, { list: to })),
+    schedule: (k: Task, w: { when?: string; evening?: boolean }) =>
+      run(() => updateTask(notes, k.path, { when: w.when, evening: w.evening || undefined })),
+    move: (k: Task, to: string | undefined) => run(() => updateTask(notes, k.path, { list: to })),
   };
 }

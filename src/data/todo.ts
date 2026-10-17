@@ -1,4 +1,5 @@
 import { addDays, isoDate, isoMinute, parseLocal, slugify, stamp } from "./dates";
+import { t } from "../i18n";
 import { titleOf, type Data } from "./frontmatter";
 import type { Note, Notes } from "./notes";
 import { nextDue, parseRule } from "./recur";
@@ -162,12 +163,12 @@ export function sections(all: Task[], view: View, today: string, now = new Date(
   if (view === "logbook") {
     tasks.sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? "") || b.path.localeCompare(a.path));
     const out: Section[] = [];
-    for (const t of tasks) {
-      const day = (t.doneAt ?? "").slice(0, 10);
+    for (const k of tasks) {
+      const day = (k.doneAt ?? "").slice(0, 10);
       let s = out[out.length - 1];
       if (!s || s.day !== day)
-        out.push((s = { key: day || "unknown", label: day ? dayLabel(day, now) : "Unknown date", day, tasks: [] }));
-      s.tasks.push(t);
+        out.push((s = { key: day || "unknown", label: day ? dayLabel(day, now) : t.dates.unknown, day, tasks: [] }));
+      s.tasks.push(k);
     }
     return out;
   }
@@ -176,9 +177,9 @@ export function sections(all: Task[], view: View, today: string, now = new Date(
     const late = tasks.filter(t => isOverdue(t, today));
     const rest = tasks.filter(t => !isOverdue(t, today));
     return [
-      { key: "overdue", label: "Overdue", tasks: late },
-      { key: "today", label: "Today", tasks: rest.filter(t => !t.evening) },
-      { key: "evening", label: "This Evening", tasks: rest.filter(t => t.evening) },
+      { key: "overdue", label: t.todo.sections.overdue, tasks: late },
+      { key: "today", label: t.todo.sections.today, tasks: rest.filter(k => !k.evening) },
+      { key: "evening", label: t.todo.sections.evening, tasks: rest.filter(k => k.evening) },
     ].filter(s => s.tasks.length || s.key === "today");
   }
   if (view === "upcoming") {
@@ -194,25 +195,23 @@ export function sections(all: Task[], view: View, today: string, now = new Date(
   return [{ key: "all", label: "", tasks }];
 }
 
-const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** "Today", "Tomorrow", "Friday" (this week), "Fri 23 Oct", "23 Oct 2027". */
 export function dayLabel(iso: string, now = new Date(), short = false): string {
   const d = parseLocal(iso);
   if (!d) return iso;
   const today = isoDate(now);
-  if (iso === today) return "Today";
-  if (iso === isoDate(addDays(now, 1))) return "Tomorrow";
-  if (iso === isoDate(addDays(now, -1))) return "Yesterday";
+  const w = t.dates;
+  if (iso === today) return w.today;
+  if (iso === isoDate(addDays(now, 1))) return w.tomorrow;
+  if (iso === isoDate(addDays(now, -1))) return w.yesterday;
   const diff = Math.round(
     (d.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86_400_000,
   );
-  const wd = WEEKDAYS[d.getDay()];
-  if (diff > 1 && diff < 7) return short ? wd.slice(0, 3) : wd;
-  const base = `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-  const withDay = short ? base : `${wd.slice(0, 3)} ${base}`;
-  return d.getFullYear() === now.getFullYear() ? withDay : `${base} ${d.getFullYear()}`;
+  if (diff > 1 && diff < 7) return (short ? w.weekdaysShort : w.weekdays)[d.getDay()];
+  const mon = w.months[d.getMonth()];
+  if (d.getFullYear() !== now.getFullYear()) return w.dayMonthYear(d.getDate(), mon, d.getFullYear());
+  return w.dayMonth(short ? "" : w.weekdaysShort[d.getDay()], d.getDate(), mon);
 }
 
 // ---- Changes ----

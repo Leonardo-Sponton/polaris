@@ -1,4 +1,5 @@
 import type { Data } from "./frontmatter";
+import { word } from "../i18n";
 import type { Note, Notes } from "./notes";
 import { dayOfPath, INTENTIONS } from "./journal";
 
@@ -10,53 +11,43 @@ export { reviewPath } from "./journal";
 // first section and sections with other names are kept as they are.
 
 export interface Question {
+  /** The English heading, also the key of the answer and of its words in i18n (review.questions). */
   title: string;
-  question: string;
-  /** A short text from the tradition, with the built-in thought it comes from (data/thoughts.json). */
-  support?: { lead: string; text: string; thought: string };
+  /** The Portuguese heading (written when the app is in Portuguese; both are read). */
+  pt: string;
+  /** A short text from the tradition, with the built-in thought it comes from (data/thoughts.json).
+   *  Who says it is in i18n (review.leads). */
+  support?: { text: string; thought: string };
 }
 
 // The supporting quotes are the built-in thoughts sen-ira-3-36a/b (Aubrey Stewart's translation
 // of De Ira III.36) and ept-man-1 (George Long's Enchiridion 1), checked verbatim in stage 4a.
 export const QUESTIONS: Question[] = [
-  { title: "Gratitude", question: "What am I grateful for today?" },
-  {
-    title: "Done well",
-    question: "What did I do well? Which actions deserve recognition?",
-    support: { lead: "Seneca, following Sextius, asked himself:", text: "…in what respect are you better?", thought: "sen-ira-3-36a" },
-  },
+  { title: "Gratitude", pt: "Gratidão" },
+  { title: "Done well", pt: "O que fiz bem", support: { text: "…in what respect are you better?", thought: "sen-ira-3-36a" } },
   {
     title: "Difficulties",
-    question: "Where did I struggle? How did I react?",
-    support: {
-      lead: "Seneca, following Sextius, asked himself:",
-      text: "What bad habit of yours have you cured to-day? what vice have you checked?",
-      thought: "sen-ira-3-36a",
-    },
+    pt: "Dificuldades",
+    support: { text: "What bad habit of yours have you cured to-day? what vice have you checked?", thought: "sen-ira-3-36a" },
   },
-  {
-    title: "Up to me",
-    question: "Which choices were mine? What was under my control?",
-    support: { lead: "Epictetus:", text: "Of things some are in our power, and others are not.", thought: "ept-man-1" },
-  },
-  { title: "Not up to me", question: "Which circumstances were outside my control?" },
-  { title: "Virtues", question: "Which virtues did I practise today? Which do I need to develop?" },
-  {
-    title: "Repair",
-    question: "Is there something to fix, a responsibility to take, or someone to apologise to?",
-    support: { lead: "Seneca:", text: "I pardon you this time: see that you never do that any more.", thought: "sen-ira-3-36b" },
-  },
-  { title: INTENTIONS, question: "What concrete action can I take tomorrow to act better?" },
+  { title: "Up to me", pt: "Depende de mim", support: { text: "Of things some are in our power, and others are not.", thought: "ept-man-1" } },
+  { title: "Not up to me", pt: "Não depende de mim" },
+  { title: "Virtues", pt: "Virtudes" },
+  { title: "Repair", pt: "Reparar", support: { text: "I pardon you this time: see that you never do that any more.", thought: "sen-ira-3-36b" } },
+  { title: INTENTIONS.en, pt: INTENTIONS.pt },
 ];
+
+/** The heading of a question in the app's language. */
+export const heading = (q: Question) => word({ en: q.title, pt: q.pt });
 
 export type Virtue = "wisdom" | "courage" | "justice" | "temperance";
 
-/** The Stoic cardinal virtues. `color` is a theme variable. */
-export const VIRTUES: { id: Virtue; label: string; hint: string; color: string }[] = [
-  { id: "wisdom", label: "Wisdom", hint: "Judge well; tell apart what is up to me", color: "cyan" },
-  { id: "courage", label: "Courage", hint: "Face what is hard", color: "h1" },
-  { id: "justice", label: "Justice", hint: "Act well towards others", color: "ok" },
-  { id: "temperance", label: "Temperance", hint: "Moderation, self-control", color: "h3" },
+/** The Stoic cardinal virtues; their names are in i18n (review.virtues). */
+export const VIRTUES: { id: Virtue; color: string }[] = [
+  { id: "wisdom", color: "cyan" },
+  { id: "courage", color: "h1" },
+  { id: "justice", color: "ok" },
+  { id: "temperance", color: "h3" },
 ];
 
 /** Known virtues from a header list, in the fixed order. */
@@ -74,7 +65,8 @@ export interface Parts {
   extras: { title: string; text: string }[];
 }
 
-const known = new Map(QUESTIONS.map(q => [q.title.toLowerCase(), q.title]));
+// Headings in either language lead to the question's key.
+const known = new Map(QUESTIONS.flatMap(q => [[q.title.toLowerCase(), q.title], [q.pt.toLowerCase(), q.title]] as const));
 
 export function splitReview(body: string): Parts {
   const parts: Parts = { free: "", answers: {}, extras: [] };
@@ -106,7 +98,7 @@ export function joinReview(p: Parts): string {
   if (p.free.trim()) out.push(p.free.trim());
   for (const q of QUESTIONS) {
     const t = (p.answers[q.title] ?? "").trim();
-    if (t) out.push(`## ${q.title}\n\n${t}`);
+    if (t) out.push(`## ${heading(q)}\n\n${t}`);
   }
   for (const x of p.extras) if (x.text.trim()) out.push(`## ${x.title}\n\n${x.text.trim()}`);
   return out.length ? out.join("\n\n") + "\n" : "";

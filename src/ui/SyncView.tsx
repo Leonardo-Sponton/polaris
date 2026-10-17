@@ -8,6 +8,7 @@ import { AskText } from "./Dialog";
 import { SyncConflicts } from "./SyncConflicts";
 import { useApp } from "./context";
 import { useBack } from "./useBack";
+import { t } from "../i18n";
 
 // USB sync (SPEC 6). The PC runs it; Android only shows the last sync and, while a sync runs,
 // the "Syncing from PC…" screen (SyncLock).
@@ -50,14 +51,14 @@ function PcSync() {
 
   const start = async (d: Device) => {
     setResult(null);
-    setProgress({ text: "Starting…", done: 0, total: 0 });
+    setProgress({ text: t.sync.starting, done: 0, total: 0 });
     try {
       await flushAll();
       const pc = { storage: platform.storage, hashes: () => sync.localHashes() };
       const device = { storage: sync.deviceStorage(d.serial, dir), hashes: () => sync.deviceHashes(d.serial, dir) };
       // Only a folder the app has set up: a wrong path must not receive a copy of everything.
       if (!(await device.storage.stat(".hypomnemata"))) {
-        throw new Error(`No Hypomnemata data folder at ${dir} on the ${d.model}. Open the app there once, or change the device folder below.`);
+        throw new Error(t.sync.noFolder(dir, d.model));
       }
       // Conflicts are decided while the device is still locked.
       const resolve = (conflicts: Step[]) =>
@@ -85,24 +86,23 @@ function PcSync() {
   return (
     <div className="page">
       <div className="page-inner">
-        <h1>Sync</h1>
+        <h1>{t.sync.title}</h1>
 
         <section className="card stack">
           <div className="row" style={{ justifyContent: "space-between" }}>
-            <h2>Devices</h2>
-            <button className="btn ghost" onClick={refresh} title="Look for devices again">
-              <RefreshCw size={18} /> Refresh
+            <h2>{t.sync.devices}</h2>
+            <button className="btn ghost" onClick={refresh} title={t.sync.lookAgain}>
+              <RefreshCw size={18} /> {t.sync.refresh}
             </button>
           </div>
           {devices && !devices.adb && (
             <p className="err" style={{ margin: 0 }}>
-              The adb program was not found. Install it with <span className="mono">sudo pacman -S android-tools</span>.
+              {t.sync.noAdb1} <span className="mono">sudo pacman -S android-tools</span>.
             </p>
           )}
           {devices?.adb && devices.list.length === 0 && (
             <p className="muted" style={{ margin: 0 }}>
-              No device connected. Connect the phone or tablet with a USB cable, with USB debugging on
-              (Settings → Developer options), then press Refresh.
+              {t.sync.noDevice}
             </p>
           )}
           {devices?.list.map(d => (
@@ -113,15 +113,15 @@ function PcSync() {
                 <span className="muted small">
                   {d.state === "device"
                     ? lasts[d.serial]
-                      ? `Last sync: ${when(lasts[d.serial]!.at)}`
-                      : "Not synced yet"
+                      ? t.sync.lastSync(when(lasts[d.serial]!.at))
+                      : t.sync.notYet
                     : d.state === "unauthorized"
-                      ? "Unlock the device and allow USB debugging for this computer"
-                      : `Not ready (${d.state})`}
+                      ? t.sync.unauthorized
+                      : t.sync.notReady(d.state)}
                 </span>
               </span>
               <button className="btn primary" disabled={d.state !== "device" || !!progress} onClick={() => start(d)}>
-                Sync now
+                {t.sync.syncNow}
               </button>
             </div>
           ))}
@@ -130,19 +130,17 @@ function PcSync() {
         {result && <SyncResult r={result} />}
 
         <section className="card stack">
-          <h2>Folder on the device</h2>
+          <h2>{t.sync.deviceFolder}</h2>
           <p className="mono" style={{ wordBreak: "break-all", margin: 0 }}>
             {dir}
           </p>
           <div className="row">
             <button className="btn" onClick={() => setEditDir(true)}>
-              Change…
+              {t.common.change}
             </button>
           </div>
           <p className="muted small" style={{ margin: 0 }}>
-            Files changed on only one side are copied to the other; files deleted on one side go to
-            the other side's trash. For a file changed on both sides you see both versions and choose
-            which one to keep.
+            {t.sync.howItWorks}
           </p>
         </section>
       </div>
@@ -150,14 +148,15 @@ function PcSync() {
       {ask && <SyncConflicts conflicts={ask.conflicts} pc={platform.storage} device={ask.device} model={ask.model} onDone={ask.done} />}
       {editDir && (
         <AskText
-          title="Data folder on the device"
+          title={t.sync.deviceFolderTitle}
           initial={dir}
-          okLabel="Save"
+          okLabel={t.common.save}
           onClose={() => setEditDir(false)}
-          onOk={t => {
+          onOk={text => {
             setEditDir(false);
-            if (!t.startsWith("/")) return toast({ text: "The folder must start with /", error: true });
-            updateSettings({ syncDeviceDir: t.replace(/\/+$/, "") === DEVICE_DIR ? undefined : t.replace(/\/+$/, "") }).catch(fail);
+            if (!text.startsWith("/")) return toast({ text: t.sync.mustStartSlash, error: true });
+            const d = text.replace(/\/+$/, "");
+            updateSettings({ syncDeviceDir: d === DEVICE_DIR ? undefined : d }).catch(fail);
           }}
         />
       )}
@@ -168,27 +167,27 @@ function PcSync() {
 function SyncResult({ r }: { r: Result & { model: string } }) {
   const c = r.counts;
   const lines = [
-    c.toDevice && `${c.toDevice} sent to the ${r.model}`,
-    c.toPC && `${c.toPC} received from the ${r.model}`,
-    c.trashDevice && `${c.trashDevice} moved to the ${r.model}'s trash`,
-    c.trashPC && `${c.trashPC} moved to this PC's trash`,
-    r.settled && `${r.settled} conflict${r.settled > 1 ? "s" : ""} settled`,
+    c.toDevice && t.sync.sent(c.toDevice, r.model),
+    c.toPC && t.sync.received(c.toPC, r.model),
+    c.trashDevice && t.sync.trashedDevice(c.trashDevice, r.model),
+    c.trashPC && t.sync.trashedPc(c.trashPC),
+    r.settled && t.sync.settled(r.settled),
   ].filter(Boolean);
   return (
-    <section className="card stack" aria-label="Sync result">
-      <h2>Synced with the {r.model}</h2>
-      <p style={{ margin: 0 }}>{lines.length ? lines.join(" · ") : "Everything was already the same."}</p>
+    <section className="card stack" aria-label={t.sync.result}>
+      <h2>{t.sync.syncedWith(r.model)}</h2>
+      <p style={{ margin: 0 }}>{lines.length ? lines.join(" · ") : t.sync.allSame}</p>
       {r.conflicts.length > 0 && (
         <>
           <p className="err" style={{ margin: 0 }}>
-            Changed on both sides, left untouched ({r.conflicts.length}); they come back on the next sync:
+            {t.sync.leftUntouched(r.conflicts.length)}
           </p>
           <ul className="sync-conflicts mono small">
             {r.conflicts.map(s => (
               <li key={s.path}>
                 {s.path}
-                {!s.pc && " (deleted on this PC)"}
-                {!s.device && " (deleted on the device)"}
+                {!s.pc && t.sync.deletedPc}
+                {!s.device && t.sync.deletedDevice}
               </li>
             ))}
           </ul>
@@ -202,14 +201,14 @@ function SyncProgress(p: { text: string; done: number; total: number }) {
   useBack(true, () => {});
   return (
     <div className="dialog-backdrop">
-      <div className="card stack dialog" role="dialog" aria-label="Syncing">
-        <h2>Syncing…</h2>
+      <div className="card stack dialog" role="dialog" aria-label={t.sync.syncing}>
+        <h2>{t.sync.syncing}</h2>
         <p className="muted small one-line" style={{ margin: 0 }}>
           {p.text}
         </p>
         {p.total > 0 && <progress max={p.total} value={p.done} style={{ width: "100%" }} />}
         <p className="muted small" style={{ margin: 0 }}>
-          Keep the cable connected.
+          {t.sync.keepCable}
         </p>
       </div>
     </div>
@@ -225,14 +224,12 @@ function DeviceSync() {
   return (
     <div className="page">
       <div className="page-inner">
-        <h1>Sync</h1>
+        <h1>{t.sync.title}</h1>
         <section className="card stack">
-          <h2>{last ? `Last sync: ${when(last.at)}` : last === null ? "Not synced yet" : "…"}</h2>
-          {last && <p style={{ margin: 0 }}>With {last.with}</p>}
+          <h2>{last ? t.sync.lastSync(when(last.at)) : last === null ? t.sync.notYet : "…"}</h2>
+          {last && <p style={{ margin: 0 }}>{t.sync.withPc(last.with)}</p>}
           <p className="muted" style={{ margin: 0 }}>
-            {platform.name === "android"
-              ? "Sync is started on the PC: connect this device with a USB cable (USB debugging on), open Hypomnemata on the PC and choose Sync → Sync now. While it runs, this app waits on a \"Syncing from PC\" screen."
-              : "Sync works between the Linux app and the Android app."}
+            {platform.name === "android" ? t.sync.startedOnPc : t.sync.linuxAndroid}
           </p>
         </section>
       </div>
@@ -261,7 +258,7 @@ export function SyncLock() {
       try {
         const st = await platform.storage.stat(LOCK_PATH);
         if (st) {
-          let pc = "the PC";
+          let pc = t.sync.thePc;
           try {
             pc = JSON.parse(await platform.storage.read(LOCK_PATH)).pc || pc;
           } catch {
@@ -300,20 +297,19 @@ function LockScreen(p: { pc: string; stale: boolean; onUnlock(): void }) {
   useBack(true, () => {});
   return (
     <div className="dialog-backdrop sync-lock">
-      <div className="card stack dialog" role="dialog" aria-label="Syncing from PC">
-        <h2>Syncing from {p.pc}…</h2>
+      <div className="card stack dialog" role="dialog" aria-label={t.sync.syncingFromPc}>
+        <h2>{t.sync.syncingFrom(p.pc)}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          Your edits are saved. The app comes back by itself when the sync ends.
+          {t.sync.editsSaved}
         </p>
         {p.stale && (
           <>
             <p className="err" style={{ margin: 0 }}>
-              This has taken more than 10 minutes; the sync probably stopped halfway (nothing is lost,
-              the next sync finishes it).
+              {t.sync.stale}
             </p>
             <div className="row" style={{ justifyContent: "flex-end" }}>
               <button className="btn" onClick={p.onUnlock}>
-                Stop waiting
+                {t.sync.stopWaiting}
               </button>
             </div>
           </>

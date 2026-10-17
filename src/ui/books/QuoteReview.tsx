@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { Quote as QuoteIcon } from "lucide-react";
 import type { Book } from "../../data/books";
 import { isoDate } from "../../data/dates";
@@ -11,7 +12,7 @@ export function useQuotes(books: Book[]): Quote[] {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   useEffect(() => {
     let alive = true;
-    loadQuotes(notes, books, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setQuotes(list));
+    loadQuotes(notes, books, p => toast({ text: t.common.couldNotRead(p), error: true })).then(list => alive && setQuotes(list));
     return () => {
       alive = false;
     };
@@ -22,7 +23,7 @@ export function useQuotes(books: Book[]): Quote[] {
 
 /** "p. 42 · Letter 1" */
 export function quotePlace(q: Quote): string {
-  return [q.page && `p. ${q.page}`, q.chapter].filter(Boolean).join(" · ");
+  return [q.page && t.books.page(String(q.page)), q.chapter].filter(Boolean).join(" · ");
 }
 
 /**
@@ -40,31 +41,31 @@ export function QuoteReview({ quotes, onOpen }: { quotes: Quote[]; onOpen(q: Quo
     try {
       const old = await markReviewed(notes, q.path);
       bump();
-      toast({ text: "Reviewed", action: { label: "Undo", run: () => setLastReviewed(notes, q.path, old.last_reviewed).then(bump) } });
+      toast({ text: t.books.reviewed, action: { label: t.common.undo, run: () => setLastReviewed(notes, q.path, old.last_reviewed).then(bump) } });
     } catch (e) {
       toast({ text: e instanceof Error ? e.message : String(e), error: true });
     }
   };
 
   return (
-    <div className="today-card quote-review" aria-label="A quote to review">
+    <div className="today-card quote-review" aria-label={t.books.toReview}>
       <div className="qr-head muted small">
         <QuoteIcon size={16} />
-        <span>Quotes to review</span>
-        <span className="count">{queue.length} left today</span>
+        <span>{t.books.quotesToReview}</span>
+        <span className="count">{t.books.leftToday(queue.length)}</span>
       </div>
       <blockquote className="qr-text">{q.text}</blockquote>
       <div className="qr-source muted small">
-        — {q.bookTitle || "(untitled)"}
+        — {q.bookTitle || t.common.untitled}
         {q.bookAuthor && `, ${q.bookAuthor}`}
         {place && ` · ${place}`}
       </div>
       <div className="row qr-actions">
         <button className="btn ghost" onClick={() => onOpen(q)}>
-          Open
+          {t.common.open}
         </button>
         <button className="btn" onClick={reviewed}>
-          Reviewed
+          {t.books.reviewed}
         </button>
       </div>
     </div>

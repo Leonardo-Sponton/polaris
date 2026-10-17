@@ -51,6 +51,8 @@ export interface Platform {
   onCaptureRequest?(cb: () => void): () => void;
   /** Android: opens the keyboard for the focused field (focus() alone does not without a tap). */
   showKeyboard?(): Promise<void>;
+  /** Desktop: words shown outside the page (tray menu, notifications) in the app's language. */
+  setLabels?(labels: { open: string; capture: string; quit: string; reminder: string }): Promise<void>;
   /** Replaces every scheduled reminder with this list (SPEC 5.3). */
   setReminders?(list: Reminder[]): Promise<void>;
   /** A reminder was tapped or clicked: gives its task's path. Returns a function that stops it. */

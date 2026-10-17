@@ -1,4 +1,5 @@
 import type { Document } from "yaml";
+import { t } from "../i18n";
 import type { Storage } from "../storage/types";
 import { isoMinute } from "./dates";
 import { parse, stringify, type Data } from "./frontmatter";
@@ -24,7 +25,7 @@ export class ConflictError extends Error {
     /** Current text on disk, or null when the file was deleted outside the app. */
     public diskText: string | null,
   ) {
-    super(`${path} changed outside the app`);
+    super(t.errors.changedOutside(path));
   }
 }
 
@@ -49,13 +50,13 @@ export class Notes {
   private async writeChecked(path: string, text: string): Promise<Note> {
     await this.storage.write(path, text);
     const back = await this.storage.read(path);
-    if (back !== text) throw new SaveError(`Saving ${path} failed: the file reads back different`);
+    if (back !== text) throw new SaveError(t.errors.readsBack(path));
     return toNote(path, text);
   }
 
   /** Creates a new file. Fails if the path is taken. `created`/`modified` are filled in. */
   async create(path: string, data: Data, body: string): Promise<Note> {
-    if (await this.exists(path)) throw new SaveError(`${path} already exists`);
+    if (await this.exists(path)) throw new SaveError(t.errors.exists(path));
     const now = isoMinute();
     const { type, ...rest } = data;
     const full = { type, created: now, modified: now, ...rest };
@@ -98,8 +99,8 @@ export class Notes {
   /** "Keep both": writes my version next to the original as "<name> (my copy).md". */
   async saveCopy(note: Note, data: Data, body: string): Promise<Note> {
     const base = note.path.replace(/\.md$/, "");
-    let path = `${base} (my copy).md`;
-    for (let i = 2; await this.exists(path); i++) path = `${base} (my copy ${i}).md`;
+    let path = `${base} (${t.note.myCopy}).md`;
+    for (let i = 2; await this.exists(path); i++) path = `${base} (${t.note.myCopy} ${i}).md`;
     return this.writeChecked(path, stringify({ ...data, modified: isoMinute() }, body, note));
   }
 
@@ -108,7 +109,7 @@ export class Notes {
    * The new file is written and read back before the old one is removed.
    */
   async relocate(note: Note, to: string, data: Data, body: string): Promise<Note> {
-    if (await this.exists(to)) throw new SaveError(`${to} already exists`);
+    if (await this.exists(to)) throw new SaveError(t.errors.exists(to));
     let disk: string | null = null;
     try {
       disk = await this.storage.read(note.path);
@@ -123,7 +124,7 @@ export class Notes {
 
   /** Puts back the exact text of a note that was relocated (undo). */
   async unrelocate(original: Note, moved: Note) {
-    if (await this.exists(original.path)) throw new SaveError(`${original.path} already exists`);
+    if (await this.exists(original.path)) throw new SaveError(t.errors.exists(original.path));
     await this.writeChecked(original.path, original.text);
     await this.storage.remove(moved.path);
   }

@@ -28,23 +28,24 @@ import { useApp } from "./context";
 import { goBack, useBack } from "./useBack";
 import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
+import { t } from "../i18n";
 
 export type Area = "today" | "ideas" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
-const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
-  { id: "today", label: "Today", icon: <Sun size={20} /> },
-  { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
-  { id: "projects", label: "Projects", icon: <FolderKanban size={20} /> },
-  { id: "books", label: "Books", icon: <BookOpen size={20} /> },
-  { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
-  { id: "journal", label: "Journal", icon: <NotebookPen size={20} /> },
-  { id: "review", label: "Review", icon: <Scale size={20} /> },
-  { id: "thoughts", label: "Thoughts", icon: <Feather size={20} /> },
-  { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
-  { id: "search", label: "Search", icon: <Search size={20} /> },
-  { id: "trash", label: "Trash", icon: <Trash2 size={20} /> },
-  { id: "sync", label: "Sync", icon: <Usb size={20} /> },
-  { id: "settings", label: "Settings", icon: <SettingsIcon size={20} /> },
+const AREAS: { id: Area; icon: ReactNode }[] = [
+  { id: "today", icon: <Sun size={20} /> },
+  { id: "ideas", icon: <Lightbulb size={20} /> },
+  { id: "projects", icon: <FolderKanban size={20} /> },
+  { id: "books", icon: <BookOpen size={20} /> },
+  { id: "todo", icon: <CheckSquare size={20} /> },
+  { id: "journal", icon: <NotebookPen size={20} /> },
+  { id: "review", icon: <Scale size={20} /> },
+  { id: "thoughts", icon: <Feather size={20} /> },
+  { id: "inbox", icon: <Inbox size={20} /> },
+  { id: "search", icon: <Search size={20} /> },
+  { id: "trash", icon: <Trash2 size={20} /> },
+  { id: "sync", icon: <Usb size={20} /> },
+  { id: "settings", icon: <SettingsIcon size={20} /> },
 ];
 
 // Phone bottom bar (SPEC 4.1); the rest lives under More.
@@ -54,12 +55,12 @@ function More({ go }: { go: (a: Area) => void }) {
   return (
     <div className="page">
       <div className="page-inner">
-        <h1>More</h1>
+        <h1>{t.area.more}</h1>
         <div className="stack" style={{ gap: 4 }}>
           {AREAS.filter(a => !BOTTOM.includes(a.id)).map(a => (
             <button key={a.id} className="nav-item" onClick={() => go(a.id)}>
               {a.icon}
-              <span className="label">{a.label}</span>
+              <span className="label">{t.area[a.id]}</span>
             </button>
           ))}
         </div>
@@ -108,7 +109,7 @@ function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
   return (
     <>
       <div className="more-backdrop" onClick={() => touched.current && props.onClose()} />
-      <div className="more-pop" role="menu" aria-label="Quick areas">
+      <div className="more-pop" role="menu" aria-label={t.shell.quickAreas}>
         {QUICK.map(id => {
           const a = AREAS.find(x => x.id === id)!;
           return (
@@ -120,7 +121,7 @@ function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
               onClick={() => props.go(id)}
             >
               {a.icon}
-              <span>{a.label}</span>
+              <span>{t.area[a.id]}</span>
               {id === "inbox" && props.inbox > 0 && <span className="count">{props.inbox}</span>}
             </button>
           );
@@ -135,18 +136,18 @@ function ResurfaceCard(props: { idea: Idea; today: string; onOpen(): void; onLat
   const seen = (props.idea.lastSeen ?? props.idea.created).slice(0, 10);
   const days = Math.round((Date.parse(props.today) - Date.parse(seen)) / 86400000);
   return (
-    <div className="today-card resurface" aria-label="An old idea">
+    <div className="today-card resurface" aria-label={t.shell.oldIdea}>
       <Lightbulb size={18} />
       <span className="what">
-        <span className="muted small">Not opened for {days} days</span>
-        <b>{props.idea.title || "(untitled idea)"}</b>
+        <span className="muted small">{t.shell.notOpenedFor(days)}</span>
+        <b>{props.idea.title || t.shell.untitledIdea}</b>
       </span>
       <span className="row" style={{ gap: 4 }}>
         <button className="btn ghost" onClick={props.onLater}>
-          Not now
+          {t.shell.notNow}
         </button>
         <button className="btn" onClick={props.onOpen}>
-          Open
+          {t.common.open}
         </button>
       </span>
     </div>
@@ -160,34 +161,34 @@ function DayCard(props: { entry?: Entry; review?: ReviewEntry; onJournal(): void
   const e = props.entry;
   const mood = e?.mood && MOODS.find(m => m.id === e.mood);
   return (
-    <div className="today-card day-card" aria-label="Today's journal">
+    <div className="today-card day-card" aria-label={t.shell.todaysJournal}>
       <button className="day-journal" onClick={props.onJournal}>
         <NotebookPen size={18} />
         {e ? (
           <span className="what">
             <span className="muted small">
-              Journal{mood && <> · <span style={{ color: `var(--${mood.color})` }}>{mood.label}</span></>}
+              {t.area.journal}{mood && <> · <span style={{ color: `var(--${mood.color})` }}>{t.journal.moods[mood.id]}</span></>}
             </span>
-            <span className="one-line">{e.preview || <span className="muted">(only the mood)</span>}</span>
+            <span className="one-line">{e.preview || <span className="muted">{t.shell.onlyMood}</span>}</span>
           </span>
         ) : (
-          <span>Write today's journal</span>
+          <span>{t.shell.writeJournal}</span>
         )}
       </button>
       <span className="row" style={{ gap: 4 }}>
         <button className="btn ghost" onClick={props.onReview}>
-          <Scale size={16} /> {props.review ? `Review ${props.review.answered}/${QUESTION_COUNT}` : "Evening review"}
+          <Scale size={16} /> {props.review ? t.shell.reviewCount(props.review.answered, QUESTION_COUNT) : t.shell.eveningReview}
         </button>
         <button className="btn" onClick={props.onCloseDay}>
-          <Moon size={16} /> Close the day
+          <Moon size={16} /> {t.shell.closeDay}
         </button>
       </span>
     </div>
   );
 }
 
-export function Shell({ captureKey = 0 }: { captureKey?: number }) {
-  const [area, setArea] = useState<Area>("today");
+export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: number; startArea?: Area }) {
+  const [area, setArea] = useState<Area>(startArea);
   const [view, setView] = useState<View>("today");
   const [homeView, setHomeView] = useState<View>("today");
   const todo = useTodo();
@@ -312,7 +313,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
                 {inbox.length > 0 && (
                   <button className="today-card" onClick={() => go("inbox")}>
                     <Inbox size={18} />
-                    <span>Inbox</span>
+                    <span>{t.area.inbox}</span>
                     <span className="count">{inbox.length}</span>
                     <ChevronRight size={18} className="muted" />
                   </button>
@@ -403,7 +404,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
 
   // To-do lists right under "To-do" in the sidebar (wide screens; narrow ones use chips).
   const todoNav = (
-    <div className="sub-nav" aria-label="To-do lists">
+    <div className="sub-nav" aria-label={t.shell.todoLists}>
       {VIEWS.map(v => (
         <button
           key={v.id}
@@ -411,7 +412,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           onClick={() => setView(v.id)}
         >
           {v.icon}
-          <span className="label">{v.label}</span>
+          <span className="label">{t.todo.views[v.id]}</span>
           {v.id === "today" && todayCount > 0 && <span className="count">{todayCount}</span>}
         </button>
       ))}
@@ -431,17 +432,17 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
 
   return (
     <div className="app">
-      <nav className="sidebar" aria-label="Areas">
+      <nav className="sidebar" aria-label={t.shell.areas}>
         <div className="brand">HYPOMNEMATA</div>
         {AREAS.map(a => (
           <Fragment key={a.id}>
             <button
               className={`nav-item${area === a.id ? " active" : ""}`}
               onClick={() => go(a.id)}
-              title={a.label}
+              title={t.area[a.id]}
             >
               {a.icon}
-              <span className="label">{a.label}</span>
+              <span className="label">{t.area[a.id]}</span>
               {a.id === "todo" && todayCount > 0 && <span className="count">{todayCount}</span>}
               {a.id === "inbox" && inbox.length > 0 && <span className="count">{inbox.length}</span>}
             </button>
@@ -451,7 +452,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       </nav>
       <main className="main">{page}</main>
       {closing && <CloseDay day={today} onClose={() => setClosing(false)} />}
-      <nav className="bottombar" aria-label="Areas">
+      <nav className="bottombar" aria-label={t.shell.areas}>
         {BOTTOM.map(id => {
           const a = AREAS.find(x => x.id === id);
           const active = id === "more" ? inMore : area === id;
@@ -463,7 +464,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
               {...(id === "more" ? { ...moreHold.handlers, style: { touchAction: "none" } } : {})}
             >
               {a ? a.icon : <Menu size={20} />}
-              <span>{a ? a.label : "More"}</span>
+              <span>{t.area[id]}</span>
             </button>
           );
         })}

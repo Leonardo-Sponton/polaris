@@ -1,4 +1,5 @@
 import type { Storage } from "../storage/types";
+import { t } from "../i18n";
 import { isoMinute } from "./dates";
 import { walkFiles } from "./files";
 
@@ -56,7 +57,7 @@ export async function moveToTrash(s: Storage, path: string, now = new Date()): P
 
 /** Undo: puts a trashed file back where it was. */
 export async function restoreFromTrash(s: Storage, trashed: string, original: string) {
-  if (await s.stat(original)) throw new Error(`${original} already exists`);
+  if (await s.stat(original)) throw new Error(t.errors.exists(original));
   await s.move(trashed, original);
   const index = await readIndex(s);
   delete index[trashed];

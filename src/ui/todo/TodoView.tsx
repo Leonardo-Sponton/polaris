@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { cap, dateFmt, t } from "../../i18n";
 import { Archive, BookCheck, CalendarDays, Layers, Palette, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { isoDate, slugify } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
@@ -21,25 +22,17 @@ import type { TodoData } from "./useTodo";
 // To-do (SPEC 5.3): Things-style lists on the left, the task screen on the right
 // (one at a time on the phone).
 
-export const VIEWS: { id: Exclude<View, object>; label: string; icon: ReactNode }[] = [
-  { id: "today", label: "Today", icon: <Star size={18} /> },
-  { id: "upcoming", label: "Upcoming", icon: <CalendarDays size={18} /> },
-  { id: "anytime", label: "Anytime", icon: <Layers size={18} /> },
-  { id: "someday", label: "Someday", icon: <Archive size={18} /> },
-  { id: "logbook", label: "Logbook", icon: <BookCheck size={18} /> },
+export const VIEWS: { id: Exclude<View, object>; icon: ReactNode }[] = [
+  { id: "today", icon: <Star size={18} /> },
+  { id: "upcoming", icon: <CalendarDays size={18} /> },
+  { id: "anytime", icon: <Layers size={18} /> },
+  { id: "someday", icon: <Archive size={18} /> },
+  { id: "logbook", icon: <BookCheck size={18} /> },
 ];
 
 export const sameView = (a: View, b: View) =>
   typeof a === "object" && typeof b === "object" ? a.list === b.list : a === b;
 
-const EMPTY: Record<string, string> = {
-  today: "Nothing for today. Add a task above.",
-  upcoming: "Nothing planned. Tasks with a future date show up here.",
-  anytime: "Tasks without a date show up here.",
-  someday: "Tasks for some day, maybe. Type “someday” when adding one.",
-  logbook: "Finished tasks show up here.",
-  list: "No open tasks in this list.",
-};
 
 const LOGBOOK_PAGE = 200;
 
@@ -54,7 +47,6 @@ interface Props {
   projects: Project[];
 }
 
-const LONG_DATE = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
 export function TodoView({ view, setView, data, home, openPath, projects }: Props) {
   const { notes, bump, toast, platform } = useApp();
@@ -68,7 +60,7 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
   const today = isoDate(now);
 
   const list = typeof view === "object" ? data.lists.find(l => l.id === view.list) : undefined;
-  const label = list ? list.name : VIEWS.find(v => v.id === view)!.label;
+  const label = list ? list.name : t.todo.views[view as Exclude<View, object>];
 
   // Ctrl+N: new task (SPEC 4.4).
   useEffect(() => {
@@ -119,12 +111,12 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
       if (!inView(toTask(n), view, today)) {
         const where = q.when
           ? q.when === "someday"
-            ? "Someday"
+            ? t.todo.views.someday
             : dayLabel(q.when, now)
           : q.list
             ? `#${q.listName}`
-            : "Anytime";
-        toast({ text: `Added: ${q.title} · ${where}` });
+            : t.todo.views.anytime;
+        toast({ text: t.todo.added(q.title, where) });
       }
       return true;
     } catch (e) {
@@ -139,7 +131,7 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
     if (!list) return;
     try {
       await flushAll();
-      for (const t of data.tasks.filter(t => t.list === list.id)) await updateTask(notes, t.path, { list: undefined });
+      for (const k of data.tasks.filter(x => x.list === list.id)) await updateTask(notes, k.path, { list: undefined });
       await data.saveLists(data.lists.filter(l => l.id !== list.id));
       setView("anytime");
     } catch (e) {
@@ -152,21 +144,21 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
   let shown = 0;
   const placeholder =
     view === "today"
-      ? "Add to Today…"
+      ? t.todo.addToday
       : list
-        ? `Add to ${list.name}…`
+        ? t.todo.addTo(list.name)
         : view === "someday"
-          ? "Add to Someday…"
-          : "Add a task…";
+          ? t.todo.addSomeday
+          : t.todo.addTask;
 
   return (
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         {!home && (
-        <nav className="todo-nav" aria-label="To-do lists">
+        <nav className="todo-nav" aria-label={t.shell.todoLists}>
           {VIEWS.map(v => (
             <button key={v.id} className={`chip${sameView(view, v.id) ? " active" : ""}`} onClick={() => setView(v.id)}>
-              {v.label}
+              {t.todo.views[v.id]}
             </button>
           ))}
           {data.lists.map(l => (
@@ -186,8 +178,8 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
         <div className="list-head">
           {home ? (
             <div>
-              <h1>Today</h1>
-              <div className="muted mono head-sub">{LONG_DATE.format(now)}</div>
+              <h1>{t.area.today}</h1>
+              <div className="muted mono head-sub">{cap(dateFmt({ weekday: "long", day: "numeric", month: "long" }).format(now))}</div>
             </div>
           ) : (
             <h1>{label}</h1>
@@ -196,8 +188,8 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
             <div className="row" style={{ gap: 2 }}>
               <button
                 className="btn ghost icon"
-                title="Change color"
-                aria-label="Change color"
+                title={t.todo.changeColor}
+                aria-label={t.todo.changeColor}
                 onClick={() => {
                   const c = LIST_COLORS[(LIST_COLORS.indexOf(list.color) + 1) % LIST_COLORS.length];
                   data.saveLists(data.lists.map(l => (l.id === list.id ? { ...l, color: c } : l))).catch(fail);
@@ -207,16 +199,16 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
               </button>
               <button
                 className="btn ghost icon"
-                title="Rename"
-                aria-label="Rename list"
+                title={t.todo.rename}
+                aria-label={t.todo.renameList}
                 onClick={() => setDialog("rename")}
               >
                 <Pencil size={18} />
               </button>
               <button
                 className="btn ghost icon"
-                title="Delete list"
-                aria-label="Delete list"
+                title={t.todo.deleteList}
+                aria-label={t.todo.deleteList}
                 onClick={() => setDialog("delete")}
               >
                 <Trash2 size={18} />
@@ -226,12 +218,14 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
         </div>
 
         {home ? (
-          <QuickAdd ref={qa} placeholder="Capture… (t = to-do, #list, date)" onCapture={home.onCapture} />
+          <QuickAdd ref={qa} placeholder={t.todo.capturePlaceholder} onCapture={home.onCapture} />
         ) : (
           view !== "logbook" && <QuickAdd ref={qa} placeholder={placeholder} onAdd={add} />
         )}
 
-        {data.loaded && count === 0 && <p className="muted empty-note">{EMPTY[list ? "list" : (view as string)]}</p>}
+        {data.loaded && count === 0 && (
+          <p className="muted empty-note">{t.todo.empty[list ? "list" : (view as Exclude<View, object>)]}</p>
+        )}
 
         {secs.map(s => {
           if (view === "logbook" && shown >= limit) return null;
@@ -243,19 +237,19 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
                 <h3 className={`section-head${s.key === "overdue" ? " late" : ""}`}>{s.label}</h3>
               )}
               <ul className="list">
-                {tasks.map(t => (
+                {tasks.map(k => (
                   <TaskRow
-                    key={t.path}
-                    task={t}
+                    key={k.path}
+                    task={k}
                     today={today}
                     lists={data.lists}
-                    active={open === t.path}
+                    active={open === k.path}
                     hideDay={view === "upcoming" || (view === "today" && s.key !== "overdue") || view === "logbook"}
-                    project={t.project && (projects.find(p => p.slug === t.project)?.title || t.project)}
-                    onOpen={() => setOpen(t.path)}
-                    onToggle={() => (t.status === "open" ? finish(t.path, "done") : reopen(t.path))}
-                    onSchedule={() => setScheduling(t)}
-                    onMenu={() => setMenu(t)}
+                    project={k.project && (projects.find(p => p.slug === k.project)?.title || k.project)}
+                    onOpen={() => setOpen(k.path)}
+                    onToggle={() => (k.status === "open" ? finish(k.path, "done") : reopen(k.path))}
+                    onSchedule={() => setScheduling(k)}
+                    onMenu={() => setMenu(k)}
                   />
                 ))}
               </ul>
@@ -265,7 +259,7 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
         {home?.footer}
         {view === "logbook" && count > limit && (
           <button className="btn ghost" onClick={() => setLimit(l => l + LOGBOOK_PAGE)}>
-            Show more
+            {t.todo.showMore}
           </button>
         )}
       </div>
@@ -284,7 +278,7 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
             onDelete={() => remove(open)}
           />
         ) : (
-          <div className="detail-empty muted">Pick a task, or add one with the field on the left.</div>
+          <div className="detail-empty muted">{t.todo.pickTask}</div>
         )}
       </div>
 
@@ -310,9 +304,9 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
       )}
       {dialog === "rename" && list && (
         <AskText
-          title="Rename list"
+          title={t.todo.renameList}
           initial={list.name}
-          okLabel="Rename"
+          okLabel={t.todo.rename}
           onClose={() => setDialog(null)}
           onOk={name => {
             setDialog(null);
@@ -322,9 +316,9 @@ export function TodoView({ view, setView, data, home, openPath, projects }: Prop
       )}
       {dialog === "delete" && list && (
         <Confirm
-          title={`Delete “${list.name}”?`}
-          text="Its tasks are kept; they just leave the list."
-          okLabel="Delete list"
+          title={t.todo.deleteListTitle(list.name)}
+          text={t.todo.deleteListText}
+          okLabel={t.todo.deleteList}
           onClose={() => setDialog(null)}
           onOk={() => {
             setDialog(null);
@@ -351,13 +345,13 @@ export function NewListButton({
     <>
       <button className={className} onClick={() => setAsking(true)}>
         <Plus size={16} />
-        <span className="label">New list</span>
+        <span className="label">{t.todo.newList}</span>
       </button>
       {asking && (
         <AskText
-          title="New list"
-          placeholder="e.g. Home"
-          okLabel="Create"
+          title={t.todo.newList}
+          placeholder={t.todo.newListEg}
+          okLabel={t.todo.create}
           onClose={() => setAsking(false)}
           onOk={async name => {
             setAsking(false);

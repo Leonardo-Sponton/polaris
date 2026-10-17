@@ -9,6 +9,7 @@ import { Dialog } from "./Dialog";
 import { NoteEditor } from "./NoteEditor";
 import { useApp } from "./context";
 import { useHold } from "./useHold";
+import { t } from "../i18n";
 
 // Inbox (SPEC 5.2): captured items wait here until they become a to-do or an idea.
 
@@ -18,7 +19,7 @@ export function useInbox(): Note[] {
   const [items, setItems] = useState<Note[]>([]);
   useEffect(() => {
     let alive = true;
-    loadInbox(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setItems(list));
+    loadInbox(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(list => alive && setItems(list));
     return () => {
       alive = false;
     };
@@ -45,10 +46,10 @@ function ItemRow({
   return (
     <li className="inbox-li" {...hold.handlers}>
       <button className={`list-item${active ? " active" : ""}`} onClick={() => !hold.eaten() && onOpen()}>
-        <span className="list-title">{previewOf(note.body) || <span className="muted">(empty)</span>}</span>
+        <span className="list-title">{previewOf(note.body) || <span className="muted">{t.common.empty}</span>}</span>
         <span className="list-meta mono">{String(note.data.created ?? "").replace("T", " ")}</span>
       </button>
-      <button className="btn ghost icon" title="Make it a to-do" aria-label="Make it a to-do" onClick={onTodo}>
+      <button className="btn ghost icon" title={t.inbox.makeTodo} aria-label={t.inbox.makeTodo} onClick={onTodo}>
         <CheckSquare size={18} />
       </button>
     </li>
@@ -87,16 +88,16 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
         const trashed = await moveToTrash(notes.storage, path);
         bump();
         toast({
-          text: "Item deleted",
-          action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+          text: t.inbox.deleted,
+          action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
         });
         return;
       }
       const m: Moved = action === "todo" ? await inboxToTodo(notes, path) : await inboxToIdea(notes, path);
       bump();
       toast({
-        text: action === "todo" ? "Moved to To-do · Anytime" : "Moved to Ideas · Draft",
-        action: { label: "Undo", run: () => undoMove(notes, m).then(bump, fail) },
+        text: action === "todo" ? t.inbox.movedTodo : t.inbox.movedIdea,
+        action: { label: t.common.undo, run: () => undoMove(notes, m).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -120,13 +121,13 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Inbox</h1>
+          <h1>{t.inbox.title}</h1>
           <button className="btn primary" onClick={create}>
-            <Plus size={18} /> New
+            <Plus size={18} /> {t.common.new}
           </button>
         </div>
         {items.length === 0 ? (
-          <p className="muted empty-note">Empty. Things you capture on Today land here.</p>
+          <p className="muted empty-note">{t.inbox.empty}</p>
         ) : (
           <ul className="list">
             {items.map(n => (
@@ -147,35 +148,35 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
           <NoteEditor
             key={open.path}
             path={open.path}
-            placeholder="Write anything… (start the first line with # for a title)"
+            placeholder={t.inbox.placeholder}
             onBack={() => setOpen(null)}
             removeIfEmpty
             autoFocus={open.isNew}
             actions={
               <>
-                <button className="btn ghost icon" title="Make it a to-do" aria-label="Make it a to-do" onClick={() => act(open.path, "todo")}>
+                <button className="btn ghost icon" title={t.inbox.makeTodo} aria-label={t.inbox.makeTodo} onClick={() => act(open.path, "todo")}>
                   <CheckSquare size={18} />
                 </button>
-                <button className="btn ghost icon" title="Make it an idea" aria-label="Make it an idea" onClick={() => act(open.path, "idea")}>
+                <button className="btn ghost icon" title={t.inbox.makeIdea} aria-label={t.inbox.makeIdea} onClick={() => act(open.path, "idea")}>
                   <Lightbulb size={18} />
                 </button>
-                <button className="btn ghost icon" title="Delete" aria-label="Delete item" onClick={() => act(open.path, "delete")}>
+                <button className="btn ghost icon" title={t.common.delete} aria-label={t.inbox.deleteItem} onClick={() => act(open.path, "delete")}>
                   <Trash2 size={18} />
                 </button>
               </>
             }
           />
         ) : (
-          <div className="detail-empty muted">Pick an item or press New.</div>
+          <div className="detail-empty muted">{t.inbox.pick}</div>
         )}
       </div>
       {menu && (
-        <Dialog title={previewOf(menu.body) || "(empty)"} onClose={() => setMenu(null)}>
+        <Dialog title={previewOf(menu.body) || t.common.empty} onClose={() => setMenu(null)}>
           <div className="stack" style={{ gap: 2 }}>
-            {item("Open", <Pencil size={18} />, () => setOpen({ path: menu.path, isNew: false }))}
-            {item("Make it a to-do", <CheckSquare size={18} />, () => act(menu.path, "todo"))}
-            {item("Make it an idea", <Lightbulb size={18} />, () => act(menu.path, "idea"))}
-            {item("Delete", <Trash2 size={18} />, () => act(menu.path, "delete"), " danger")}
+            {item(t.common.open, <Pencil size={18} />, () => setOpen({ path: menu.path, isNew: false }))}
+            {item(t.inbox.makeTodo, <CheckSquare size={18} />, () => act(menu.path, "todo"))}
+            {item(t.inbox.makeIdea, <Lightbulb size={18} />, () => act(menu.path, "idea"))}
+            {item(t.common.delete, <Trash2 size={18} />, () => act(menu.path, "delete"), " danger")}
           </div>
         </Dialog>
       )}

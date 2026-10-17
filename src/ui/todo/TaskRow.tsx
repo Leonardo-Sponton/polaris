@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../../i18n";
 import { Bell, CalendarClock, Check, FolderKanban, ListChecks, Moon, Repeat } from "lucide-react";
 import type { TodoList } from "../../data/lists";
 import { dayLabel, isOverdue, type Task } from "../../data/todo";
@@ -26,14 +27,14 @@ interface Props {
   onMenu(): void;
 }
 
-export function TaskRow({ task: t, today, lists, active, hideDay, project, onOpen, onToggle, onSchedule, onMenu }: Props) {
+export function TaskRow({ task: k, today, lists, active, hideDay, project, onOpen, onToggle, onSchedule, onMenu }: Props) {
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number; id: number; horizontal?: boolean } | null>(null);
   const swiped = useRef(false);
   const hold = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const done = t.status !== "open";
-  const list = t.list ? lists.find(l => l.id === t.list) : undefined;
-  const late = isOverdue(t, today);
+  const done = k.status !== "open";
+  const list = k.list ? lists.find(l => l.id === k.list) : undefined;
+  const late = isOverdue(k, today);
 
   // The click that follows a swipe or a hold must not open the task.
   const eatClick = () => {
@@ -78,28 +79,28 @@ export function TaskRow({ task: t, today, lists, active, hideDay, project, onOpe
   };
 
   const chips: React.ReactNode[] = [];
-  if (t.when && !hideDay) {
+  if (k.when && !hideDay) {
     chips.push(
-      <span key="when" className={late && t.when !== "someday" && t.when < today ? "late" : ""}>
-        {t.when === "someday" ? "Someday" : dayLabel(t.when, undefined, true)}
+      <span key="when" className={late && k.when !== "someday" && k.when < today ? "late" : ""}>
+        {k.when === "someday" ? t.todo.views.someday : dayLabel(k.when, undefined, true)}
       </span>,
     );
   }
-  if (t.evening && !done) chips.push(<Moon key="eve" size={13} aria-label="Evening" />);
-  if (t.time) chips.push(<span key="time">{t.time}</span>);
-  if (!done && reminderOf(t)) chips.push(<Bell key="bell" size={13} aria-label="Reminder" />);
-  if (t.due) {
+  if (k.evening && !done) chips.push(<Moon key="eve" size={13} aria-label={t.todo.evening} />);
+  if (k.time) chips.push(<span key="time">{k.time}</span>);
+  if (!done && reminderOf(k)) chips.push(<Bell key="bell" size={13} aria-label={t.todo.reminder} />);
+  if (k.due) {
     chips.push(
-      <span key="due" className={t.due < today && !done ? "late" : ""}>
-        <CalendarClock size={13} /> {dayLabel(t.due, undefined, true)}
+      <span key="due" className={k.due < today && !done ? "late" : ""}>
+        <CalendarClock size={13} /> {dayLabel(k.due, undefined, true)}
       </span>,
     );
   }
-  if (t.repeat) chips.push(<Repeat key="rep" size={13} aria-label="Repeats" />);
-  if (t.subtasks.total) {
+  if (k.repeat) chips.push(<Repeat key="rep" size={13} aria-label={t.todo.repeats} />);
+  if (k.subtasks.total) {
     chips.push(
       <span key="sub">
-        <ListChecks size={13} /> {t.subtasks.done}/{t.subtasks.total}
+        <ListChecks size={13} /> {k.subtasks.done}/{k.subtasks.total}
       </span>,
     );
   }
@@ -122,7 +123,7 @@ export function TaskRow({ task: t, today, lists, active, hideDay, project, onOpe
   return (
     <li className="task-li">
       <div className={`swipe-under${dx > 0 ? " right" : dx < 0 ? " left" : ""}`} aria-hidden>
-        {dx > 0 ? (done ? "Reopen" : "Done") : "When…"}
+        {dx > 0 ? (done ? t.todo.reopen : t.todo.done) : t.todo.when}
       </div>
       <div
         className={`task-row${active ? " active" : ""}${done ? " done" : ""}`}
@@ -145,17 +146,17 @@ export function TaskRow({ task: t, today, lists, active, hideDay, project, onOpe
         }}
       >
         <button
-          className={`check${done ? " on" : ""}${t.priority ? ` p${t.priority}` : ""}`}
+          className={`check${done ? " on" : ""}${k.priority ? ` p${k.priority}` : ""}`}
           role="checkbox"
           aria-checked={done}
-          aria-label={done ? "Mark as not done" : "Mark as done"}
+          aria-label={done ? t.todo.markNotDone : t.todo.markDone}
           onClick={onToggle}
         >
           {done && <Check size={14} strokeWidth={3} />}
         </button>
         <button className="task-main" onClick={() => !swiped.current && onOpen()}>
-          <span className={`task-title${t.status === "canceled" ? " canceled" : ""}`}>
-            {t.title || <span className="muted">(no title)</span>}
+          <span className={`task-title${k.status === "canceled" ? " canceled" : ""}`}>
+            {k.title || <span className="muted">{t.todo.noTitle}</span>}
           </span>
           {chips.length > 0 && <span className="task-meta">{chips}</span>}
         </button>

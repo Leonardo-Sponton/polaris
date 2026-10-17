@@ -1,4 +1,5 @@
 import { addDays, isoDate, parseLocal } from "./dates";
+import { isWord, word, type Words } from "../i18n";
 import type { Data } from "./frontmatter";
 import type { Note, Notes } from "./notes";
 
@@ -9,20 +10,27 @@ import type { Note, Notes } from "./notes";
 export type Mood = "hard" | "tiring" | "hectic" | "normal" | "calm" | "good";
 
 /** "The day was…": words, not a score (as MyNotes). `color` is a theme variable. */
-export const MOODS: { id: Mood; label: string; color: string }[] = [
-  { id: "hard", label: "hard", color: "h1" },
-  { id: "tiring", label: "tiring", color: "h2" },
-  { id: "hectic", label: "hectic", color: "h3" },
-  { id: "normal", label: "normal", color: "muted" },
-  { id: "calm", label: "calm", color: "cyan" },
-  { id: "good", label: "good", color: "ok" },
+export const MOODS: { id: Mood; color: string }[] = [
+  { id: "hard", color: "h1" },
+  { id: "tiring", color: "h2" },
+  { id: "hectic", color: "h3" },
+  { id: "normal", color: "muted" },
+  { id: "calm", color: "cyan" },
+  { id: "good", color: "ok" },
 ];
 
-/** Optional sections, added by buttons; nothing is required. */
-export const JOURNAL_SECTIONS = ["Important events", "Learnings", "Personal notes"];
+/** Where Close the day puts what was learned. */
+export const LEARNINGS: Words = { en: "Learnings", pt: "Aprendizados" };
+
+/** Optional sections, added by buttons; nothing is required. Written in the app's language. */
+export const JOURNAL_SECTIONS: Words[] = [
+  { en: "Important events", pt: "Acontecimentos importantes" },
+  LEARNINGS,
+  { en: "Personal notes", pt: "Notas pessoais" },
+];
 
 /** Where Close the day puts the intentions (SPEC 5.8, 5.9). */
-export const INTENTIONS = "Intentions for tomorrow";
+export const INTENTIONS: Words = { en: "Intentions for tomorrow", pt: "Intenções para amanhã" };
 
 export const journalPath = (day: string) => `journal/${day}.md`;
 export const reviewPath = (day: string) => `review/${day}.md`;
@@ -94,8 +102,9 @@ function headings(lines: string[]) {
 /**
  * Adds `text` at the end of the section "## name" (created at the end when missing), or, with
  * name null, at the end of the free text before the first section. Nothing else is changed.
+ * A name in both languages finds the section in either and creates it in the app's language.
  */
-export function appendTo(body: string, name: string | null, text: string): string {
+export function appendTo(body: string, name: string | Words | null, text: string): string {
   const add = text.trim();
   if (!add) return body;
   const lines = body.replace(/\s+$/, "").split("\n");
@@ -107,10 +116,10 @@ export function appendTo(body: string, name: string | null, text: string): strin
     start = 0;
     end = hs.length ? hs[0].at : lines.length;
   } else {
-    const i = hs.findIndex(h => h.name === name.toLowerCase());
+    const i = hs.findIndex(h => (typeof name === "string" ? h.name === name.toLowerCase() : isWord(name, h.name)));
     if (i < 0) {
       const base = lines.join("\n");
-      return `${base}${base ? "\n\n" : ""}## ${name}\n\n${add}\n`;
+      return `${base}${base ? "\n\n" : ""}## ${typeof name === "string" ? name : word(name)}\n\n${add}\n`;
     }
     start = hs[i].at + 1;
     end = i + 1 < hs.length ? hs[i + 1].at : lines.length;
@@ -139,7 +148,7 @@ export interface Closing {
  */
 export async function closeDay(notes: Notes, day: string, c: Closing): Promise<string[]> {
   const written: string[] = [];
-  const write = async (kind: "journal" | "review", parts: [string | null, string][]) => {
+  const write = async (kind: "journal" | "review", parts: [Words | null, string][]) => {
     if (!parts.some(([, t]) => t.trim())) return;
     const n = await openDay(notes, kind, day);
     let body = n.body;
@@ -149,7 +158,7 @@ export async function closeDay(notes: Notes, day: string, c: Closing): Promise<s
   };
   await write("journal", [
     [null, c.how],
-    ["Learnings", c.learned],
+    [LEARNINGS, c.learned],
   ]);
   await write("review", [[INTENTIONS, c.intentions]]);
   return written;

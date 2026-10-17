@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, CalendarCheck, Dices, ExternalLink, Pencil, Plus, Search, SlidersHorizontal, Star, Trash2 } from "lucide-react";
 import { isoDate } from "../../data/dates";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import {
-  KINDS,
   citation,
   filterThoughts,
   loadThoughts,
@@ -37,7 +37,7 @@ export function useThoughts(): ThoughtsData {
   const [data, setData] = useState<ThoughtsData>({ all: [], state: { favorites: [], days: {} }, loaded: false });
   useEffect(() => {
     let alive = true;
-    loadThoughts(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(r => alive && setData({ ...r, loaded: true }));
+    loadThoughts(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(r => alive && setData({ ...r, loaded: true }));
     return () => {
       alive = false;
     };
@@ -45,16 +45,11 @@ export function useThoughts(): ThoughtsData {
   return data;
 }
 
-const ORIGINS: { id: Origin | undefined; label: string }[] = [
-  { id: undefined, label: "All" },
-  { id: "builtin", label: "Built-in" },
-  { id: "mine", label: "Mine" },
-  { id: "uncertain", label: "Uncertain" },
-];
+const ORIGINS: (Origin | undefined)[] = [undefined, "builtin", "mine", "uncertain"];
 
 /** "verified" items need no badge; the others say what they are. */
-export function kindLabel(t: Thought): string | null {
-  return t.kind === "verified" ? null : KINDS.find(k => k.id === t.kind)!.label;
+export function kindLabel(th: Thought): string | null {
+  return th.kind === "verified" ? null : t.thoughts.kinds[th.kind][0];
 }
 
 type Open = { id: string; edit?: boolean } | { new: true } | null;
@@ -87,38 +82,38 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
   const authors = values(data.all, "author");
   const traditions = values(data.all, "tradition");
   const themes = values(data.all, "themes");
-  const openThought = open && "id" in open ? data.all.find(t => t.id === open.id) : undefined;
+  const openThought = open && "id" in open ? data.all.find(x => x.id === open.id) : undefined;
   const ofDay = thoughtOfDay(data.all, data.state, today);
   // A filter menu in use stays visible, so it is never active unseen.
   const menusOn = !!(filter.author || filter.tradition || filter.theme);
 
-  const favorite = async (t: Thought) => {
+  const favorite = async (th: Thought) => {
     try {
-      const undo = await setFavorite(notes, t, !t.favorite);
+      const undo = await setFavorite(notes, th, !th.favorite);
       bump();
-      toast({ text: t.favorite ? "Removed from favorites" : "Added to favorites", action: { label: "Undo", run: () => undo().then(bump, fail) } });
+      toast({ text: th.favorite ? t.thoughts.favRemoved : t.thoughts.favAdded, action: { label: t.common.undo, run: () => undo().then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
   };
 
-  const useToday = async (t: Thought) => {
+  const useToday = async (th: Thought) => {
     try {
-      const undo = await pickForDay(notes.storage, t.id, today);
+      const undo = await pickForDay(notes.storage, th.id, today);
       bump();
-      toast({ text: "Today's thought", action: { label: "Undo", run: () => undo().then(bump, fail) } });
+      toast({ text: t.thoughts.todays, action: { label: t.common.undo, run: () => undo().then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
   };
 
-  const remove = async (t: Thought) => {
-    if (!t.path) return;
+  const remove = async (th: Thought) => {
+    if (!th.path) return;
     try {
       setOpen(null);
-      const trashed = await moveToTrash(notes.storage, t.path);
+      const trashed = await moveToTrash(notes.storage, th.path);
       bump();
-      toast({ text: "Thought deleted", action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, t.path!).then(bump, fail) } });
+      toast({ text: t.thoughts.deleted, action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, th.path!).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
@@ -132,7 +127,7 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
         value={filter[key] ?? ""}
         onChange={e => setFilter(f => ({ ...f, [key]: e.target.value || undefined }))}
       >
-        <option value="">{label}: all</option>
+        <option value="">{t.thoughts.selectAll(label)}</option>
         {list.map(v => (
           <option key={v} value={v}>
             {v}
@@ -151,9 +146,9 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
     <div className={`split thoughts${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Thoughts</h1>
+          <h1>{t.thoughts.title}</h1>
           <button className="btn primary" onClick={() => setOpen({ new: true })}>
-            <Plus size={18} /> New
+            <Plus size={18} /> {t.common.new}
           </button>
         </div>
         <div className="th-tools">
@@ -162,29 +157,29 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
             <input
               className="field"
               value={filter.text ?? ""}
-              placeholder="Text, author, work, theme"
-              aria-label="Search thoughts"
+              placeholder={t.thoughts.searchPlaceholder}
+              aria-label={t.thoughts.search}
               onChange={e => setFilter(f => ({ ...f, text: e.target.value }))}
             />
           </label>
           <div className="row" style={{ gap: 4 }}>
-            <button className="btn ghost" title="Today's thought" onClick={() => ofDay && setOpen({ id: ofDay.thought.id })}>
-              <CalendarCheck size={16} /> Today
+            <button className="btn ghost" title={t.thoughts.todays} onClick={() => ofDay && setOpen({ id: ofDay.thought.id })}>
+              <CalendarCheck size={16} /> {t.thoughts.today}
             </button>
             <button
               className="btn ghost"
-              title="A random thought"
+              title={t.thoughts.randomTitle}
               onClick={() => {
                 const r = randomThought(shown.length ? shown : data.all, openThought?.id);
                 if (r) setOpen({ id: r.id });
               }}
             >
-              <Dices size={16} /> Random
+              <Dices size={16} /> {t.thoughts.random}
             </button>
             <button
               className={`btn ghost icon${menusOn ? " fav-on" : ""}`}
-              title="Filter by author, tradition, theme"
-              aria-label="Filter by author, tradition, theme"
+              title={t.thoughts.filterBy}
+              aria-label={t.thoughts.filterBy}
               aria-expanded={showMenus || menusOn}
               onClick={() => setShowMenus(v => !v)}
             >
@@ -192,35 +187,35 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
             </button>
           </div>
         </div>
-        <div className="chips" aria-label="Filter">
-          {ORIGINS.map(o => chip(o.label, filter.origin === o.id, () => setFilter(f => ({ ...f, origin: o.id }))))}
-          {chip("★ Favorites", !!filter.favorites, () => setFilter(f => ({ ...f, favorites: !f.favorites || undefined })))}
+        <div className="chips" aria-label={t.ideas.filter}>
+          {ORIGINS.map(o => chip(t.thoughts.origins[o ?? "all"], filter.origin === o, () => setFilter(f => ({ ...f, origin: o }))))}
+          {chip(t.thoughts.favorites, !!filter.favorites, () => setFilter(f => ({ ...f, favorites: !f.favorites || undefined })))}
         </div>
         {(showMenus || menusOn) && (
           <div className="th-selects">
-            {select("author", "Author", authors)}
-            {select("tradition", "Tradition", traditions)}
-            {select("theme", "Theme", themes)}
+            {select("author", t.thoughts.author, authors)}
+            {select("tradition", t.thoughts.tradition, traditions)}
+            {select("theme", t.thoughts.theme, themes)}
           </div>
         )}
         {data.stateError && <p className="err small">{data.stateError}</p>}
         {data.loaded && shown.length === 0 ? (
           <p className="muted empty-note">
-            {filter.origin === "mine" && !filter.text ? "No thoughts of your own yet. Press New." : "No thoughts match."}
+            {filter.origin === "mine" && !filter.text ? t.thoughts.noOwn : t.thoughts.noMatch}
           </p>
         ) : (
           <>
             <div className="section-head">
-              {shown.length === data.all.length ? "All" : "Found"} <span className="mono muted">{shown.length}</span>
+              {shown.length === data.all.length ? t.thoughts.all : t.thoughts.found} <span className="mono muted">{shown.length}</span>
             </div>
             <ul className="list">
-              {shown.map(t => (
-                <li key={t.id}>
-                  <button className={`list-item${openThought?.id === t.id ? " active" : ""}`} onClick={() => setOpen({ id: t.id })}>
-                    <span className="list-title th-text">{t.text}</span>
+              {shown.map(x => (
+                <li key={x.id}>
+                  <button className={`list-item${openThought?.id === x.id ? " active" : ""}`} onClick={() => setOpen({ id: x.id })}>
+                    <span className="list-title th-text">{x.text}</span>
                     <span className="list-meta">
-                      {t.favorite && "★ "}
-                      {[t.author, t.work, kindLabel(t)].filter(Boolean).join(" · ")}
+                      {x.favorite && "★ "}
+                      {[x.author, x.work, kindLabel(x)].filter(Boolean).join(" · ")}
                     </span>
                   </button>
                 </li>
@@ -245,7 +240,7 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
             onDelete={() => remove(openThought)}
           />
         ) : (
-          <div className="detail-empty muted">Pick a thought, or press New.</div>
+          <div className="detail-empty muted">{t.thoughts.pick}</div>
         )}
       </div>
     </div>
@@ -262,10 +257,10 @@ interface DetailProps {
   onDelete(): void;
 }
 
-function ThoughtDetail({ thought: t, isToday, onBack, onFavorite, onToday, onEdit, onDelete }: DetailProps) {
+function ThoughtDetail({ thought: th, isToday, onBack, onFavorite, onToday, onEdit, onDelete }: DetailProps) {
   const { platform, toast } = useApp();
   useBack(true, onBack);
-  const link = /^https?:\/\//.test(t.source) && platform.openLink ? t.source : null;
+  const link = /^https?:\/\//.test(th.source) && platform.openLink ? th.source : null;
   const row = (label: string, value: string) =>
     value && (
       <>
@@ -273,30 +268,30 @@ function ThoughtDetail({ thought: t, isToday, onBack, onFavorite, onToday, onEdi
         <span className="th-value">{value}</span>
       </>
     );
-  const kind = kindLabel(t);
+  const kind = kindLabel(th);
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
-        <span className="muted small">{t.builtin ? "Built-in" : "Mine"}</span>
+        <span className="muted small">{th.builtin ? t.thoughts.origins.builtin : t.thoughts.origins.mine}</span>
         <button
-          className={`btn ghost icon${t.favorite ? " fav-on" : ""}`}
-          aria-label={t.favorite ? "Remove from favorites" : "Add to favorites"}
-          aria-pressed={t.favorite}
-          title="Favorite"
+          className={`btn ghost icon${th.favorite ? " fav-on" : ""}`}
+          aria-label={th.favorite ? t.thoughts.favRemoved : t.thoughts.favAdded}
+          aria-pressed={th.favorite}
+          title={t.thoughts.favorite}
           onClick={onFavorite}
           style={{ marginLeft: "auto" }}
         >
-          <Star size={18} fill={t.favorite ? "currentColor" : "none"} />
+          <Star size={18} fill={th.favorite ? "currentColor" : "none"} />
         </button>
-        {!t.builtin && (
+        {!th.builtin && (
           <>
-            <button className="btn ghost icon" aria-label="Edit thought" title="Edit" onClick={onEdit}>
+            <button className="btn ghost icon" aria-label={t.thoughts.editThought} title={t.common.edit} onClick={onEdit}>
               <Pencil size={18} />
             </button>
-            <button className="btn ghost icon" aria-label="Delete thought" title="Delete" onClick={onDelete}>
+            <button className="btn ghost icon" aria-label={t.thoughts.deleteThought} title={t.common.delete} onClick={onDelete}>
               <Trash2 size={18} />
             </button>
           </>
@@ -304,37 +299,37 @@ function ThoughtDetail({ thought: t, isToday, onBack, onFavorite, onToday, onEdi
       </div>
       <div className="page task-page">
         <div className="page-inner stack">
-          <blockquote className="th-quote">{t.text}</blockquote>
-          {(t.author || t.work) && <div className="th-cite">— {citation(t)}</div>}
-          {kind && <span className={`th-kind${t.kind === "uncertain" ? " warn" : ""}`}>{kind}</span>}
+          <blockquote className="th-quote">{th.text}</blockquote>
+          {(th.author || th.work) && <div className="th-cite">— {citation(th)}</div>}
+          {kind && <span className={`th-kind${th.kind === "uncertain" ? " warn" : ""}`}>{kind}</span>}
           <div className="task-fields">
-            {row("Era", t.era)}
-            {row("Tradition", t.tradition)}
-            {row("Themes", t.themes.join(", "))}
-            {row("Language", t.language)}
-            {row("Translation", t.translation)}
-            {t.source && (
+            {row(t.thoughts.era, th.era)}
+            {row(t.thoughts.tradition, th.tradition)}
+            {row(t.thoughts.themes, th.themes.join(", "))}
+            {row(t.thoughts.language, th.language)}
+            {row(t.thoughts.translation, th.translation)}
+            {th.source && (
               <>
-                <span className="fl">Source</span>
+                <span className="fl">{t.thoughts.source}</span>
                 {link ? (
                   <button
                     className="btn ghost th-link"
-                    title="Open in the browser"
+                    title={t.books.openBrowser}
                     onClick={() => platform.openLink!(link).catch(e => toast({ text: String(e), error: true }))}
                   >
-                    <span className="mono small th-source">{t.source}</span>
+                    <span className="mono small th-source">{th.source}</span>
                     <ExternalLink size={14} />
                   </button>
                 ) : (
-                  <span className="th-value mono small th-source">{t.source}</span>
+                  <span className="th-value mono small th-source">{th.source}</span>
                 )}
               </>
             )}
           </div>
-          {t.notes && <p className="th-notes">{t.notes}</p>}
+          {th.notes && <p className="th-notes">{th.notes}</p>}
           <div className="row task-actions">
             <button className="btn" disabled={isToday} onClick={onToday}>
-              <CalendarCheck size={16} /> {isToday ? "Today's thought" : "Use as today's thought"}
+              <CalendarCheck size={16} /> {isToday ? t.thoughts.todays : t.thoughts.useToday}
             </button>
           </div>
         </div>

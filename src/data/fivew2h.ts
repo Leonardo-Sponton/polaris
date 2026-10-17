@@ -1,3 +1,4 @@
+import { isWord, word, type Words } from "../i18n";
 // The 5W2H block (SPEC 3.4): plain Markdown that any editor can read, shown by the app as a
 // small form. The block is the "## 5W2H" section: from its heading to the next "## " heading.
 //
@@ -7,6 +8,17 @@
 
 export const FIELDS = ["What", "Why", "Where", "When", "Who", "How", "How much"] as const;
 export type Field = (typeof FIELDS)[number];
+
+/** The name written in the file, in the app's language; both languages are read. */
+export const FIELD_NAMES: Record<Field, Words> = {
+  What: { en: "What", pt: "O quê" },
+  Why: { en: "Why", pt: "Por quê" },
+  Where: { en: "Where", pt: "Onde" },
+  When: { en: "When", pt: "Quando" },
+  Who: { en: "Who", pt: "Quem" },
+  How: { en: "How", pt: "Como" },
+  "How much": { en: "How much", pt: "Quanto" },
+};
 
 export interface Block {
   values: Record<Field, string>;
@@ -40,7 +52,7 @@ export function split(body: string): { rest: string; block: Block | null } {
   const extra: string[] = [];
   for (const line of inner.split("\n")) {
     const f = FIELD.exec(line.trim());
-    const name = f && FIELDS.find(x => x.toLowerCase() === f[1].trim().toLowerCase());
+    const name = f && FIELDS.find(x => isWord(FIELD_NAMES[x], f[1]));
     if (name) block.values[name] = f![2].trim();
     else extra.push(line);
   }
@@ -52,7 +64,7 @@ export function split(body: string): { rest: string; block: Block | null } {
 }
 
 export function format(block: Block): string {
-  const lines = FIELDS.map(f => `- **${f}:** ${block.values[f].replace(/\s*\n\s*/g, " ").trim()}`.trimEnd());
+  const lines = FIELDS.map(f => `- **${word(FIELD_NAMES[f])}:** ${block.values[f].replace(/\s*\n\s*/g, " ").trim()}`.trimEnd());
   return `## 5W2H\n${lines.join("\n")}\n${block.extra ? `\n${block.extra}\n` : ""}`;
 }
 

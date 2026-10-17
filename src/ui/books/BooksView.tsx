@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { ChartColumn, Plus, Search, Star } from "lucide-react";
 import { STATUSES, createBook, loadBooks, matches, statusPatch, type Book, type BookStatus } from "../../data/books";
 import type { Data } from "../../data/frontmatter";
@@ -24,7 +25,7 @@ export function useBooks(): Book[] {
   const [books, setBooks] = useState<Book[]>([]);
   useEffect(() => {
     let alive = true;
-    loadBooks(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setBooks(list));
+    loadBooks(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(list => alive && setBooks(list));
     return () => {
       alive = false;
     };
@@ -38,7 +39,7 @@ export function Cover({ book: b }: { book: Book }) {
   if (url) return <img className="cover" src={url} alt="" draggable={false} />;
   return (
     <div className="cover placeholder" style={{ background: placeholderColor(b.title) }}>
-      <span className="pt">{b.title || "(untitled)"}</span>
+      <span className="pt">{b.title || t.common.untitled}</span>
       {b.author && <span className="pa">{b.author}</span>}
     </div>
   );
@@ -50,10 +51,10 @@ function BookCard({ book: b, active, onOpen, onMenu }: { book: Book; active: boo
     <li className="book-li" {...hold.handlers}>
       <button className={`book-card${active ? " active" : ""}`} onClick={() => !hold.eaten() && onOpen()}>
         <Cover book={b} />
-        <span className="book-title">{b.title || <span className="muted">(untitled)</span>}</span>
+        <span className="book-title">{b.title || <span className="muted">{t.common.untitled}</span>}</span>
         {b.author && <span className="book-author">{b.author}</span>}
         {b.rating && (
-          <span className="book-rating" aria-label={`${b.rating} of 5`}>
+          <span className="book-rating" aria-label={t.books.ofFive(b.rating)}>
             {Array.from({ length: b.rating }, (_, i) => (
               <Star key={i} size={11} fill="currentColor" />
             ))}
@@ -70,15 +71,15 @@ function NewBook({ status, onOk, onClose }: { status: BookStatus; onOk(title: st
   const ok = () => title.trim() && onOk(title, author);
   const enter = (e: React.KeyboardEvent) => e.key === "Enter" && ok();
   return (
-    <Dialog title={`New book · ${STATUSES.find(s => s.id === status)!.label}`} onClose={onClose}>
-      <input className="field" autoFocus value={title} placeholder="Title" onChange={e => setTitle(e.target.value)} onKeyDown={enter} />
-      <input className="field" value={author} placeholder="Author (optional)" onChange={e => setAuthor(e.target.value)} onKeyDown={enter} />
+    <Dialog title={t.books.newBook(t.books.status[status])} onClose={onClose}>
+      <input className="field" autoFocus value={title} placeholder={t.books.fTitle} onChange={e => setTitle(e.target.value)} onKeyDown={enter} />
+      <input className="field" value={author} placeholder={t.books.authorOptional} onChange={e => setAuthor(e.target.value)} onKeyDown={enter} />
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" disabled={!title.trim()} onClick={ok}>
-          Add
+          {t.books.add}
         </button>
       </div>
     </Dialog>
@@ -160,14 +161,14 @@ export function BooksView({ books, quotes, openPath }: Props) {
       await flushAll(); // an open book screen writes its last edits first
       const old = await notes.patchHeader(b.path, patch);
       bump();
-      toast({ text, action: { label: "Undo", run: () => notes.patchHeader(b.path, old).then(bump, fail) } });
+      toast({ text, action: { label: t.common.undo, run: () => notes.patchHeader(b.path, old).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
   };
 
   const setStatus = (b: Book, s: BookStatus, reason?: string) =>
-    change(b, statusPatch(b.note.data, s, { reason }), `Moved to ${STATUSES.find(x => x.id === s)!.label}`);
+    change(b, statusPatch(b.note.data, s, { reason }), t.books.movedTo(t.books.status[s]));
 
   const remove = async (b: Book) => {
     try {
@@ -176,8 +177,8 @@ export function BooksView({ books, quotes, openPath }: Props) {
       const trashed = await moveToTrash(notes.storage, b.dir);
       bump();
       toast({
-        text: "Book deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, b.dir).then(bump, fail) },
+        text: t.books.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, b.dir).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -200,7 +201,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
       setQuote(null);
       const trashed = await moveToTrash(notes.storage, path);
       bump();
-      toast({ text: "Quote deleted", action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) } });
+      toast({ text: t.books.quoteDeleted, action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
@@ -218,15 +219,15 @@ export function BooksView({ books, quotes, openPath }: Props) {
     <div className={`split books${open || stats ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Books</h1>
+          <h1>{t.books.title}</h1>
           <div className="row">
             {books.length > 0 && (
-              <button className={`btn ghost icon${stats ? " active" : ""}`} aria-label="Reading stats" title="Reading stats" onClick={() => setStats(true)}>
+              <button className={`btn ghost icon${stats ? " active" : ""}`} aria-label={t.books.stats} title={t.books.stats} onClick={() => setStats(true)}>
                 <ChartColumn size={20} />
               </button>
             )}
             <button className="btn primary" onClick={() => setAdding(true)}>
-              <Plus size={18} /> New
+              <Plus size={18} /> {t.common.new}
             </button>
           </div>
         </div>
@@ -237,26 +238,26 @@ export function BooksView({ books, quotes, openPath }: Props) {
               className="field"
               type="search"
               value={query}
-              placeholder="Title or author"
-              aria-label="Search books"
+              placeholder={t.books.searchPlaceholder}
+              aria-label={t.books.searchBooks}
               onChange={e => setQuery(e.target.value)}
             />
           </div>
         )}
         {!searching && <QuoteReview quotes={quotes} onOpen={openQuote} />}
         {!searching && (
-          <div className="chips" aria-label="Status">
+          <div className="chips" aria-label={t.books.fStatus}>
             {STATUSES.map(s => (
               <button key={s.id} className={`chip${tab === s.id ? " active" : ""}`} onClick={() => setTab(s.id)}>
-                {s.label} <span className="mono muted">{count(s.id)}</span>
+                {t.books.status[s.id]} <span className="mono muted">{count(s.id)}</span>
               </button>
             ))}
           </div>
         )}
         {books.length === 0 ? (
-          <p className="muted empty-note">No books yet. Press New: a title is enough, the rest can come later.</p>
+          <p className="muted empty-note">{t.books.none}</p>
         ) : shown.length === 0 ? (
-          <p className="muted empty-note">{searching ? "No book matches." : "Nothing here yet."}</p>
+          <p className="muted empty-note">{searching ? t.books.noMatch : t.books.nothingHere}</p>
         ) : (
           <ul className="shelf">
             {shown.map(b => (
@@ -287,7 +288,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
             onOpenQuote={setQuote}
           />
         ) : (
-          <div className="detail-empty muted">Pick a book or press New.</div>
+          <div className="detail-empty muted">{t.books.pick}</div>
         )}
       </div>
       {menu && (
@@ -301,9 +302,9 @@ export function BooksView({ books, quotes, openPath }: Props) {
       )}
       {dnf && (
         <AskText
-          title="Why did you stop? (optional)"
-          placeholder="e.g. Too slow for me"
-          okLabel="Did not finish"
+          title={t.books.whyStop}
+          placeholder={t.books.whyStopEg}
+          okLabel={t.books.status.dnf}
           optional
           onClose={() => setDnf(null)}
           onOk={reason => {

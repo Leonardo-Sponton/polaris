@@ -4,6 +4,7 @@ import type { Capture } from "../data/inbox";
 import { useApp } from "./context";
 import { QuickAdd } from "./todo/QuickAdd";
 import { useCapture, whereLabel } from "./useCapture";
+import { t } from "../i18n";
 
 // The small window opened by `hypomnemata --capture` (SPEC 5.2): type, Enter, gone.
 
@@ -30,12 +31,12 @@ export function CaptureWindow() {
     <div className="capture-window">
       {saved ? (
         <p className="capture-done">
-          <Check size={20} /> Added to {saved}
+          <Check size={20} /> {t.capture.addedTo(saved)}
         </p>
       ) : (
         <>
-          <QuickAdd placeholder="Capture anything…" autoFocus onCapture={onCapture} />
-          <p className="muted capture-hint mono">Enter saves · Esc closes · t = to-do, or add a date, #list</p>
+          <QuickAdd placeholder={t.capture.placeholder} autoFocus onCapture={onCapture} />
+          <p className="muted capture-hint mono">{t.capture.hint}</p>
         </>
       )}
     </div>
@@ -46,7 +47,7 @@ export function CaptureWindow() {
 export function CaptureNotReady() {
   return (
     <div className="capture-window">
-      <p className="muted">Open Hypomnemata once to choose the data folder, then capture works.</p>
+      <p className="muted">{t.capture.notReady}</p>
     </div>
   );
 }

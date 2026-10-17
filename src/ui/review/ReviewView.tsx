@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { cap, dateFmt, t } from "../../i18n";
 import { ArrowLeft, ChevronLeft, ChevronRight, Feather, Moon, NotebookPen, Shuffle, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { isoDate } from "../../data/dates";
@@ -7,6 +8,7 @@ import type { Note } from "../../data/notes";
 import {
   QUESTIONS,
   VIRTUES,
+  heading,
   isEmptyReview,
   joinReview,
   loadReviews,
@@ -25,7 +27,7 @@ import { Calendar, monthOf } from "../journal/Calendar";
 import { CloseDay } from "../journal/CloseDay";
 import type { ThoughtsData } from "../thoughts/ThoughtsView";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 
 // Review, the evening examination (SPEC 5.8): calendar and the month's reviews on the left, the
 // day's questions on the right (one at a time on the phone). Built like the Journal: a day gets a
@@ -37,7 +39,7 @@ export function useReviews(): ReviewEntry[] {
   const [entries, setEntries] = useState<ReviewEntry[]>([]);
   useEffect(() => {
     let alive = true;
-    loadReviews(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(l => alive && setEntries(l));
+    loadReviews(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(l => alive && setEntries(l));
     return () => {
       alive = false;
     };
@@ -45,8 +47,8 @@ export function useReviews(): ReviewEntry[] {
   return entries;
 }
 
-const LONG = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-const ROW = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short" });
+const LONG = () => dateFmt({ weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const ROW = () => dateFmt({ weekday: "short", day: "numeric", month: "short" });
 const at = (day: string) => new Date(`${day}T12:00`);
 const wide = () => matchMedia("(min-width: 720px)").matches;
 
@@ -95,17 +97,15 @@ export function ReviewView({ entries, thoughts, openDay: target, onJournal, onTh
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Review</h1>
+          <h1>{t.review.title}</h1>
           <button className="btn primary" onClick={() => pick(isoDate())}>
-            Today
+            {t.journal.today}
           </button>
         </div>
         <Calendar month={month} setMonth={setMonth} selected={open} entries={byDay} onPick={pick} />
         {shown.length === 0 ? (
           <p className="muted empty-note">
-            {entries.length === 0
-              ? "No reviews yet. Pick a day, or press Today, and answer what you want. An empty day keeps no file."
-              : "No reviews this month."}
+            {entries.length === 0 ? t.review.none : t.review.noneMonth}
           </p>
         ) : (
           <ul className="list">
@@ -113,11 +113,11 @@ export function ReviewView({ entries, thoughts, openDay: target, onJournal, onTh
               <li key={e.day}>
                 <button className={`list-item${open === e.day ? " active" : ""}`} onClick={() => pick(e.day)}>
                   <span className="list-meta mono">
-                    {ROW.format(at(e.day))} · {e.answered}/{QUESTIONS.length}
+                    {cap(ROW().format(at(e.day)))} · {e.answered}/{QUESTIONS.length}
                     {e.virtues.length > 0 && <VirtueDots list={e.virtues} />}
                   </span>
                   <span className="list-title journal-preview">
-                    {e.preview || <span className="muted">(only virtues)</span>}
+                    {e.preview || <span className="muted">{t.review.onlyVirtues}</span>}
                   </span>
                 </button>
               </li>
@@ -138,7 +138,7 @@ export function ReviewView({ entries, thoughts, openDay: target, onJournal, onTh
             onClose={() => setClosing(open)}
           />
         ) : (
-          <div className="detail-empty muted">Pick a day.</div>
+          <div className="detail-empty muted">{t.journal.pickDay}</div>
         )}
       </div>
       {closing && <CloseDay day={closing} onClose={() => setClosing(null)} />}
@@ -148,7 +148,7 @@ export function ReviewView({ entries, thoughts, openDay: target, onJournal, onTh
 
 function VirtueDots({ list }: { list: Virtue[] }) {
   return (
-    <span className="virtue-dots" aria-label={`Practised: ${list.join(", ")}`}>
+    <span className="virtue-dots" aria-label={t.review.practisedList(list.map(v => t.review.virtues[v][0]).join(", "))}>
       {list.map(v => (
         <span key={v} className="dot" style={{ background: `var(--${VIRTUES.find(x => x.id === v)!.color})` }} />
       ))}
@@ -200,19 +200,19 @@ function ReviewDay(props: DayProps) {
 
   const bar = (status: string, extra?: ReactNode) => (
     <div className="note-bar">
-      <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+      <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
         <ArrowLeft size={20} />
       </button>
-      <button className="btn ghost icon" aria-label="Previous day" title="Previous day (Alt+←)" onClick={() => onDay(shiftDay(day, -1))}>
+      <button className="btn ghost icon" aria-label={t.journal.prevDay} title={t.journal.prevDayKey} onClick={() => onDay(shiftDay(day, -1))}>
         <ChevronLeft size={20} />
       </button>
-      <button className="btn ghost icon" aria-label="Next day" title="Next day (Alt+→)" onClick={() => onDay(shiftDay(day, 1))}>
+      <button className="btn ghost icon" aria-label={t.journal.nextDay} title={t.journal.nextDayKey} onClick={() => onDay(shiftDay(day, 1))}>
         <ChevronRight size={20} />
       </button>
       <span className="note-status mono" aria-live="polite">
         {status}
       </span>
-      <button className="btn ghost icon" aria-label="Journal of this day" title="Journal of this day" onClick={props.onJournal}>
+      <button className="btn ghost icon" aria-label={t.journal.journalOfDay} title={t.journal.journalOfDay} onClick={props.onJournal}>
         <NotebookPen size={18} />
       </button>
       {extra}
@@ -221,8 +221,8 @@ function ReviewDay(props: DayProps) {
 
   const head = (
     <div className="journal-head">
-      <h2 className="journal-date">{LONG.format(at(day))}</h2>
-      {day === isoDate() && <span className="muted small">Today</span>}
+      <h2 className="journal-date">{cap(LONG().format(at(day)))}</h2>
+      {day === isoDate() && <span className="muted small">{t.journal.today}</span>}
     </div>
   );
 
@@ -246,7 +246,7 @@ function ReviewDay(props: DayProps) {
                   />
                 )}
                 <button className="review-empty" onClick={() => create({}, { focus: q.title })}>
-                  Write here, if you want…
+                  {t.review.writeHere}
                 </button>
               </QuestionBlock>
             ))}
@@ -264,13 +264,13 @@ function DayThought(props: { day: string; data: ThoughtsData; picked?: string; o
   const { notes, bump, toast } = useApp();
   const { data, day } = props;
   if (!data.loaded) return null;
-  const own = props.picked ? data.all.find(t => t.id === props.picked) : undefined;
+  const own = props.picked ? data.all.find(x => x.id === props.picked) : undefined;
   const d = own ? { thought: own, picked: true } : thoughtOfDay(data.all, data.state, day);
   if (!d) return null;
-  const t = d.thought;
+  const th = d.thought;
 
   const another = async () => {
-    const next = randomThought(data.all, t.id);
+    const next = randomThought(data.all, th.id);
     if (!next) return;
     try {
       await pickForDay(notes.storage, next.id, day);
@@ -282,20 +282,20 @@ function DayThought(props: { day: string; data: ThoughtsData; picked?: string; o
   };
 
   return (
-    <div className="today-card quote-review review-thought" aria-label="Thought of the day">
+    <div className="today-card quote-review review-thought" aria-label={t.review.thoughtOfDay}>
       <div className="qr-head muted small">
         <Feather size={16} />
-        <span>{day === isoDate() ? "Thought of the day" : "Thought of this day"}</span>
-        {d.picked && <span className="count">picked</span>}
+        <span>{day === isoDate() ? t.review.thoughtOfDay : t.review.thoughtOfThisDay}</span>
+        {d.picked && <span className="count">{t.thoughts.picked}</span>}
       </div>
-      <blockquote className="qr-text">{t.text}</blockquote>
-      {(t.author || t.work) && <div className="qr-source muted small">— {citation(t)}</div>}
+      <blockquote className="qr-text">{th.text}</blockquote>
+      {(th.author || th.work) && <div className="qr-source muted small">— {citation(th)}</div>}
       <div className="row qr-actions">
-        <button className="btn ghost" onClick={another} title="Another thought for this day, drawn from the library">
-          <Shuffle size={16} /> Another
+        <button className="btn ghost" onClick={another} title={t.review.anotherTitle}>
+          <Shuffle size={16} /> {t.review.another}
         </button>
-        <button className="btn ghost" onClick={() => props.onOpen(t)}>
-          Open
+        <button className="btn ghost" onClick={() => props.onOpen(th)}>
+          {t.common.open}
         </button>
       </div>
     </div>
@@ -304,12 +304,12 @@ function DayThought(props: { day: string; data: ThoughtsData; picked?: string; o
 
 function QuestionBlock({ q, title, note, children }: { q?: Question; title?: string; note?: string; children: ReactNode }) {
   return (
-    <section className="review-q" aria-label={q?.title ?? title}>
-      <h3>{q?.title ?? title}</h3>
-      {q && <p className="review-question">{q.question}</p>}
+    <section className="review-q" aria-label={q ? heading(q) : title}>
+      <h3>{q ? heading(q) : title}</h3>
+      {q && <p className="review-question">{t.review.questions[q.title]}</p>}
       {q?.support && (
         <p className="review-support muted small">
-          {q.support.lead} “{q.support.text}”
+          {t.review.leads[q.title]} “{q.support.text}”
         </p>
       )}
       {note && <p className="review-support muted small">{note}</p>}
@@ -331,10 +331,10 @@ function VirtuePicker(props: { virtues: Virtue[]; develop: Virtue[]; onChange(fi
               className={`chip mood${on ? " active" : ""}`}
               style={{ "--mood": `var(--${v.color})` } as CSSProperties}
               aria-pressed={on}
-              title={v.hint}
+              title={t.review.virtues[v.id][1]}
               onClick={() => props.onChange(field, virtuesOf(on ? list.filter(x => x !== v.id) : [...list, v.id]))}
             >
-              {v.label}
+              {t.review.virtues[v.id][0]}
             </button>
           );
         })}
@@ -343,8 +343,8 @@ function VirtuePicker(props: { virtues: Virtue[]; develop: Virtue[]; onChange(fi
   );
   return (
     <div className="virtues">
-      {row("virtues", "Practised", props.virtues)}
-      {row("develop", "To develop", props.develop)}
+      {row("virtues", t.review.practised, props.virtues)}
+      {row("develop", t.review.toDevelop, props.develop)}
     </div>
   );
 }
@@ -353,7 +353,7 @@ function DayActions({ onClose }: { onClose(): void }) {
   return (
     <div className="row task-actions">
       <button className="btn" onClick={onClose}>
-        <Moon size={18} /> Close the day
+        <Moon size={18} /> {t.shell.closeDay}
       </button>
     </div>
   );
@@ -380,8 +380,8 @@ function ReviewPage(props: PageProps) {
       props.onGone();
       bump();
       toast({
-        text: "Review deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+        text: t.review.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -391,9 +391,9 @@ function ReviewPage(props: PageProps) {
   return (
     <div className="note-editor">
       {bar(
-        f.note ? STATUS_TEXT[f.status] : "",
+        f.note ? t.note.status[f.status] : "",
         f.note && (
-          <button className="btn ghost icon" aria-label="Delete review" title="Delete" onClick={remove}>
+          <button className="btn ghost icon" aria-label={t.review.deleteReview} title={t.common.delete} onClick={remove}>
             <Trash2 size={18} />
           </button>
         ),
@@ -422,7 +422,7 @@ function ReviewForm(props: PageProps & { file: NoteFile; note: Note }) {
   const [hidden, setHidden] = useState<Set<string>>(() => {
     if (day >= isoDate() || start.created) return new Set();
     const blank = QUESTIONS.filter(q => !(parts.answers[q.title] ?? "").trim()).map(q => q.title);
-    return new Set(blank.filter(t => t !== "Virtues" || !(virtues.length || develop.length)));
+    return new Set(blank.filter(x => x !== "Virtues" || !(virtues.length || develop.length)));
   });
 
   const write = () => f.setBody(joinReview(parts));
@@ -433,7 +433,7 @@ function ReviewForm(props: PageProps & { file: NoteFile; note: Note }) {
 
   const field = (key: string, text: string, onChange: (t: string) => void) => (
     <div className="task-notes review-field">
-      <Editor text={text} autoFocus={start.focus === key} placeholder="Write here, if you want…" onSaveNow={f.saveNow} onChange={onChange} />
+      <Editor text={text} autoFocus={start.focus === key} placeholder={t.review.writeHere} onSaveNow={f.saveNow} onChange={onChange} />
     </div>
   );
 
@@ -452,9 +452,9 @@ function ReviewForm(props: PageProps & { file: NoteFile; note: Note }) {
           }}
         />
         {parts.free.trim() && (
-          <QuestionBlock title="Free text" note="Text written outside the questions.">
-            {field("", parts.free, t => {
-              parts.free = t;
+          <QuestionBlock title={t.review.freeText} note={t.review.freeNote}>
+            {field("", parts.free, text => {
+              parts.free = text;
               write();
             })}
           </QuestionBlock>
@@ -471,18 +471,18 @@ function ReviewForm(props: PageProps & { file: NoteFile; note: Note }) {
                 }}
               />
             )}
-            {field(q.title, parts.answers[q.title] ?? "", t => setAnswer(q.title, t))}
+            {field(q.title, parts.answers[q.title] ?? "", text => setAnswer(q.title, text))}
           </QuestionBlock>
         ))}
         {hidden.size > 0 && (
           <button className="btn ghost review-more" onClick={() => setHidden(new Set())}>
-            {hidden.size > 1 ? `Show the ${hidden.size} blank questions` : "Show the blank question"}
+            {t.review.showBlank(hidden.size)}
           </button>
         )}
         {parts.extras.map((x, i) => (
-          <QuestionBlock key={i} title={x.title} note="A section with another name, kept as it was.">
-            {field(`extra-${i}`, x.text, t => {
-              x.text = t;
+          <QuestionBlock key={i} title={x.title} note={t.review.otherSection}>
+            {field(`extra-${i}`, x.text, text => {
+              x.text = text;
               write();
             })}
           </QuestionBlock>

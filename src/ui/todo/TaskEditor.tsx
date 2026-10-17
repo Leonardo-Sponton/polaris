@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, Ban, Check, ListPlus, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { addDays, isoDate, parseLocal, slugify } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
 import type { TodoList } from "../../data/lists";
-import { parseQuickAdd } from "../../data/quickadd";
+import { asRepeat, parseQuickAdd } from "../../data/quickadd";
 import { describeRule, firstOnOrAfter, formatRule, parseRule, pinRule } from "../../data/recur";
 import { dayLabel, joinTitle, splitTitle, toTask } from "../../data/todo";
 import type { Note } from "../../data/notes";
@@ -14,7 +15,7 @@ import { useApp } from "../context";
 import { AskText } from "../Dialog";
 import { useFiveW2H } from "../FiveW2H";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 import { ScheduleDialog } from "./Schedule";
 
 // The task screen (SPEC 5.3): title, when / evening / time / due / repeat, list, priority,
@@ -39,17 +40,17 @@ export function TaskEditor(props: Props) {
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={props.onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={props.onBack} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && (
           <button
             className="btn ghost icon"
-            aria-label="Delete task"
-            title="Delete"
+            aria-label={t.todo.deleteTask}
+            title={t.common.delete}
             onClick={() => f.saveNow().then(props.onDelete)}
           >
             <Trash2 size={18} />
@@ -70,12 +71,7 @@ export function TaskEditor(props: Props) {
   );
 }
 
-const PRIOS: [number | undefined, string][] = [
-  [undefined, "None"],
-  [1, "High"],
-  [2, "Medium"],
-  [3, "Low"],
-];
+const PRIOS = [undefined, 1, 2, 3] as const;
 
 function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReopen }: Props & { file: NoteFile; note: Note }) {
   const split = splitTitle(note.body);
@@ -89,9 +85,9 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
   const w = useFiveW2H(split.rest, writeBody);
   const [rest, setRest] = useState(w.initialText);
 
-  const t = toTask({ ...note, data: d, body: joinTitle(title, rest) });
-  const open = t.status === "open";
-  const rule = t.repeat ? parseRule(t.repeat) : null;
+  const k = toTask({ ...note, data: d, body: joinTitle(title, rest) });
+  const open = k.status === "open";
+  const rule = k.repeat ? parseRule(k.repeat) : null;
   const [repeatText, setRepeatText] = useState(rule ? describeRule(rule) : "");
   const [repeatErr, setRepeatErr] = useState(false);
 
@@ -104,18 +100,18 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
     const text = repeatText.trim();
     if (!text) {
       setRepeatErr(false);
-      if (t.repeat) patch({ repeat: undefined });
+      if (k.repeat) patch({ repeat: undefined });
       return;
     }
-    const q = parseQuickAdd(/^every\b|^(daily|weekly|monthly|yearly|annually)\b/i.test(text) ? text : `every ${text}`);
+    const q = parseQuickAdd(asRepeat(text));
     if (!q.repeat) return setRepeatErr(true);
     setRepeatErr(false);
     const r = parseRule(q.repeat)!;
     // A repeating task needs a date to count from: without one it starts on its first day.
-    const start = parseLocal(t.when) ?? firstOnOrAfter(r, parseLocal(isoDate())!);
+    const start = parseLocal(k.when) ?? firstOnOrAfter(r, parseLocal(isoDate())!);
     const value = formatRule(pinRule(r, start));
     setRepeatText(describeRule(parseRule(value)!));
-    patch({ repeat: value, ...(t.when && t.when !== "someday" ? {} : { when: isoDate(start) }) });
+    patch({ repeat: value, ...(k.when && k.when !== "someday" ? {} : { when: isoDate(start) }) });
   };
 
   const addSubtask = () => {
@@ -127,31 +123,31 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
     writeBody();
   };
 
-  const whenLabel = !t.when
-    ? "No date"
-    : t.when === "someday"
-      ? "Someday"
-      : `${dayLabel(t.when)}${t.evening ? " · Evening" : ""}`;
+  const whenLabel = !k.when
+    ? t.todo.noDate
+    : k.when === "someday"
+      ? t.todo.views.someday
+      : `${dayLabel(k.when)}${k.evening ? t.todo.eveningSuffix : ""}`;
 
   return (
     <div className="page task-page">
       <div className="page-inner stack">
         <div className="task-head">
           <button
-            className={`check big${!open ? " on" : ""}${t.priority ? ` p${t.priority}` : ""}`}
+            className={`check big${!open ? " on" : ""}${k.priority ? ` p${k.priority}` : ""}`}
             role="checkbox"
             aria-checked={!open}
-            aria-label={open ? "Mark as done" : "Mark as not done"}
+            aria-label={open ? t.todo.markDone : t.todo.markNotDone}
             onClick={() => (open ? onFinish("done") : onReopen())}
           >
             {!open && <Check size={16} strokeWidth={3} />}
           </button>
           <textarea
-            className={`task-title-input${t.status === "canceled" ? " canceled" : ""}`}
+            className={`task-title-input${k.status === "canceled" ? " canceled" : ""}`}
             rows={1}
             value={title}
-            placeholder="Task title"
-            aria-label="Title"
+            placeholder={t.todo.titlePlaceholder}
+            aria-label={t.todo.title}
             onChange={e => {
               const v = e.target.value.replace(/\n/g, " ");
               setTitle(v);
@@ -164,88 +160,88 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
 
         {!open && (
           <p className="muted task-closed">
-            {t.status === "done" ? "Done" : "Canceled"}
-            {t.doneAt ? ` · ${t.doneAt.replace("T", " ")}` : ""}
+            {k.status === "done" ? t.todo.done : t.todo.canceled}
+            {k.doneAt ? ` · ${k.doneAt.replace("T", " ")}` : ""}
           </p>
         )}
 
         <div className="task-fields">
-          <span className="fl">When</span>
+          <span className="fl">{t.todo.fWhen}</span>
           <button className="btn field-btn" onClick={() => setPicking(true)}>
             {whenLabel}
           </button>
 
-          <span className="fl">Time</span>
+          <span className="fl">{t.todo.fTime}</span>
           <div className="row">
             <input
               type="time"
               className="field"
-              value={t.time ?? ""}
+              value={k.time ?? ""}
               onChange={e => patch({ time: e.target.value || undefined })}
             />
           </div>
 
-          <span className="fl">Reminder</span>
-          <ReminderField task={t} patch={patch} />
+          <span className="fl">{t.todo.fReminder}</span>
+          <ReminderField task={k} patch={patch} />
 
-          <span className="fl">Deadline</span>
+          <span className="fl">{t.todo.fDeadline}</span>
           <div className="row">
             <input
               type="date"
               className="field"
-              value={t.due ?? ""}
+              value={k.due ?? ""}
               onChange={e => patch({ due: e.target.value || undefined })}
             />
           </div>
 
-          <span className="fl">Repeat</span>
+          <span className="fl">{t.todo.fRepeat}</span>
           <div className="stack" style={{ gap: 4 }}>
             <input
               className={`field${repeatErr ? " bad" : ""}`}
               value={repeatText}
-              placeholder="e.g. every monday, every 2 weeks"
+              placeholder={t.todo.repeatEg}
               onChange={e => setRepeatText(e.target.value)}
               onBlur={commitRepeat}
               onKeyDown={e => e.key === "Enter" && (e.target as HTMLElement).blur()}
             />
             {repeatErr && (
               <span className="err small">
-                Not understood. Try “every day”, “every mon and thu”, “every month on the 5th”.
+                {t.todo.repeatBad}
               </span>
             )}
           </div>
 
-          <span className="fl">List</span>
+          <span className="fl">{t.todo.fList}</span>
           <select
             className="field"
-            value={t.list ?? ""}
+            value={k.list ?? ""}
             onChange={e =>
               e.target.value === "\u0000new" ? setNewList(true) : patch({ list: e.target.value || undefined })
             }
           >
-            <option value="">No list</option>
+            <option value="">{t.todo.noList}</option>
             {lists.map(l => (
               <option key={l.id} value={l.id}>
                 {l.name}
               </option>
             ))}
-            <option value={"\u0000new"}>New list…</option>
+            <option value={"\u0000new"}>{t.todo.newListDots}</option>
           </select>
 
-          <ProjectField task={t} projects={projects} patch={patch} />
+          <ProjectField task={k} projects={projects} patch={patch} />
 
-          <span className="fl">Priority</span>
+          <span className="fl">{t.todo.fPriority}</span>
           <div className="segmented">
-            {PRIOS.map(([p, label]) => (
-              <button key={label} aria-pressed={t.priority === p} onClick={() => patch({ priority: p })}>
-                {label}
+            {PRIOS.map(p => (
+              <button key={p ?? 0} aria-pressed={k.priority === p} onClick={() => patch({ priority: p })}>
+                {t.todo.prio[p ?? "none"]}
               </button>
             ))}
           </div>
         </div>
 
         <div className="task-notes-head">
-          <span className="fl">Notes and subtasks</span>
+          <span className="fl">{t.todo.notesAndSubtasks}</span>
           <div className="row" style={{ gap: 2 }}>
             {!w.has && (
               <button className="btn ghost" onClick={w.insert}>
@@ -253,7 +249,7 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
               </button>
             )}
             <button className="btn ghost" onClick={addSubtask}>
-              <ListPlus size={18} /> Subtask
+              <ListPlus size={18} /> {t.todo.subtask}
             </button>
           </div>
         </div>
@@ -262,7 +258,7 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
             key={notesRev}
             text={rest}
             autoFocus={notesRev > 0}
-            placeholder="Notes…"
+            placeholder={t.todo.notes}
             onSaveNow={f.saveNow}
             commands={{ "5w2h": w.insert }}
             onChange={text => {
@@ -276,29 +272,29 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
         <div className="row task-actions">
           {open ? (
             <button className="btn" onClick={() => onFinish("canceled")}>
-              <Ban size={18} /> Cancel task
+              <Ban size={18} /> {t.todo.cancelTask}
             </button>
           ) : (
             <button className="btn" onClick={onReopen}>
-              <RotateCcw size={18} /> Reopen
+              <RotateCcw size={18} /> {t.todo.reopen}
             </button>
           )}
-          <span className="muted small mono">Created {String(d.created ?? "").replace("T", " ")}</span>
+          <span className="muted small mono">{t.todo.created(String(d.created ?? "").replace("T", " "))}</span>
         </div>
       </div>
 
       {picking && (
         <ScheduleDialog
-          current={{ when: t.when, evening: t.evening }}
+          current={{ when: k.when, evening: k.evening }}
           onPick={w => patch({ when: w.when, evening: w.evening || undefined })}
           onClose={() => setPicking(false)}
         />
       )}
       {newList && (
         <AskText
-          title="New list"
-          placeholder="e.g. Home"
-          okLabel="Create"
+          title={t.todo.newList}
+          placeholder={t.todo.newListEg}
+          okLabel={t.todo.create}
           onClose={() => setNewList(false)}
           onOk={async name => {
             setNewList(false);
@@ -314,23 +310,23 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
  * Project and step (SPEC 5.5): a project task shows up under its step on the project page.
  * Picking a project puts the task on the project's current step.
  */
-function ProjectField({ task: t, projects, patch }: { task: ReturnType<typeof toTask>; projects: Project[]; patch(p: Data): void }) {
-  const p = projects.find(x => x.slug === t.project);
+function ProjectField({ task: k, projects, patch }: { task: ReturnType<typeof toTask>; projects: Project[]; patch(p: Data): void }) {
+  const p = projects.find(x => x.slug === k.project);
   const choices = projects.filter(x => x === p || x.status === "active" || x.status === "on-hold");
   return (
     <>
-      <span className="fl">Project</span>
+      <span className="fl">{t.todo.fProject}</span>
       <select
         className="field"
-        value={t.project ?? ""}
-        aria-label="Project"
+        value={k.project ?? ""}
+        aria-label={t.todo.fProject}
         onChange={e => {
           const to = projects.find(x => x.slug === e.target.value);
           patch(to ? { project: to.slug, step: to.step.id } : { project: undefined, step: undefined });
         }}
       >
-        <option value="">No project</option>
-        {t.project && !p && <option value={t.project}>{t.project} (not found)</option>}
+        <option value="">{t.todo.noProject}</option>
+        {k.project && !p && <option value={k.project}>{t.todo.notFound(k.project)}</option>}
         {choices.map(x => (
           <option key={x.slug} value={x.slug}>
             {x.title || x.slug}
@@ -339,15 +335,15 @@ function ProjectField({ task: t, projects, patch }: { task: ReturnType<typeof to
       </select>
       {p && (
         <>
-          <span className="fl">Step</span>
+          <span className="fl">{t.todo.fStep}</span>
           <select
             className="field"
-            value={t.step ?? ""}
-            aria-label="Step"
+            value={k.step ?? ""}
+            aria-label={t.todo.fStep}
             onChange={e => patch({ step: e.target.value || undefined })}
           >
-            <option value="">No step</option>
-            {t.step && !p.flow.steps.some(s => s.id === t.step) && <option value={t.step}>{t.step}</option>}
+            <option value="">{t.todo.noStep}</option>
+            {k.step && !p.flow.steps.some(s => s.id === k.step) && <option value={k.step}>{k.step}</option>}
             {p.flow.steps.map((s, i) => (
               <option key={s.id} value={s.id}>
                 {i + 1}. {s.name}
@@ -364,12 +360,12 @@ function ProjectField({ task: t, projects, patch }: { task: ReturnType<typeof to
  * Reminder (SPEC 5.3): by default a task with a date and a time reminds at that time. It can be
  * turned off (`remind: none`) or set to any other moment (`remind: <date>T<time>`).
  */
-function ReminderField({ task: t, patch }: { task: ReturnType<typeof toTask>; patch(p: Data): void }) {
+function ReminderField({ task: k, patch }: { task: ReturnType<typeof toTask>; patch(p: Data): void }) {
   const { platform } = useApp();
   const [blocked, setBlocked] = useState(false);
-  const hasAuto = !!t.time && !!t.when && t.when !== "someday";
-  const mode = t.remind === "none" ? "none" : t.remind ? "custom" : hasAuto ? "auto" : "none";
-  const at = reminderOf(t);
+  const hasAuto = !!k.time && !!k.when && k.when !== "someday";
+  const mode = k.remind === "none" ? "none" : k.remind ? "custom" : hasAuto ? "auto" : "none";
+  const at = reminderOf(k);
 
   // Shown only when a reminder is set but Android does not allow notifications.
   useEffect(() => {
@@ -388,34 +384,34 @@ function ReminderField({ task: t, patch }: { task: ReturnType<typeof toTask>; pa
     if (m === "none") patch({ remind: hasAuto ? "none" : undefined });
     else if (m === "auto") patch({ remind: undefined });
     else {
-      const day = t.when && t.when !== "someday" ? t.when : isoDate(addDays(new Date(), 1));
-      patch({ remind: at ?? `${day}T${t.time ?? "09:00"}` });
+      const day = k.when && k.when !== "someday" ? k.when : isoDate(addDays(new Date(), 1));
+      patch({ remind: at ?? `${day}T${k.time ?? "09:00"}` });
     }
   };
 
   return (
     <div className="stack" style={{ gap: 6 }}>
-      <select className="field" value={mode} onChange={e => choose(e.target.value)} aria-label="Reminder">
-        <option value="none">None</option>
+      <select className="field" value={mode} onChange={e => choose(e.target.value)} aria-label={t.todo.fReminder}>
+        <option value="none">{t.todo.remindNone}</option>
         <option value="auto" disabled={!hasAuto}>
-          {hasAuto ? `At the task time (${t.time})` : "At the task time (set a date and time)"}
+          {hasAuto ? t.todo.remindAuto(k.time!) : t.todo.remindAutoOff}
         </option>
-        <option value="custom">Other time…</option>
+        <option value="custom">{t.todo.remindOther}</option>
       </select>
       {mode === "custom" && (
         <input
           type="datetime-local"
           className="field"
-          value={t.remind}
-          aria-label="Reminder time"
+          value={k.remind}
+          aria-label={t.todo.remindTime}
           onChange={e => e.target.value && patch({ remind: e.target.value.slice(0, 16) })}
         />
       )}
       {blocked && (
         <div className="row">
-          <span className="err small">Notifications are off for Hypomnemata.</span>
+          <span className="err small">{t.todo.notificationsOff}</span>
           <button className="btn" onClick={() => platform.askNotifications?.()}>
-            Allow
+            {t.settings.allow}
           </button>
         </div>
       )}

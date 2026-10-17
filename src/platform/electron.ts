@@ -14,6 +14,7 @@ interface HypoBridge {
   closeWindow(): Promise<void>;
   saveBackup(name: string, data: Uint8Array): Promise<string | null>;
   setReminders(list: Reminder[]): Promise<void>;
+  setLabels(labels: Record<string, string>): Promise<void>;
   onReminderOpen(cb: (path: string) => void): () => void;
   sync: {
     devices(): Promise<{ adb: boolean; list: Device[] }>;
@@ -87,6 +88,7 @@ export function electronPlatform(): Platform {
     closeWindow: () => b.closeWindow(),
     saveBackup: (name, data) => b.saveBackup(name, data),
     setReminders: list => b.setReminders(list),
+    setLabels: labels => b.setLabels(labels),
     onReminderOpen: cb => b.onReminderOpen(cb),
     sync: syncBridge(b),
   };

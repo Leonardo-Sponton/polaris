@@ -1,4 +1,5 @@
 import { App } from "@capacitor/app";
+import { t } from "../i18n";
 import { registerPlugin } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { parseLocal } from "../data/dates";
@@ -56,14 +57,14 @@ async function setReminders(list: Reminder[]) {
   if (perm.display === "prompt" || perm.display === "prompt-with-rationale") await LocalNotifications.requestPermissions();
   const exact = (await LocalNotifications.checkExactNotificationSetting()).exact_alarm === "granted";
   if (!channelReady) {
-    await LocalNotifications.createChannel({ id: CHANNEL, name: "Reminders", importance: 4, visibility: 1 });
+    await LocalNotifications.createChannel({ id: CHANNEL, name: t.settings.reminders, importance: 4, visibility: 1 });
     channelReady = true;
   }
   await LocalNotifications.schedule({
     notifications: list.map(r => ({
       id: r.id,
       title: r.title,
-      body: r.text || "Reminder",
+      body: r.text || t.tray.reminder,
       channelId: CHANNEL,
       autoCancel: true,
       schedule: { at: parseLocal(r.at)!, allowWhileIdle: true },
@@ -77,7 +78,7 @@ export function androidPlatform(): Platform {
   // The folder is a per-device choice, so it is kept in the WebView's own storage.
   const root = () => {
     const r = localStorage.getItem(KEY);
-    if (!r) throw new Error("No data folder chosen");
+    if (!r) throw new Error(t.errors.noDataFolder);
     return r;
   };
   const storage: Storage = {

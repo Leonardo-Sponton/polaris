@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FolderOpen, ShieldCheck } from "lucide-react";
 import type { Platform } from "../platform/types";
+import { t } from "../i18n";
 
 // First run: choose where the notes live (SPEC 2.3).
 export function FirstRun({ platform, onDone }: { platform: Platform; onDone: () => void }) {
@@ -28,26 +29,23 @@ export function FirstRun({ platform, onDone }: { platform: Platform; onDone: () 
   return (
     <div className="center-screen">
       <div className="card stack">
-        <h1>Welcome to Hypomnemata</h1>
-        <p>
-          Your notes are plain Markdown files in a folder you choose. You can open them with any editor and
-          copy the folder to back them up.
-        </p>
+        <h1>{t.boot.welcome}</h1>
+        <p>{t.boot.intro}</p>
         <label className="stack" style={{ gap: 6 }}>
-          <span className="muted">Data folder</span>
+          <span className="muted">{t.boot.dataFolder}</span>
           <input className="field mono" value={dir} onChange={e => setDir(e.target.value)} spellCheck={false} />
         </label>
         <div className="row">
           {platform.pickFolder && (
             <button className="btn" onClick={pick}>
-              <FolderOpen size={18} /> Choose…
+              <FolderOpen size={18} /> {t.boot.choose}
             </button>
           )}
           <button className="btn primary" disabled={!dir.trim()} onClick={confirm}>
-            Use this folder
+            {t.boot.useFolder}
           </button>
         </div>
-        <p className="muted">If the folder already has Hypomnemata files, they are used as they are.</p>
+        <p className="muted">{t.boot.existing}</p>
         {error && <p className="err">{error}</p>}
       </div>
     </div>
@@ -59,18 +57,17 @@ export function FileAccess({ platform, onCheck }: { platform: Platform; onCheck:
   return (
     <div className="center-screen">
       <div className="card stack">
-        <h1>Allow access to your notes folder</h1>
+        <h1>{t.boot.accessTitle}</h1>
         <p>
-          Hypomnemata keeps your notes in a normal folder so the PC can copy them over USB. Android only lets an
-          app read files it did not create itself when you turn on <b>All files access</b>.
+          {t.boot.accessText1} <b>{t.boot.accessAll}</b>.
         </p>
-        <p className="muted">The app works offline and never sends anything anywhere.</p>
+        <p className="muted">{t.boot.offline}</p>
         <div className="row">
           <button className="btn primary" onClick={() => platform.openFileAccessSettings?.()}>
-            <ShieldCheck size={18} /> Open settings
+            <ShieldCheck size={18} /> {t.boot.openSettings}
           </button>
           <button className="btn" onClick={onCheck}>
-            I turned it on
+            {t.boot.turnedOn}
           </button>
         </div>
       </div>

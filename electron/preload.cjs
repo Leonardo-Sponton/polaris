@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("hypo", {
   closeWindow: call("capture:close"),
   saveBackup: call("dialog:saveBackup"),
   setReminders: call("reminders:set"),
+  setLabels: call("app:labels"),
   onReminderOpen: cb => {
     const listener = (_e, path) => cb(path);
     ipcRenderer.on("reminder:open", listener);

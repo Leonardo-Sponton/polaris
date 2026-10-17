@@ -5,6 +5,7 @@ import type { Theme } from "../data/settings";
 import { BEFORE_RESTORE, backupName, exportBackup, readBackup, restoreBackup, type Backup } from "../data/backup";
 import { flushAll } from "../data/pending";
 import { Confirm } from "./Dialog";
+import { deviceLang, LANGS, t } from "../i18n";
 
 export function SettingsView() {
   const { platform, settings, updateSettings, bump, toast } = useApp();
@@ -21,7 +22,7 @@ export function SettingsView() {
       await flushAll();
       const zip = await exportBackup(platform.storage);
       const where = await platform.saveBackup!(backupName(), zip);
-      if (where) toast({ text: `Backup saved: ${where}` });
+      if (where) toast({ text: t.settings.backupSaved(where) });
     } catch (e) {
       fail(e);
     } finally {
@@ -48,7 +49,7 @@ export function SettingsView() {
       await flushAll();
       await restoreBackup(platform.storage, b);
       bump();
-      toast({ text: `Backup restored (${b.files.size} files)` });
+      toast({ text: t.settings.backupRestored(b.files.size) });
     } catch (e) {
       fail(e);
     } finally {
@@ -65,15 +66,32 @@ export function SettingsView() {
   return (
     <div className="page">
       <div className="page-inner">
-        <h1>Settings</h1>
+        <h1>{t.settings.title}</h1>
 
         <section className="card stack">
-          <h2>Theme</h2>
-          <div className="segmented" role="group" aria-label="Theme">
-            {themes.map(t => (
-              <button key={t} aria-pressed={settings.theme === t} onClick={() => updateSettings({ theme: t })}>
-                {t[0].toUpperCase() + t.slice(1)}
+          <h2>{t.settings.theme}</h2>
+          <div className="segmented" role="group" aria-label={t.settings.theme}>
+            {themes.map(th => (
+              <button key={th} aria-pressed={settings.theme === th} onClick={() => updateSettings({ theme: th })}>
+                {t.settings.themes[th]}
               </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="card stack">
+          <h2>{t.settings.language}</h2>
+          <div className="stack" role="radiogroup" aria-label={t.settings.language} style={{ gap: 2 }}>
+            {LANGS.map(l => (
+              <label key={l.id} className="row radio-row">
+                <input
+                  type="radio"
+                  name="language"
+                  checked={(settings.language ?? "system") === l.id}
+                  onChange={() => updateSettings({ language: l.id === "system" ? undefined : l.id })}
+                />
+                {l.id === "system" ? t.settings.systemLang(LANGS.find(x => x.id === deviceLang())!.label) : l.label}
+              </label>
             ))}
           </div>
         </section>
@@ -81,33 +99,33 @@ export function SettingsView() {
         <RemindersCard />
 
         <section className="card stack">
-          <h2>Data folder</h2>
+          <h2>{t.settings.dataFolder}</h2>
           <p className="mono" style={{ wordBreak: "break-all", margin: 0 }}>
             {dir}
           </p>
           {platform.openDataFolder && (
             <div className="row">
               <button className="btn" onClick={() => platform.openDataFolder!()}>
-                <FolderOpen size={18} /> Open folder
+                <FolderOpen size={18} /> {t.settings.openFolder}
               </button>
             </div>
           )}
         </section>
 
         <section className="card stack">
-          <h2>Backup</h2>
+          <h2>{t.settings.backup}</h2>
           <p className="muted" style={{ margin: 0 }}>
-            One .zip file with all your notes, to-dos and the trash.
-            {platform.name === "android" && " It is saved in the Download folder."}
+            {t.settings.backupText}
+            {platform.name === "android" && t.settings.backupAndroid}
           </p>
           <div className="row" style={{ flexWrap: "wrap" }}>
             {platform.saveBackup && (
               <button className="btn" disabled={busy} onClick={doExport}>
-                <Download size={18} /> Export backup (.zip)
+                <Download size={18} /> {t.settings.exportBackup}
               </button>
             )}
             <button className="btn" disabled={busy} onClick={() => file.current?.click()}>
-              <Upload size={18} /> Restore backup…
+              <Upload size={18} /> {t.settings.restoreBackup}
             </button>
             <input
               ref={file}
@@ -121,9 +139,9 @@ export function SettingsView() {
       </div>
       {pending && (
         <Confirm
-          title="Restore this backup?"
-          text={`Backup from ${pending.created.replace("T", " ") || "an unknown date"}, ${pending.files.size} files. It replaces your current data; the current data is first moved to ${BEFORE_RESTORE}/ so nothing is lost.`}
-          okLabel="Restore"
+          title={t.settings.restoreTitle}
+          text={t.settings.restoreText(pending.created.replace("T", " "), pending.files.size, BEFORE_RESTORE)}
+          okLabel={t.common.restore}
           onClose={() => setPending(null)}
           onOk={() => doRestore(pending)}
         />
@@ -152,31 +170,29 @@ function RemindersCard() {
   if (platform.name === "electron")
     return (
       <section className="card stack">
-        <h2>Reminders</h2>
+        <h2>{t.settings.reminders}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          Reminders show while Hypomnemata runs. Closing the window keeps it running in the tray;
-          use Quit in the tray menu to stop it. To have reminders right after logging in, start it
-          with <span className="mono">hypomnemata --background</span>.
+          {t.settings.remindersPc1} <span className="mono">hypomnemata --background</span>.
         </p>
       </section>
     );
   if (!access) return null;
   return (
     <section className="card stack">
-      <h2>Reminders</h2>
+      <h2>{t.settings.reminders}</h2>
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <span>{access.notifications ? "Notifications allowed" : "Notifications are off"}</span>
+        <span>{access.notifications ? t.settings.notificationsOn : t.settings.notificationsOff}</span>
         {!access.notifications && (
           <button className="btn" onClick={() => platform.askNotifications!()}>
-            Allow
+            {t.settings.allow}
           </button>
         )}
       </div>
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <span>{access.exact ? "Reminders come on the minute" : "Reminders may come a few minutes late"}</span>
+        <span>{access.exact ? t.settings.exactOn : t.settings.exactOff}</span>
         {!access.exact && (
           <button className="btn" onClick={() => platform.openExactAlarmSettings!()}>
-            Allow exact time
+            {t.settings.allowExact}
           </button>
         )}
       </div>

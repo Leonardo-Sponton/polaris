@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, BookMarked, Pencil, Trash2 } from "lucide-react";
 import { STATUSES, type Book, type BookStatus } from "../../data/books";
 import { Dialog } from "../Dialog";
@@ -33,14 +34,14 @@ export function BookMenu({ book: b, onOpen, onStatus, onDelete, onClose }: Props
 
   if (picking) {
     return (
-      <Dialog title="Status" onClose={onClose}>
+      <Dialog title={t.books.fStatus} onClose={onClose}>
         <div className="stack" style={{ gap: 2 }}>
           <button className="menu-item" onClick={() => setPicking(false)}>
             <ArrowLeft size={18} />
-            Back
+            {t.common.back}
           </button>
           {STATUSES.map(s =>
-            item(s.label, <BookMarked size={18} />, () => onStatus(s.id), b.status === s.id ? " active" : ""),
+            item(t.books.status[s.id], <BookMarked size={18} />, () => onStatus(s.id), b.status === s.id ? " active" : ""),
           )}
         </div>
       </Dialog>
@@ -48,14 +49,14 @@ export function BookMenu({ book: b, onOpen, onStatus, onDelete, onClose }: Props
   }
 
   return (
-    <Dialog title={b.title || "(untitled)"} onClose={onClose}>
+    <Dialog title={b.title || t.common.untitled} onClose={onClose}>
       <div className="stack" style={{ gap: 2 }}>
-        {item("Open", <Pencil size={18} />, onOpen)}
+        {item(t.common.open, <Pencil size={18} />, onOpen)}
         <button className="menu-item" onClick={() => setPicking(true)}>
           <BookMarked size={18} />
-          Status…
+          {t.books.statusDots}
         </button>
-        {item("Delete", <Trash2 size={18} />, onDelete, " danger")}
+        {item(t.common.delete, <Trash2 size={18} />, onDelete, " danger")}
       </div>
     </Dialog>
   );

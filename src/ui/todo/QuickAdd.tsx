@@ -1,4 +1,5 @@
 import { forwardRef, useMemo, useState, type ReactNode } from "react";
+import { t } from "../../i18n";
 import { Plus } from "lucide-react";
 import { routeCapture, type Capture } from "../../data/inbox";
 import { parseQuickAdd, type QuickAdd as Parsed } from "../../data/quickadd";
@@ -10,16 +11,14 @@ import { dayLabel } from "../../data/todo";
 // With `onCapture` it is the quick capture field (SPEC 5.2): the preview says where the line
 // goes (Inbox or To-do) before Enter, and "Keep as note" sends a matched line to the inbox.
 
-const PRIO = { 1: "High", 2: "Medium", 3: "Low" } as const;
-
 export function previewParts(q: Parsed): string[] {
   const out: string[] = [];
-  if (q.when) out.push(q.when === "someday" ? "Someday" : dayLabel(q.when));
-  if (q.evening) out.push("Evening");
+  if (q.when) out.push(q.when === "someday" ? t.todo.views.someday : dayLabel(q.when));
+  if (q.evening) out.push(t.todo.evening);
   if (q.time) out.push(q.time);
   if (q.repeat) out.push(describeRule(parseRule(q.repeat)!));
   if (q.listName) out.push(`#${q.listName}`);
-  if (q.priority) out.push(`${PRIO[q.priority]} priority`);
+  if (q.priority) out.push(t.todo.priorityOf(t.todo.prio[q.priority]));
   return out;
 }
 
@@ -101,7 +100,7 @@ export const QuickAdd = forwardRef<HTMLTextAreaElement, Props>(function QuickAdd
           spellCheck
           enterKeyHint="done"
           autoFocus={autoFocus}
-          aria-label={onCapture ? "Quick capture" : "New task"}
+          aria-label={onCapture ? t.todo.quickCapture : t.todo.newTask}
           onChange={e => {
             // Some Android keyboards send Enter as a new line instead of a key event.
             const v = e.target.value;
@@ -120,7 +119,7 @@ export const QuickAdd = forwardRef<HTMLTextAreaElement, Props>(function QuickAdd
         />
         <button
           className="btn ghost icon qa-add"
-          aria-label={onCapture ? "Capture" : "Add task"}
+          aria-label={onCapture ? t.todo.capture : t.todo.addTaskBtn}
           disabled={!canAdd || busy}
           onClick={() => submit()}
         >
@@ -129,24 +128,24 @@ export const QuickAdd = forwardRef<HTMLTextAreaElement, Props>(function QuickAdd
       </div>
       {text.trim() && route?.to === "inbox" && (
         <div className="qa-preview mono">
-          <span className="qa-dest">Inbox</span> {route.text}
+          <span className="qa-dest">{t.area.inbox}</span> {route.text}
           {asNote && (
             <button className="qa-link" onPointerDown={keepFocus} onClick={() => setAsNote(false)}>
-              Make it a to-do
+              {t.todo.makeTodo}
             </button>
           )}
         </div>
       )}
       {text.trim() && task && (
         <div className="qa-preview mono">
-          {route && <span className="qa-dest">To-do</span>}{" "}
-          {task.title ? <strong>{task.title}</strong> : <span className="err">Type a title</span>}
+          {route && <span className="qa-dest">{t.area.todo}</span>}{" "}
+          {task.title ? <strong>{task.title}</strong> : <span className="err">{t.todo.typeTitle}</span>}
           {parts.map(p => (
             <span key={p}> · {p}</span>
           ))}
           {route && (
             <button className="qa-link" onPointerDown={keepFocus} onClick={() => setAsNote(true)}>
-              Keep as note
+              {t.todo.keepNote}
             </button>
           )}
         </div>

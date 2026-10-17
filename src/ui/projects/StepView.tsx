@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { ArrowLeft, ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { isoDate } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
@@ -51,7 +52,7 @@ export function StepView({ project: p, stepId, todo, onBack, onOpenNote, onNewNo
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back to the project">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.projects.backToProject}>
           <ArrowLeft size={20} />
         </button>
         <span className="quote-book muted small">{p.title}</span>
@@ -59,30 +60,30 @@ export function StepView({ project: p, stepId, todo, onBack, onOpenNote, onNewNo
       <div className="page task-page">
         <div className="page-inner stack">
           <div>
-            <span className="fl">{n ? `Step ${n} of ${p.flow.steps.length}` : "Not in this flow"}</span>
+            <span className="fl">{n ? t.projects.stepOf(n, p.flow.steps.length) : t.projects.notInFlow}</span>
             <h2 className="step-title">{step?.name ?? stepId}</h2>
           </div>
           {step?.guidance && <p className="step-guidance">{step.guidance}</p>}
           {step && step.sections.length > 0 && (
-            <p className="muted small">Suggested sections: {step.sections.join(" · ")}</p>
+            <p className="muted small">{t.projects.suggested(step.sections.join(" · "))}</p>
           )}
 
           <StepTodos project={p} stepId={stepId} todo={todo} onOpen={onOpenTask} />
 
           <div className="task-notes-head">
-            <span className="fl">Notes{list.length > 0 && ` · ${list.length}`}</span>
+            <span className="fl">{t.projects.notesCount}{list.length > 0 && ` · ${list.length}`}</span>
             <button className="btn ghost" onClick={onNewNote}>
-              <Plus size={16} /> New note
+              <Plus size={16} /> {t.projects.newNoteBtn}
             </button>
           </div>
           {list.length === 0 ? (
-            <p className="muted small">Nothing here yet. Each note keeps the date it was written.</p>
+            <p className="muted small">{t.projects.noNotes}</p>
           ) : (
             <ul className="list">
               {list.map(x => (
                 <li key={x.path}>
                   <button className="list-item" onClick={() => onOpenNote(x.path)}>
-                    <span className="list-title">{x.title || <span className="muted">(untitled)</span>}</span>
+                    <span className="list-title">{x.title || <span className="muted">{t.common.untitled}</span>}</span>
                     <span className="list-meta mono">{x.created.replace("T", " ")}</span>
                   </button>
                 </li>
@@ -103,8 +104,8 @@ function StepTodos({ project: p, stepId, todo, onOpen }: { project: Project; ste
   const [scheduling, setScheduling] = useState<Task | null>(null);
   const today = isoDate();
   const all = projectTasks(todo.tasks, p.slug, stepId);
-  const open = all.filter(t => t.status === "open").sort(compareTasks);
-  const done = all.filter(t => t.status !== "open").sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? ""));
+  const open = all.filter(k => k.status === "open").sort(compareTasks);
+  const done = all.filter(k => k.status !== "open").sort((a, b) => (b.doneAt ?? "").localeCompare(a.doneAt ?? ""));
 
   const add = async (q: Parsed) => {
     try {
@@ -128,33 +129,33 @@ function StepTodos({ project: p, stepId, todo, onOpen }: { project: Project; ste
     }
   };
 
-  const row = (t: Task) => (
+  const row = (k: Task) => (
     <TaskRow
-      key={t.path}
-      task={t}
+      key={k.path}
+      task={k}
       today={today}
       lists={todo.lists}
       active={false}
-      onOpen={() => onOpen(t.path)}
-      onToggle={() => (t.status === "open" ? act.finish(t.path, "done") : act.reopen(t.path))}
-      onSchedule={() => setScheduling(t)}
-      onMenu={() => setMenu(t)}
+      onOpen={() => onOpen(k.path)}
+      onToggle={() => (k.status === "open" ? act.finish(k.path, "done") : act.reopen(k.path))}
+      onSchedule={() => setScheduling(k)}
+      onMenu={() => setMenu(k)}
     />
   );
 
   return (
-    <section className="stack" style={{ gap: 6 }} aria-label="To-dos">
-      <span className="fl">To-dos{open.length > 0 && ` · ${open.length}`}</span>
-      <QuickAdd placeholder="Add a to-do for this step…" onAdd={add} />
+    <section className="stack" style={{ gap: 6 }} aria-label={t.projects.todos}>
+      <span className="fl">{t.projects.todos}{open.length > 0 && ` · ${open.length}`}</span>
+      <QuickAdd placeholder={t.projects.addTodo} onAdd={add} />
       {open.length > 0 && <ul className="list">{open.map(row)}</ul>}
       {open.length === 0 && !done.length && (
-        <p className="muted small">They also show up in To-do, with the project's name.</p>
+        <p className="muted small">{t.projects.alsoInTodo}</p>
       )}
       {done.length > 0 && (
         <>
           <button className="section-head fold" onClick={() => setShowDone(v => !v)}>
             {showDone ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            Done <span className="mono muted">{done.length}</span>
+            {t.projects.done} <span className="mono muted">{done.length}</span>
           </button>
           {showDone && <ul className="list">{done.map(row)}</ul>}
         </>

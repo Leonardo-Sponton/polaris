@@ -1,4 +1,5 @@
 import { addDays, isoDate } from "./dates";
+import { t } from "../i18n";
 
 // Repeating tasks (SPEC 5.3). The file keeps a small part of the RFC 5545 RRULE format:
 //   FREQ=DAILY|WEEKLY|MONTHLY|YEARLY, INTERVAL=n, BYDAY=MO,TU… (weekly), BYMONTHDAY=d or -1 (monthly).
@@ -16,7 +17,7 @@ export interface Rule {
 }
 
 export const DAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 
 export function parseRule(s: unknown): Rule | null {
   if (typeof s !== "string" || !s.trim()) return null;
@@ -59,23 +60,11 @@ export function formatRule(r: Rule): string {
   return s;
 }
 
-function ordinal(n: number): string {
-  if (n === -1) return "last day";
-  const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th");
-  return `${n}${s}`;
-}
-
-/** "Every 2 weeks on Mon, Thu". */
+/** "Every 2 weeks on Mon, Thu" ("A cada 2 semanas na segunda, quinta"). */
 export function describeRule(r: Rule): string {
-  const unit = { DAILY: "day", WEEKLY: "week", MONTHLY: "month", YEARLY: "year" }[r.freq];
-  let s = r.interval > 1 ? `Every ${r.interval} ${unit}s` : `Every ${unit}`;
-  if (r.byDay?.length) {
-    const d = r.byDay.join();
-    if (r.interval === 1 && d === "1,2,3,4,5") return "Every weekday";
-    s += ` on ${r.byDay.map(x => DAY_NAMES[x]).join(", ")}`;
-  }
-  if (r.byMonthDay !== undefined) s += ` on the ${ordinal(r.byMonthDay)}`;
-  return s;
+  const weekday = r.interval === 1 && r.byDay?.join() === "1,2,3,4,5";
+  const days = r.byDay?.length ? r.byDay.map(x => t.recur.dayNames[x]) : null;
+  return t.recur.describe(r.freq, r.interval, days, r.byMonthDay, weekday);
 }
 
 const DAY_MS = 86_400_000;

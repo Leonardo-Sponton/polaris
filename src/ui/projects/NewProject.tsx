@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "../../i18n";
 import { FLOWS, type FlowId } from "../../data/flows";
 import { Dialog } from "../Dialog";
 
@@ -22,13 +23,13 @@ export function NewProject(props: {
         className="field"
         autoFocus
         value={name}
-        placeholder="Project name"
-        aria-label="Project name"
+        placeholder={t.projects.name}
+        aria-label={t.projects.name}
         onChange={e => setName(e.target.value)}
         onKeyDown={e => e.key === "Enter" && ok()}
       />
-      <span className="fl">Flow</span>
-      <div className="segmented" role="group" aria-label="Flow">
+      <span className="fl">{t.projects.flow}</span>
+      <div className="segmented" role="group" aria-label={t.projects.flow}>
         {FLOWS.map(f => (
           <button key={f.id} aria-pressed={flow === f.id} onClick={() => setFlow(f.id)}>
             {f.name}
@@ -42,10 +43,10 @@ export function NewProject(props: {
       </ol>
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={props.onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" disabled={!name.trim()} onClick={ok}>
-          {props.okLabel ?? "Create"}
+          {props.okLabel ?? t.projects.create}
         </button>
       </div>
     </Dialog>

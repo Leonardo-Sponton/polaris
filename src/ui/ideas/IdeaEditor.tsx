@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { t } from "../../i18n";
 import { Archive, ArrowLeft, FolderKanban, FolderPlus, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import type { Data } from "../../data/frontmatter";
@@ -21,7 +22,7 @@ import { AskText } from "../Dialog";
 import { useApp } from "../context";
 import { useFiveW2H } from "../FiveW2H";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 import { Viability } from "./Viability";
 
 // The idea screen (SPEC 5.4): title, status, template, tags, then the free draft with the
@@ -48,8 +49,8 @@ export function IdeaEditor({ path, onBack, onGone, onOpenProject }: Props) {
       onGone();
       bump();
       toast({
-        text: "Idea deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+        text: t.ideas.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -59,14 +60,14 @@ export function IdeaEditor({ path, onBack, onGone, onOpenProject }: Props) {
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && (
-          <button className="btn ghost icon" aria-label="Delete idea" title="Delete" onClick={remove}>
+          <button className="btn ghost icon" aria-label={t.ideas.deleteIdea} title={t.common.delete} onClick={remove}>
             <Trash2 size={18} />
           </button>
         )}
@@ -130,8 +131,8 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
           className="task-title-input"
           rows={1}
           value={title}
-          placeholder="Idea title"
-          aria-label="Title"
+          placeholder={t.ideas.ideaTitle}
+          aria-label={t.todo.title}
           onChange={e => {
             const v = e.target.value.replace(/\n/g, " ");
             setTitle(v);
@@ -143,44 +144,44 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
 
         {idea.status === "archived" && (
           <div className="idea-archived">
-            <span className="fl">Archived · didn't work because</span>
-            <p>{idea.archivedReason || <span className="muted">(no reason written)</span>}</p>
+            <span className="fl">{t.ideas.archivedBecause}</span>
+            <p>{idea.archivedReason || <span className="muted">{t.ideas.noReason}</span>}</p>
           </div>
         )}
 
         <div className="task-fields">
-          <span className="fl">Status</span>
+          <span className="fl">{t.ideas.fStatus}</span>
           {active ? (
             <div className="segmented">
               <button aria-pressed={idea.status === "draft"} onClick={() => patch({ status: "draft" })}>
-                Draft
+                {t.ideas.status.draft}
               </button>
               <button aria-pressed={idea.status === "maturing"} onClick={() => patch({ status: "maturing" })}>
-                Maturing
+                {t.ideas.status.maturing}
               </button>
             </div>
           ) : (
-            <span>{idea.status === "archived" ? "Archived" : "Became a project"}</span>
+            <span>{idea.status === "archived" ? t.ideas.archived : t.ideas.becameProject}</span>
           )}
 
-          <span className="fl">Template</span>
+          <span className="fl">{t.ideas.fTemplate}</span>
           <select
             className="field"
             value={idea.template}
             onChange={e => patch({ template: e.target.value as Template })}
           >
-            {TEMPLATES.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.label}
+            {TEMPLATES.map(x => (
+              <option key={x.id} value={x.id}>
+                {t.ideas.templates[x.id]}
               </option>
             ))}
           </select>
 
-          <span className="fl">Tags</span>
+          <span className="fl">{t.ideas.fTags}</span>
           <input
             className="field"
             value={tagText}
-            placeholder="e.g. app, study"
+            placeholder={t.ideas.tagsEg}
             onChange={e => setTagText(e.target.value)}
             onBlur={commitTags}
             onKeyDown={e => e.key === "Enter" && (e.target as HTMLElement).blur()}
@@ -188,14 +189,14 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
         </div>
 
         <div className="task-notes-head">
-          <span className="fl">Draft</span>
+          <span className="fl">{t.ideas.draft}</span>
         </div>
         <div className="task-notes">
           <Editor
             key={restRev}
             text={rest}
             autoFocus={restRev > 0}
-            placeholder="Write it down as it comes…"
+            placeholder={t.ideas.draftPlaceholder}
             onSaveNow={f.saveNow}
             commands={{ "5w2h": w.insert }}
             onChange={text => {
@@ -206,7 +207,7 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
           />
         </div>
         {(missing.length > 0 || !w.has) && (
-          <div className="row idea-sections" aria-label="Add a section">
+          <div className="row idea-sections" aria-label={t.ideas.addSection}>
             {missing.map(s => (
               <button key={s} className="btn ghost" onClick={() => add(s)}>
                 <Plus size={16} /> {s}
@@ -227,33 +228,33 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
           {active ? (
             <>
               <button className="btn" onClick={() => setMaking(true)}>
-                <FolderPlus size={18} /> Make it a project
+                <FolderPlus size={18} /> {t.ideas.makeProject}
               </button>
               <button className="btn" onClick={() => setArchiving(true)}>
-                <Archive size={18} /> Archive
+                <Archive size={18} /> {t.ideas.archive}
               </button>
             </>
           ) : idea.status === "archived" ? (
             <button className="btn" onClick={() => patch(reopenPatch())}>
-              <RotateCcw size={18} /> Reopen
+              <RotateCcw size={18} /> {t.todo.reopen}
             </button>
           ) : (
             idea.project && (
               <button className="btn" onClick={() => onOpenProject(`projects/${idea.project}/${PROJECT_FILE}`)}>
-                <FolderKanban size={18} /> Open the project
+                <FolderKanban size={18} /> {t.ideas.openProject}
               </button>
             )
           )}
-          <span className="muted small mono">Created {String(d.created ?? "").replace("T", " ")}</span>
+          <span className="muted small mono">{t.todo.created(String(d.created ?? "").replace("T", " "))}</span>
         </div>
       </div>
 
       {making && (
         <NewProject
-          title="Make it a project"
+          title={t.ideas.makeProject}
           initialName={title}
           initialFlow={flowForTemplate(idea.template)}
-          okLabel="Make project"
+          okLabel={t.ideas.makeProjectOk}
           onClose={() => setMaking(false)}
           onOk={async (name, flow) => {
             setMaking(false);
@@ -270,9 +271,9 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
       )}
       {archiving && (
         <AskText
-          title="Why didn't it work?"
-          placeholder="e.g. Too expensive to build alone"
-          okLabel="Archive"
+          title={t.ideas.whyTitle}
+          placeholder={t.ideas.whyEg}
+          okLabel={t.ideas.archive}
           onClose={() => setArchiving(false)}
           onOk={reason => {
             setArchiving(false);

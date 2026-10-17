@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { closeDay, type Closing } from "../../data/journal";
+import { dateFmt, t, word } from "../../i18n";
+import { closeDay, INTENTIONS, LEARNINGS, type Closing } from "../../data/journal";
 import { flushAll } from "../../data/pending";
 import { Dialog } from "../Dialog";
 import { useApp } from "../context";
 
 // Close the day (SPEC 5.9): three short, optional questions; each answer goes to one place.
 
-const SHORT = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-
-export const shortDay = (day: string) => SHORT.format(new Date(`${day}T12:00`));
+export const shortDay = (day: string) => dateFmt({ day: "numeric", month: "short" }).format(new Date(`${day}T12:00`));
 
 export function CloseDay({ day, onClose }: { day: string; onClose(): void }) {
   const { notes, bump, toast } = useApp();
@@ -16,20 +15,16 @@ export function CloseDay({ day, onClose }: { day: string; onClose(): void }) {
   const [busy, setBusy] = useState(false);
   const d = shortDay(day);
   const questions: { key: keyof Closing; q: string; where: string; hint?: string }[] = [
-    { key: "how", q: "How was the day?", where: `Goes to the end of the Journal of ${d}.`, hint: "What happened, how you felt…" },
-    {
-      key: "learned",
-      q: "What did I learn from what I lived and from my choices?",
-      where: `Goes to “Learnings” in the Journal of ${d}.`,
-    },
+    { key: "how", q: t.journal.qHow, where: t.journal.qHowWhere(d), hint: t.journal.qHowHint },
+    { key: "learned", q: t.journal.qLearned, where: t.journal.qLearnedWhere(d, word(LEARNINGS)) },
     {
       key: "intentions",
-      q: "One or two concrete intentions for tomorrow",
-      where: `Goes to “Intentions for tomorrow” in the Review of ${d}.`,
-      hint: "e.g. Go to bed before midnight",
+      q: t.journal.qIntentions,
+      where: t.journal.qIntentionsWhere(d, word(INTENTIONS)),
+      hint: t.journal.qIntentionsHint,
     },
   ];
-  const empty = !Object.values(c).some(t => t.trim());
+  const empty = !Object.values(c).some(x => x.trim());
 
   const save = async () => {
     setBusy(true);
@@ -37,8 +32,7 @@ export function CloseDay({ day, onClose }: { day: string; onClose(): void }) {
       await flushAll(); // an open journal page writes its last edits first
       const written = await closeDay(notes, day, c);
       bump();
-      const where = written.map(p => (p.startsWith("journal/") ? "Journal" : "Review")).join(" and ");
-      toast({ text: `Saved to the ${where} of ${d}` });
+      toast({ text: t.journal.savedTo(written.some(p => p.startsWith("journal/")), written.some(p => p.startsWith("review/")), d) });
       onClose();
     } catch (e) {
       setBusy(false);
@@ -47,9 +41,9 @@ export function CloseDay({ day, onClose }: { day: string; onClose(): void }) {
   };
 
   return (
-    <Dialog title={`Close the day · ${d}`} onClose={onClose}>
+    <Dialog title={t.journal.closeTitle(d)} onClose={onClose}>
       <p className="muted small" style={{ margin: 0 }}>
-        Three short, optional steps. Empty answers are skipped.
+        {t.journal.closeIntro}
       </p>
       {questions.map((x, i) => (
         <label key={x.key} className="close-q">
@@ -69,10 +63,10 @@ export function CloseDay({ day, onClose }: { day: string; onClose(): void }) {
       ))}
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" disabled={empty || busy} onClick={save}>
-          Save
+          {t.common.save}
         </button>
       </div>
     </Dialog>

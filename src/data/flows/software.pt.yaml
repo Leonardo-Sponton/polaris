@@ -1,0 +1,61 @@
+# Portuguese words of software.yaml (same step ids).
+name: Software
+steps:
+  - id: 01-discovery
+    name: Descoberta
+    guidance: >-
+      Entenda o problema antes da solução. Quem tem o problema, como lida com ele hoje e por que
+      isso não basta. Converse com pessoas reais e anote o que viu, não o que imagina.
+    sections: [Problema, Quem tem o problema, Alternativas atuais, Entrevistas, Descobertas]
+  - id: 02-lean-canvas
+    name: Lean Canvas
+    guidance: >-
+      Uma página com o plano em forma de hipóteses: problema, segmentos de clientes, proposta única
+      de valor, solução, canais, fontes de receita, estrutura de custos, métricas-chave e vantagem
+      injusta.
+    sections:
+      - Problema
+      - Segmentos de clientes
+      - Proposta única de valor
+      - Solução
+      - Canais
+      - Fontes de receita
+      - Estrutura de custos
+      - Métricas-chave
+      - Vantagem injusta
+  - id: 03-requirements
+    name: Requisitos
+    guidance: >-
+      Escreva histórias de usuário ("Como …, quero … para …") com critérios de aceitação. Ordene
+      com MoSCoW: Must have (obrigatório), Should have (importante), Could have (desejável), Won't
+      have (fica para depois).
+    sections: [Histórias de usuário, Must have, Should have, Could have, Won't have]
+  - id: 04-mvp-scope
+    name: Escopo do MVP
+    guidance: >-
+      A menor versão que testa a suposição mais arriscada com usuários reais. Diga o que entra, o
+      que fica de fora e como você vai saber se deu certo.
+    sections: [Dentro do escopo, Fora do escopo, Critérios de sucesso]
+  - id: 05-architecture
+    name: Arquitetura
+    guidance: >-
+      Modelo C4: contexto (o sistema e quem o usa), contêineres (apps, bancos de dados),
+      componentes. Registre cada decisão importante num ADR: contexto, decisão, consequências.
+    sections: [Contexto, Contêineres, Componentes, Decisões (ADRs)]
+  - id: 06-backlog-roadmap
+    name: Backlog / Roadmap
+    guidance: >-
+      Quebre as histórias em tarefas pequenas, por ordem de prioridade, e agrupe-as em marcos.
+      Mantenha o backlog como as tarefas desta etapa.
+    sections: [Marcos, Backlog]
+  - id: 07-release
+    name: Lançamento
+    guidance: >-
+      Prepare e entregue: testes, build, número de versão, notas da versão, onde as pessoas
+      conseguem o app e como voltar atrás se algo quebrar.
+    sections: [Checklist, Notas da versão, Distribuição]
+  - id: 08-retrospective
+    name: Retrospectiva
+    guidance: >-
+      Olhe para trás: o que foi bem, o que não foi, o que se aprendeu e o que mudar da próxima vez.
+    sections: [O que foi bem, O que não foi, Aprendizados, Da próxima vez]

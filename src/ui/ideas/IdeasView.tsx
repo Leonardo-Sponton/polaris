@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import {
   STATUSES,
@@ -29,7 +30,7 @@ export function useIdeas(): Idea[] {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   useEffect(() => {
     let alive = true;
-    loadIdeas(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(list => alive && setIdeas(list));
+    loadIdeas(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(list => alive && setIdeas(list));
     return () => {
       alive = false;
     };
@@ -44,11 +45,11 @@ function IdeaRow({ idea: i, active, onOpen, onMenu }: { idea: Idea; active: bool
   return (
     <li className="idea-li" {...hold.handlers}>
       <button className={`list-item${active ? " active" : ""}`} onClick={() => !hold.eaten() && onOpen()}>
-        <span className="list-title">{i.title || <span className="muted">(untitled)</span>}</span>
+        <span className="list-title">{i.title || <span className="muted">{t.common.untitled}</span>}</span>
         <span className="list-meta mono">
           {[
-            i.template !== "blank" && TEMPLATES.find(t => t.id === i.template)!.label,
-            ...i.tags.map(t => `#${t}`),
+            i.template !== "blank" && t.ideas.templates[i.template],
+            ...i.tags.map(tag => `#${tag}`),
             i.modified.slice(0, 10),
           ]
             .filter(Boolean)
@@ -121,7 +122,7 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
       await flushAll(); // an open idea screen writes its last edits first
       const old = await notes.patchHeader(i.path, patch);
       bump();
-      toast({ text, action: { label: "Undo", run: () => notes.patchHeader(i.path, old).then(bump, fail) } });
+      toast({ text, action: { label: t.common.undo, run: () => notes.patchHeader(i.path, old).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }
@@ -134,8 +135,8 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
       const trashed = await moveToTrash(notes.storage, i.path);
       bump();
       toast({
-        text: "Idea deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, i.path).then(bump, fail) },
+        text: t.ideas.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, i.path).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -143,7 +144,7 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
   };
 
   const tags = [...new Set(ideas.flatMap(i => i.tags))].sort();
-  const usedTemplates = TEMPLATES.filter(t => ideas.some(i => i.template === t.id));
+  const usedTemplates = TEMPLATES.filter(x => ideas.some(i => i.template === x.id));
   const shown = ideas.filter(
     i => (!filter.template || i.template === filter.template) && (!filter.tag || i.tags.includes(filter.tag)),
   );
@@ -157,30 +158,28 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Ideas</h1>
+          <h1>{t.ideas.title}</h1>
           <button className="btn primary" onClick={() => setAsking(true)}>
-            <Plus size={18} /> New
+            <Plus size={18} /> {t.common.new}
           </button>
         </div>
         {(usedTemplates.length > 1 || tags.length > 0) && (
-          <div className="chips" aria-label="Filter">
-            {chip("All", !filter.template && !filter.tag, () => setFilter({}))}
-            {usedTemplates.map(t =>
-              chip(t.label, filter.template === t.id, () =>
-                setFilter(f => ({ ...f, template: f.template === t.id ? undefined : t.id })),
+          <div className="chips" aria-label={t.ideas.filter}>
+            {chip(t.common.all, !filter.template && !filter.tag, () => setFilter({}))}
+            {usedTemplates.map(x =>
+              chip(t.ideas.templates[x.id], filter.template === x.id, () =>
+                setFilter(f => ({ ...f, template: f.template === x.id ? undefined : x.id })),
               ),
             )}
-            {tags.map(t =>
-              chip(`#${t}`, filter.tag === t, () => setFilter(f => ({ ...f, tag: f.tag === t ? undefined : t }))),
+            {tags.map(tag =>
+              chip(`#${tag}`, filter.tag === tag, () => setFilter(f => ({ ...f, tag: f.tag === tag ? undefined : tag }))),
             )}
           </div>
         )}
         {ideas.length === 0 ? (
-          <p className="muted empty-note">
-            No ideas yet. Press New, or turn an inbox item into an idea. A title is enough to start.
-          </p>
+          <p className="muted empty-note">{t.ideas.none}</p>
         ) : shown.length === 0 ? (
-          <p className="muted empty-note">No ideas match this filter.</p>
+          <p className="muted empty-note">{t.ideas.noMatch}</p>
         ) : (
           STATUSES.map(s => {
             const group = shown.filter(i => i.status === s.id);
@@ -191,11 +190,11 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
                 {s.id === "archived" ? (
                   <button className="section-head fold" onClick={() => setShowArchived(v => !v)}>
                     {folded ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                    {s.label} <span className="mono muted">{group.length}</span>
+                    {t.ideas.status[s.id]} <span className="mono muted">{group.length}</span>
                   </button>
                 ) : (
                   <div className="section-head">
-                    {s.label} <span className="mono muted">{group.length}</span>
+                    {t.ideas.status[s.id]} <span className="mono muted">{group.length}</span>
                   </div>
                 )}
                 {!folded && (
@@ -220,7 +219,7 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
         {open ? (
           <IdeaEditor key={open} path={open} onBack={() => setOpen(null)} onGone={() => setOpen(null)} onOpenProject={props.onOpenProject} />
         ) : (
-          <div className="detail-empty muted">Pick an idea or press New.</div>
+          <div className="detail-empty muted">{t.ideas.pick}</div>
         )}
       </div>
       {menu && (
@@ -228,30 +227,30 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
           idea={menu}
           onClose={() => setMenu(null)}
           onOpen={() => openIdea(menu.path)}
-          onStatus={st => change(menu, { status: st }, st === "draft" ? "Back to Draft" : "Moved to Maturing")}
-          onTemplate={t => change(menu, { template: t }, `Template: ${TEMPLATES.find(x => x.id === t)!.label}`)}
+          onStatus={st => change(menu, { status: st }, st === "draft" ? t.ideas.backToDraft : t.ideas.movedMaturing)}
+          onTemplate={x => change(menu, { template: x }, t.ideas.templateIs(t.ideas.templates[x]))}
           onArchive={() => setArchiving(menu)}
-          onReopen={() => change(menu, reopenPatch(), "Reopened · Maturing")}
+          onReopen={() => change(menu, reopenPatch(), t.ideas.reopened)}
           onDelete={() => remove(menu)}
         />
       )}
       {archiving && (
         <AskText
-          title="Why didn't it work?"
-          placeholder="e.g. Too expensive to build alone"
-          okLabel="Archive"
+          title={t.ideas.whyTitle}
+          placeholder={t.ideas.whyEg}
+          okLabel={t.ideas.archive}
           onClose={() => setArchiving(null)}
           onOk={reason => {
             setArchiving(null);
-            change(archiving, archivePatch(reason), "Archived");
+            change(archiving, archivePatch(reason), t.ideas.archived);
           }}
         />
       )}
       {asking && (
         <AskText
-          title="New idea"
-          placeholder="A title is enough"
-          okLabel="Create"
+          title={t.ideas.newIdea}
+          placeholder={t.ideas.titleEnough}
+          okLabel={t.todo.create}
           onClose={() => setAsking(false)}
           onOk={create}
         />

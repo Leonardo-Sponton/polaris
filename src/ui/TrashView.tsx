@@ -7,6 +7,7 @@ import { deleteForever, emptyTrash, listTrash, restore, type Trashed } from "../
 import { Confirm, Dialog } from "./Dialog";
 import { useApp } from "./context";
 import { areaLabel } from "./SearchView";
+import { t } from "../i18n";
 
 // Trash (SPEC 4.4): deleted files wait here until restored or deleted for good.
 
@@ -29,18 +30,18 @@ export function TrashView() {
     let alive = true;
     (async () => {
       const out: Row[] = [];
-      for (const t of await listTrash(notes.storage)) {
-        let title = t.from.slice(t.from.lastIndexOf("/") + 1);
+      for (const x of await listTrash(notes.storage)) {
+        let title = x.from.slice(x.from.lastIndexOf("/") + 1);
         try {
-          if (t.path.endsWith(".md")) title = previewOf(parse(await notes.storage.read(t.path)).body) || "(empty)";
+          if (x.path.endsWith(".md")) title = previewOf(parse(await notes.storage.read(x.path)).body) || t.common.empty;
           // A book folder: its title is in the header of book.md.
-          else if ((await notes.storage.stat(t.path))?.isDir) {
-            title = String(parse(await notes.storage.read(`${t.path}/${BOOK_FILE}`)).data.title ?? "") || title;
+          else if ((await notes.storage.stat(x.path))?.isDir) {
+            title = String(parse(await notes.storage.read(`${x.path}/${BOOK_FILE}`)).data.title ?? "") || title;
           }
         } catch {
           /* keep the file name */
         }
-        out.push({ ...t, title });
+        out.push({ ...x, title });
       }
       if (alive) setRows(out);
     })().catch(fail);
@@ -53,7 +54,7 @@ export function TrashView() {
     try {
       const to = await restore(notes.storage, r);
       bump();
-      toast({ text: to === r.from ? `Restored to ${areaLabel(areaOf(to))}` : `Restored as ${to}` });
+      toast({ text: to === r.from ? t.trash.restoredTo(areaLabel(areaOf(to))) : t.trash.restoredAs(to) });
     } catch (e) {
       fail(e);
     }
@@ -61,17 +62,17 @@ export function TrashView() {
 
   const confirmForever = (r: Row) =>
     setAsk({
-      title: "Delete forever?",
-      text: `“${r.title}” will be erased. This cannot be undone.`,
-      ok: "Delete forever",
+      title: t.trash.foreverTitle,
+      text: t.trash.foreverText(r.title),
+      ok: t.trash.forever,
       run: () => deleteForever(notes.storage, r),
     });
 
   const confirmEmpty = () =>
     setAsk({
-      title: "Empty the trash?",
-      text: `All ${rows!.length} items will be erased. This cannot be undone.`,
-      ok: "Empty trash",
+      title: t.trash.emptyTitle,
+      text: t.trash.emptyText(rows!.length),
+      ok: t.trash.emptyOk,
       run: () => emptyTrash(notes.storage),
     });
 
@@ -92,14 +93,14 @@ export function TrashView() {
     <div className="page">
       <div className="page-inner">
         <div className="list-head" style={{ padding: "0 0 12px" }}>
-          <h1>Trash</h1>
+          <h1>{t.trash.title}</h1>
           {!!rows?.length && (
             <button className="btn" onClick={confirmEmpty}>
-              <Trash2 size={18} /> Empty
+              <Trash2 size={18} /> {t.trash.empty}
             </button>
           )}
         </div>
-        {rows && rows.length === 0 && <p className="muted">The trash is empty. Deleted items wait here.</p>}
+        {rows && rows.length === 0 && <p className="muted">{t.trash.isEmpty}</p>}
         {!!rows?.length && (
           <ul className="list">
             {rows.map(r => (
@@ -108,10 +109,10 @@ export function TrashView() {
                   <span className="list-title">{r.title}</span>
                   <span className="list-meta mono">
                     {areaLabel(areaOf(r.from))}
-                    {r.at && ` · deleted ${r.at.replace("T", " ")}`}
+                    {r.at && t.trash.deletedAt(r.at.replace("T", " "))}
                   </span>
                 </button>
-                <button className="btn ghost icon" title="Restore" aria-label="Restore" onClick={() => put(r)}>
+                <button className="btn ghost icon" title={t.common.restore} aria-label={t.common.restore} onClick={() => put(r)}>
                   <RotateCcw size={18} />
                 </button>
               </li>
@@ -122,8 +123,8 @@ export function TrashView() {
       {menu && (
         <Dialog title={menu.title} onClose={() => setMenu(null)}>
           <div className="stack" style={{ gap: 2 }}>
-            {item("Restore", <RotateCcw size={18} />, () => put(menu))}
-            {item("Delete forever", <X size={18} />, () => confirmForever(menu), " danger")}
+            {item(t.common.restore, <RotateCcw size={18} />, () => put(menu))}
+            {item(t.trash.forever, <X size={18} />, () => confirmForever(menu), " danger")}
           </div>
         </Dialog>
       )}

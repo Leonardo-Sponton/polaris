@@ -1,4 +1,5 @@
 import { addDays, isoDate, parseLocal, slugify } from "./dates";
+import { isWord, word, type Words } from "../i18n";
 import { titleOf } from "./frontmatter";
 import type { Note, Notes } from "./notes";
 import { joinTitle } from "./todo";
@@ -9,22 +10,18 @@ import { joinTitle } from "./todo";
 export type IdeaStatus = "draft" | "maturing" | "project" | "archived";
 export type Template = "blank" | "software" | "business" | "personal";
 
-export const STATUSES: { id: IdeaStatus; label: string }[] = [
-  { id: "draft", label: "Draft" },
-  { id: "maturing", label: "Maturing" },
-  { id: "project", label: "Became project" },
-  { id: "archived", label: "Archived" },
-];
+export const STATUSES: { id: IdeaStatus }[] = [{ id: "draft" }, { id: "maturing" }, { id: "project" }, { id: "archived" }];
 
-export const TEMPLATES: { id: Template; label: string }[] = [
-  { id: "blank", label: "Blank" },
-  { id: "software", label: "Software" },
-  { id: "business", label: "Business" },
-  { id: "personal", label: "Personal" },
-];
+export const TEMPLATES: { id: Template }[] = [{ id: "blank" }, { id: "software" }, { id: "business" }, { id: "personal" }];
 
-/** The helper sections a non-blank template suggests (SPEC 5.4, Q6). */
-export const OPTIONAL_SECTIONS = ["Problem", "For whom", "Solution", "Why now", "Risks"];
+/** The helper sections a non-blank template suggests (SPEC 5.4, Q6), in both languages. */
+export const OPTIONAL_SECTIONS: Words[] = [
+  { en: "Problem", pt: "Problema" },
+  { en: "For whom", pt: "Para quem" },
+  { en: "Solution", pt: "Solução" },
+  { en: "Why now", pt: "Por que agora" },
+  { en: "Risks", pt: "Riscos" },
+];
 
 export interface Idea {
   path: string;
@@ -82,11 +79,11 @@ export function sectionsOf(body: string): string[] {
   return [...body.matchAll(/^##[ \t]+(.+?)[ \t]*#*[ \t]*$/gm)].map(m => m[1].trim());
 }
 
-/** Optional sections the template suggests that the body does not have yet. */
+/** Optional sections the template suggests that the body does not have yet (named in the app's language). */
 export function missingSections(template: Template, body: string): string[] {
   if (template === "blank") return [];
-  const have = new Set(sectionsOf(body).map(s => s.toLowerCase()));
-  return OPTIONAL_SECTIONS.filter(s => !have.has(s.toLowerCase()));
+  const have = sectionsOf(body);
+  return OPTIONAL_SECTIONS.filter(s => !have.some(h => isWord(s, h))).map(word);
 }
 
 /** Adds an empty "## name" section at the end of the text, leaving the caret line after it. */
@@ -122,15 +119,16 @@ export async function markSeen(notes: Notes, path: string, today = isoDate()): P
 
 export type Answer = "yes" | "no" | "unsure";
 
-export const QUESTIONS: { id: string; text: string }[] = [
-  { id: "problem-real", text: "Is the problem real (did I see it happen, not just imagine it)?" },
-  { id: "who", text: "Do I know who has it?" },
-  { id: "would-use", text: "Would they use (or pay for) a solution?" },
-  { id: "better", text: "Is my solution clearly better than what they use today?" },
-  { id: "can-build", text: "Can I build a first version with my current time and skills?" },
-  { id: "cost-ok", text: "Is the cost acceptable?" },
-  { id: "still-want", text: "Do I still want to do it after a few days?" },
-  { id: "riskiest-known", text: "Do I know the riskiest assumption and how to test it?" },
+/** The questions' words are in i18n (ideas.questions), by id. */
+export const QUESTIONS: { id: string }[] = [
+  { id: "problem-real" },
+  { id: "who" },
+  { id: "would-use" },
+  { id: "better" },
+  { id: "can-build" },
+  { id: "cost-ok" },
+  { id: "still-want" },
+  { id: "riskiest-known" },
 ];
 
 /** Older YAML readers turn an unquoted yes/no into true/false: both are accepted. */
@@ -170,11 +168,7 @@ export function answerPatch(data: Record<string, unknown>, id: string, a: Answer
 // Riskiest assumptions (SPEC 5.4, Lean Canvas): what must be true, how to test it, the result.
 
 export type Result = "untested" | "confirmed" | "rejected";
-export const RESULTS: { id: Result; label: string }[] = [
-  { id: "untested", label: "Untested" },
-  { id: "confirmed", label: "Confirmed" },
-  { id: "rejected", label: "Rejected" },
-];
+export const RESULTS: { id: Result }[] = [{ id: "untested" }, { id: "confirmed" }, { id: "rejected" }];
 
 export interface Assumption {
   text: string;

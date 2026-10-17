@@ -1,4 +1,5 @@
 import { FORMATS, STATUSES, type Book, type BookStatus, type Format } from "./books";
+import { t } from "../i18n";
 import { parseLocal } from "./dates";
 
 // Reading stats (SPEC 5.6). A book counts as read in the year and month of its `finished` date;
@@ -33,8 +34,6 @@ export interface Stats {
   byStatus: { id: BookStatus; label: string; count: number }[];
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 const finishedOn = (b: Book) => (b.status === "read" ? parseLocal(b.finished) : null);
 
 /** Days from start to finish, both counted, or null when a date is missing or out of order. */
@@ -67,8 +66,8 @@ export function bookStats(books: Book[], year: number | null): Stats {
 
   let bars: Stats["bars"];
   if (year !== null) {
-    bars = MONTHS.map((label, m) => ({
-      label,
+    bars = t.dates.months.map((label, m) => ({
+      label: label[0].toUpperCase() + label.slice(1),
       key: String(m + 1),
       ...tally(read.filter(b => finishedOn(b)!.getMonth() === m)),
     }));
@@ -95,7 +94,7 @@ export function bookStats(books: Book[], year: number | null): Stats {
     timed: days.length,
     bars,
     undated: year === null ? read.filter(b => !finishedOn(b)).length : 0,
-    byFormat: FORMATS.map(f => ({ ...f, count: read.filter(b => b.format === f.id).length })),
-    byStatus: STATUSES.map(s => ({ ...s, count: books.filter(b => b.status === s.id).length })),
+    byFormat: FORMATS.map(f => ({ ...f, label: t.books.formats[f.id], count: read.filter(b => b.format === f.id).length })),
+    byStatus: STATUSES.map(s => ({ ...s, label: t.books.status[s.id], count: books.filter(b => b.status === s.id).length })),
   };
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { t } from "../i18n";
 import { sameReminders, upcomingReminders, type Reminder } from "../data/reminders";
 import type { Task } from "../data/todo";
 import { useApp } from "./context";
@@ -20,7 +21,7 @@ export function useReminders(tasks: Task[], loaded: boolean, onOpen: (path: stri
     last.current = list;
     platform.setReminders(list).catch(e => {
       last.current = null;
-      toast({ text: `Could not set reminders: ${e?.message ?? e}`, error: true });
+      toast({ text: t.errors.reminders(String(e?.message ?? e)), error: true });
     });
   }, [tasks, loaded, platform, toast]);
 

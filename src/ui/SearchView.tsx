@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { loadDocs, search, type Doc, type Since } from "../data/search";
 import { NoteEditor } from "./NoteEditor";
 import { useApp } from "./context";
+import { t } from "../i18n";
 
 // Global search (SPEC 4.4): every area, ignores accents and case, filters by area and date.
 // To-dos and inbox items open in their own screens; other notes open here.
@@ -13,25 +14,11 @@ export interface SearchState {
   since: Since;
 }
 
-export const AREA_LABEL: Record<string, string> = {
-  todo: "To-do",
-  inbox: "Inbox",
-  ideas: "Ideas",
-  projects: "Projects",
-  books: "Books",
-  journal: "Journal",
-  review: "Review",
-  thoughts: "Thoughts",
-};
+const AREAS = ["todo", "inbox", "ideas", "projects", "books", "journal", "review", "thoughts"];
 
-export const areaLabel = (a: string) => AREA_LABEL[a] ?? a;
+export const areaLabel = (a: string) => (AREAS.includes(a) ? t.area[a as keyof typeof t.area] : a);
 
-const SINCE: { id: Since; label: string }[] = [
-  { id: "any", label: "Any time" },
-  { id: "week", label: "Past week" },
-  { id: "month", label: "Past month" },
-  { id: "year", label: "Past year" },
-];
+const SINCE: Since[] = ["any", "week", "month", "year"];
 
 const MAX_SHOWN = 100;
 
@@ -81,7 +68,7 @@ export function SearchView({ state, setState, focusKey, openElsewhere }: Props) 
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Search</h1>
+          <h1>{t.search.title}</h1>
         </div>
         <div className="search-box">
           <Search size={18} className="muted" />
@@ -89,54 +76,54 @@ export function SearchView({ state, setState, focusKey, openElsewhere }: Props) 
             ref={input}
             className="search-input"
             value={text}
-            placeholder="Search everything…"
-            aria-label="Search"
+            placeholder={t.search.placeholder}
+            aria-label={t.search.title}
             autoFocus
             enterKeyHint="search"
             onChange={e => setText(e.target.value)}
             onKeyDown={e => e.key === "Enter" && hits[0] && pick(hits[0].doc)}
           />
           {text && (
-            <button className="btn ghost icon" aria-label="Clear" onClick={() => (setText(""), input.current?.focus())}>
+            <button className="btn ghost icon" aria-label={t.common.clear} onClick={() => (setText(""), input.current?.focus())}>
               <X size={18} />
             </button>
           )}
         </div>
-        <nav className="search-filters" aria-label="Area">
+        <nav className="search-filters" aria-label={t.search.area}>
           {["", ...areas].map(a => (
             <button key={a} className={`chip${state.area === a ? " active" : ""}`} onClick={() => setState({ ...state, area: a })}>
-              {a ? areaLabel(a) : "All"}
+              {a ? areaLabel(a) : t.common.all}
             </button>
           ))}
         </nav>
-        <nav className="search-filters" aria-label="Date">
+        <nav className="search-filters" aria-label={t.search.date}>
           {SINCE.map(s => (
             <button
-              key={s.id}
-              className={`chip${state.since === s.id ? " active" : ""}`}
-              onClick={() => setState({ ...state, since: s.id })}
+              key={s}
+              className={`chip${state.since === s ? " active" : ""}`}
+              onClick={() => setState({ ...state, since: s })}
             >
-              {s.label}
+              {t.search.since[s]}
             </button>
           ))}
         </nav>
         {!docs ? (
-          <p className="muted empty-note">Reading notes…</p>
+          <p className="muted empty-note">{t.search.reading}</p>
         ) : !state.text.trim() ? (
-          <p className="muted empty-note">Type to search {docs.length} notes. Accents and capitals do not matter.</p>
+          <p className="muted empty-note">{t.search.typeTo(docs.length)}</p>
         ) : hits.length === 0 ? (
-          <p className="muted empty-note">Nothing found.</p>
+          <p className="muted empty-note">{t.search.nothing}</p>
         ) : (
           <>
             <p className="muted small empty-note">
-              {hits.length} {hits.length === 1 ? "result" : "results"}
-              {hits.length > MAX_SHOWN && `, showing the first ${MAX_SHOWN}`}
+              {t.search.results(hits.length)}
+              {hits.length > MAX_SHOWN && t.search.showingFirst(MAX_SHOWN)}
             </p>
             <ul className="list">
               {hits.slice(0, MAX_SHOWN).map(({ doc, snippet }) => (
                 <li key={doc.path}>
                   <button className={`list-item${open === doc.path ? " active" : ""}`} onClick={() => pick(doc)}>
-                    <span className="list-title">{doc.title || <span className="muted">(empty)</span>}</span>
+                    <span className="list-title">{doc.title || <span className="muted">{t.common.empty}</span>}</span>
                     {snippet && (
                       <span className="search-snippet">
                         {snippet.before}
@@ -159,7 +146,7 @@ export function SearchView({ state, setState, focusKey, openElsewhere }: Props) 
         {open ? (
           <NoteEditor key={open} path={open} onBack={() => setOpen(null)} />
         ) : (
-          <div className="detail-empty muted">Results open here.</div>
+          <div className="detail-empty muted">{t.search.opensHere}</div>
         )}
       </div>
     </div>

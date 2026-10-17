@@ -1,4 +1,5 @@
 import type { Storage } from "../storage/types";
+import type { LangSetting } from "../i18n";
 
 // Per-device settings in .hypomnemata/settings.json (not synced, SPEC 6.2).
 
@@ -6,6 +7,8 @@ export type Theme = "dark" | "light" | "system";
 
 export interface Settings {
   theme: Theme;
+  /** "system" (or missing) follows the device's language. */
+  language?: LangSetting;
   /** PC: the data folder on the Android devices it syncs with (SPEC 6.1). */
   syncDeviceDir?: string;
 }

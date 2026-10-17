@@ -1,0 +1,909 @@
+{
+ "note": "Portuguese metadata for data/thoughts.json, by id. Quote texts stay in English, except Portuguese originals. Built from MyNotes' pensamentos.json and the English notes.",
+ "thoughts": {
+  "sen-ep1-3a": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 1, §3",
+   "tradition": "Estoicismo",
+   "themes": [
+    "tempo"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “Omnia, Lucili, aliena sunt, tempus tantum nostrum est.”"
+  },
+  "sen-ep1-3b": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 1, §2",
+   "tradition": "Estoicismo",
+   "themes": [
+    "tempo",
+    "ação"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “Dum differtur vita transcurrit.”"
+  },
+  "sen-ep7-8": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 7, §8",
+   "tradition": "Estoicismo",
+   "themes": [
+    "aprendizado",
+    "amizade"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “homines dum docent discunt.” No contexto, Sêneca recomenda conviver com quem nos torna melhores e com quem podemos tornar melhores."
+  },
+  "sen-ep13-4": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 13, §4",
+   "tradition": "Estoicismo",
+   "themes": [
+    "medo",
+    "sofrimento",
+    "sabedoria"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “Plura sunt, Lucili, quae nos terrent quam quae premunt, et saepius opinione quam re laboramus.”"
+  },
+  "sen-ep28-1": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 28, §1",
+   "tradition": "Estoicismo",
+   "themes": [
+    "autoconhecimento",
+    "tranquilidade"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “Animum debes mutare, non caelum.” Sêneca responde a um amigo que viajava para fugir da própria tristeza."
+  },
+  "sen-ep104-26": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Cartas a Lucílio",
+   "reference": "Carta 104, §26",
+   "tradition": "Estoicismo",
+   "themes": [
+    "coragem",
+    "ação"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Latim: “Non quia difficilia sunt non audemus, sed quia non audemus difficilia sunt.” Ao pé da letra: não é porque as coisas são difíceis que não ousamos; é porque não ousamos que elas são difíceis."
+  },
+  "sen-brev-1-3": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Sobre a brevidade da vida",
+   "reference": "1, §3",
+   "tradition": "Estoicismo",
+   "themes": [
+    "tempo"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Aubrey Stewart (1889, domínio público)",
+   "notes": "Latim: “Non exiguum temporis habemus, sed multum perdidimus.”"
+  },
+  "sen-ira-3-36a": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Sobre a ira",
+   "reference": "III, 36.1",
+   "tradition": "Estoicismo",
+   "themes": [
+    "exame de consciência",
+    "temperança"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Aubrey Stewart (1889, domínio público)",
+   "notes": "Sêneca relata que o filósofo Séxtio fazia estas perguntas a si mesmo ao fim de cada dia, e conta em seguida (III.36.2–3) que faz o mesmo."
+  },
+  "sen-ira-3-36b": {
+   "author": "Sêneca",
+   "era": "c. 4 a.C.–65 d.C.",
+   "work": "Sobre a ira",
+   "reference": "III, 36.4",
+   "tradition": "Estoicismo",
+   "themes": [
+    "exame de consciência",
+    "perdão"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de Aubrey Stewart (1889, domínio público)",
+   "notes": "Latim: “vide ne istud amplius facias, nunc tibi ignosco.” É o que Sêneca diz a si mesmo ao revisar o dia: exigência sem condenação."
+  },
+  "ept-man-1": {
+   "author": "Epicteto",
+   "era": "c. 50–135 d.C.",
+   "work": "Manual (Encheirídion)",
+   "reference": "1.1",
+   "tradition": "Estoicismo",
+   "themes": [
+    "liberdade",
+    "responsabilidade",
+    "sabedoria"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": "O Manual foi compilado por Arriano, aluno de Epicteto, a partir das lições do mestre."
+  },
+  "ept-man-5": {
+   "author": "Epicteto",
+   "era": "c. 50–135 d.C.",
+   "work": "Manual (Encheirídion)",
+   "reference": "5",
+   "tradition": "Estoicismo",
+   "themes": [
+    "tranquilidade",
+    "sabedoria"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": ""
+  },
+  "ept-man-8": {
+   "author": "Epicteto",
+   "era": "c. 50–135 d.C.",
+   "work": "Manual (Encheirídion)",
+   "reference": "8",
+   "tradition": "Estoicismo",
+   "themes": [
+    "aceitação",
+    "tranquilidade"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": ""
+  },
+  "ept-man-51": {
+   "author": "Epicteto",
+   "era": "c. 50–135 d.C.",
+   "work": "Manual (Encheirídion)",
+   "reference": "51.1 (capítulo L na tradução de G. Long)",
+   "tradition": "Estoicismo",
+   "themes": [
+    "ação",
+    "tempo"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": ""
+  },
+  "ept-disc-2-18": {
+   "author": "Epicteto",
+   "era": "c. 50–135 d.C.",
+   "work": "Discursos (Diatribes)",
+   "reference": "II, 18.1",
+   "tradition": "Estoicismo",
+   "themes": [
+    "hábito",
+    "ação"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": ""
+  },
+  "cle-man-53": {
+   "author": "Cleantes",
+   "era": "c. 330–230 a.C.",
+   "work": "versos citados no Manual de Epicteto",
+   "reference": "Manual 53.1 (capítulo LII na tradução de G. Long)",
+   "tradition": "Estoicismo",
+   "themes": [
+    "aceitação",
+    "coragem"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1877, domínio público)",
+   "notes": "Versos de Cleantes, sucessor de Zenão, conservados por Epicteto. Não fazem parte do Hino a Zeus, outro poema dele."
+  },
+  "mar-2-1": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "II, 1",
+   "tradition": "Estoicismo",
+   "themes": [
+    "justiça",
+    "paciência"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mar-4-3": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "IV, 3",
+   "tradition": "Estoicismo",
+   "themes": [
+    "mudança",
+    "sabedoria"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mar-4-17": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "IV, 17",
+   "tradition": "Estoicismo",
+   "themes": [
+    "morte",
+    "tempo",
+    "ação"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mar-5-20": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "V, 20",
+   "tradition": "Estoicismo",
+   "themes": [
+    "coragem",
+    "adversidade"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mar-6-6": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "VI, 6",
+   "tradition": "Estoicismo",
+   "themes": [
+    "justiça",
+    "temperança"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": "Long imprime “[the wrong-doer]” entre colchetes: as palavras estão implícitas no grego."
+  },
+  "mar-7-67": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "VII, 67",
+   "tradition": "Estoicismo",
+   "themes": [
+    "felicidade",
+    "temperança"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mar-10-16": {
+   "author": "Marco Aurélio",
+   "era": "121–180 d.C.",
+   "work": "Meditações",
+   "reference": "X, 16",
+   "tradition": "Estoicismo",
+   "themes": [
+    "ação",
+    "justiça"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de George Long (1862, domínio público)",
+   "notes": ""
+  },
+  "mus-gel-16-1": {
+   "author": "Musônio Rufo",
+   "era": "c. 30–101 d.C.",
+   "work": "dito citado por Aulo Gélio, Noites Áticas",
+   "reference": "XVI, 1.2",
+   "tradition": "Estoicismo",
+   "themes": [
+    "temperança",
+    "esforço"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa do próprio projeto, a partir do original em grego.",
+   "notes": "Grego: “Ἄν τι πράξεις καλὸν μετὰ πόνου, ὁ μὲν πόνος οἴχεται, τὸ δὲ καλὸν μένει· ἄν τι ποιήσεις αἰσχρὸν μετὰ ἡδονῆς, τὸ μὲν ἡδὺ οἴχεται, τὸ δὲ αἰσχρὸν μένει.” Gélio ouviu o dito como de Musônio e observa que Catão, o Velho, disse algo semelhante muito antes, num discurso em Numância (XVI.1.3–4)."
+  },
+  "zen-dl-7-23": {
+   "author": "Zenão de Cício",
+   "era": "c. 334–262 a.C.",
+   "work": "dito registrado por Diógenes Laércio, Vidas e doutrinas dos filósofos ilustres",
+   "reference": "VII, 23",
+   "tradition": "Estoicismo",
+   "themes": [
+    "escuta",
+    "temperança"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de C. D. Yonge (1853, domínio público)",
+   "notes": "Zenão disse isso a um jovem que falava muita bobagem. Diógenes Laércio escreveu cerca de cinco séculos depois de Zenão: é um dito atribuído, não um texto do próprio Zenão."
+  },
+  "pla-apo-38a": {
+   "author": "Platão",
+   "era": "c. 428–348 a.C.",
+   "work": "Apologia de Sócrates",
+   "reference": "38a",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "autoconhecimento",
+    "sabedoria"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de Benjamin Jowett (domínio público)",
+   "notes": "Palavras de Sócrates no seu julgamento, como Platão as registrou."
+  },
+  "pla-gor-469c": {
+   "author": "Platão",
+   "era": "c. 428–348 a.C.",
+   "work": "Górgias",
+   "reference": "469c",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "justiça",
+    "escolha"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de Benjamin Jowett (domínio público)",
+   "notes": "Sócrates responde a Polo, que perguntou: “Então preferirias sofrer injustiça a cometê-la?”"
+  },
+  "pla-tee-155d": {
+   "author": "Platão",
+   "era": "c. 428–348 a.C.",
+   "work": "Teeteto",
+   "reference": "155d",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "conhecimento",
+    "admiração"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de Benjamin Jowett (domínio público)",
+   "notes": "Fala de Sócrates a Teeteto."
+  },
+  "ari-en-2-1": {
+   "author": "Aristóteles",
+   "era": "384–322 a.C.",
+   "work": "Ética a Nicômaco",
+   "reference": "II, 1 (1103a–b)",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "hábito",
+    "justiça",
+    "coragem",
+    "temperança"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de D. P. Chase (1847, domínio público)",
+   "notes": ""
+  },
+  "ari-en-1-7": {
+   "author": "Aristóteles",
+   "era": "384–322 a.C.",
+   "work": "Ética a Nicômaco",
+   "reference": "I, 7 (1098a18)",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "felicidade",
+    "tempo",
+    "hábito"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de D. P. Chase (1847, domínio público)",
+   "notes": "O grego diz “primavera” (éar); em inglês o provérbio ficou “one swallow does not make a summer” e, em português, “uma andorinha só não faz verão”."
+  },
+  "ari-en-8-1": {
+   "author": "Aristóteles",
+   "era": "384–322 a.C.",
+   "work": "Ética a Nicômaco",
+   "reference": "VIII, 1 (1155a5)",
+   "tradition": "Filosofia grega clássica",
+   "themes": [
+    "amizade"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de D. P. Chase (1847, domínio público)",
+   "notes": ""
+  },
+  "epc-men-122": {
+   "author": "Epicuro",
+   "era": "341–270 a.C.",
+   "work": "Carta a Meneceu",
+   "reference": "em Diógenes Laércio, X, 122",
+   "tradition": "Epicurismo",
+   "themes": [
+    "sabedoria",
+    "aprendizado"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de C. D. Yonge (1853, domínio público)",
+   "notes": "A carta chegou até nós porque Diógenes Laércio a copiou inteira."
+  },
+  "epc-men-125": {
+   "author": "Epicuro",
+   "era": "341–270 a.C.",
+   "work": "Carta a Meneceu",
+   "reference": "em Diógenes Laércio, X, 125",
+   "tradition": "Epicurismo",
+   "themes": [
+    "morte",
+    "tranquilidade"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de C. D. Yonge (1853, domínio público)",
+   "notes": ""
+  },
+  "epc-kd-27": {
+   "author": "Epicuro",
+   "era": "341–270 a.C.",
+   "work": "Máximas principais",
+   "reference": "27 (em Diógenes Laércio, X, 148; número 28 na tradução de Yonge)",
+   "tradition": "Epicurismo",
+   "themes": [
+    "amizade",
+    "felicidade"
+   ],
+   "language": "Grego antigo",
+   "translation": "Tradução inglesa de C. D. Yonge (1853, domínio público)",
+   "notes": ""
+  },
+  "epc-sen-16-7": {
+   "author": "Epicuro",
+   "era": "341–270 a.C.",
+   "work": "dito citado por Sêneca, Cartas a Lucílio",
+   "reference": "Carta 16, §7",
+   "tradition": "Epicurismo",
+   "themes": [
+    "desejo",
+    "temperança"
+   ],
+   "language": "Latim (citação de Sêneca)",
+   "translation": "Tradução inglesa de Richard M. Gummere (1917, domínio público)",
+   "notes": "Sêneca cita o dito como de Epicuro: “si ad naturam vives, numquam eris pauper; si ad opiniones, numquam eris dives.” Só o conhecemos por essa citação."
+  },
+  "ago-conf-1-1": {
+   "author": "Agostinho de Hipona",
+   "era": "354–430",
+   "work": "Confissões",
+   "reference": "I, 1.1",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "fé",
+    "inquietação"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de E. B. Pusey (domínio público)",
+   "notes": "Latim: “fecisti nos ad te et inquietum est cor nostrum donec requiescat in te.” É uma oração dirigida a Deus."
+  },
+  "ago-conf-10-8": {
+   "author": "Agostinho de Hipona",
+   "era": "354–430",
+   "work": "Confissões",
+   "reference": "X, 8.15",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "autoconhecimento",
+    "admiração"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de E. B. Pusey (domínio público)",
+   "notes": "Latim: “et eunt homines mirari alta montium … et relinquunt se ipsos.” Agostinho fala da imensidão da memória, que é ele mesmo e que ele não consegue abarcar."
+  },
+  "boe-cons-2-4": {
+   "author": "Boécio",
+   "era": "c. 480–524",
+   "work": "A consolação da filosofia",
+   "reference": "Livro II, prosa 4",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "sofrimento",
+    "tranquilidade"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de H. R. James (1897, domínio público)",
+   "notes": "A Filosofia, personificada, fala a Boécio, que escreveu o livro na prisão antes de ser executado."
+  },
+  "pas-277": {
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensamentos",
+   "reference": "fragmento 277 (numeração Brunschvicg)",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "fé",
+    "conhecimento"
+   ],
+   "language": "Francês",
+   "translation": "Tradução inglesa de W. F. Trotter (domínio público)",
+   "notes": "Francês: “Le cœur a ses raisons que la raison ne connaît point.” Os Pensamentos são notas que Pascal deixou inacabadas; a numeração muda conforme a edição."
+  },
+  "pas-139": {
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensamentos",
+   "reference": "fragmento 139 (numeração Brunschvicg)",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "tranquilidade",
+    "distração"
+   ],
+   "language": "Francês",
+   "translation": "Tradução inglesa de W. F. Trotter (domínio público)",
+   "notes": "Do fragmento sobre o “divertimento”: buscar distração para não pensar em si mesmo."
+  },
+  "pas-347": {
+   "author": "Blaise Pascal",
+   "era": "1623–1662",
+   "work": "Pensamentos",
+   "reference": "fragmento 347 (numeração Brunschvicg)",
+   "tradition": "Filosofia cristã",
+   "themes": [
+    "condição humana",
+    "conhecimento"
+   ],
+   "language": "Francês",
+   "translation": "Tradução inglesa de W. F. Trotter (domínio público)",
+   "notes": ""
+  },
+  "mon-1-39": {
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Ensaios",
+   "reference": "I, 39 “Da solidão” (I, 38 em algumas edições)",
+   "tradition": "Humanismo renascentista",
+   "themes": [
+    "liberdade",
+    "autoconhecimento"
+   ],
+   "language": "Francês (médio)",
+   "translation": "Tradução inglesa de Charles Cotton (domínio público)",
+   "notes": "Original: “La plus grande chose du monde, c’est de sçavoir estre à soy.”"
+  },
+  "mon-3-2": {
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Ensaios",
+   "reference": "III, 2 “Do arrependimento”",
+   "tradition": "Humanismo renascentista",
+   "themes": [
+    "condição humana",
+    "autoconhecimento"
+   ],
+   "language": "Francês (médio)",
+   "translation": "Tradução inglesa de Charles Cotton (domínio público)",
+   "notes": "Original: “chaque homme porte la forme entiere de l’humaine condition.”"
+  },
+  "mon-3-13": {
+   "author": "Michel de Montaigne",
+   "era": "1533–1592",
+   "work": "Ensaios",
+   "reference": "III, 13 “Da experiência”",
+   "tradition": "Humanismo renascentista",
+   "themes": [
+    "sabedoria",
+    "vida"
+   ],
+   "language": "Francês (médio)",
+   "translation": "Tradução inglesa de Charles Cotton (domínio público)",
+   "notes": "Original: “Nostre grand et glorieux chef-d’œuvre c’est vivre à propos.” Montaigne continua: reinar, entesourar, construir são só pequenos apêndices e escoras."
+  },
+  "spi-4-67": {
+   "author": "Baruch Spinoza",
+   "era": "1632–1677",
+   "work": "Ética",
+   "reference": "Parte IV, proposição 67",
+   "tradition": "Racionalismo",
+   "themes": [
+    "liberdade",
+    "morte",
+    "vida"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de R. H. M. Elwes (1883, domínio público)",
+   "notes": "Para Spinoza, “homem livre” é quem vive guiado pela razão, e não levado pelo medo."
+  },
+  "spi-5-42": {
+   "author": "Baruch Spinoza",
+   "era": "1632–1677",
+   "work": "Ética",
+   "reference": "Parte V, proposição 42, escólio",
+   "tradition": "Racionalismo",
+   "themes": [
+    "esforço",
+    "sabedoria"
+   ],
+   "language": "Latim",
+   "translation": "Tradução inglesa de R. H. M. Elwes (1883, domínio público)",
+   "notes": "É a última frase da Ética. Latim: “Sed omnia praeclara tam difficilia quam rara sunt.”"
+  },
+  "nie-gc-270": {
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "A gaia ciência",
+   "reference": "§ 270",
+   "tradition": "Filosofia alemã do séc. XIX",
+   "themes": [
+    "autoconhecimento",
+    "liberdade"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa de Thomas Common (1910, domínio público)",
+   "notes": "A fórmula ecoa o poeta grego Píndaro (“torna-te o que és”). Nietzsche voltou a usá-la no subtítulo de Ecce Homo."
+  },
+  "nie-gc-290": {
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "A gaia ciência",
+   "reference": "§ 290",
+   "tradition": "Filosofia alemã do séc. XIX",
+   "themes": [
+    "caráter",
+    "autoconhecimento"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa de Thomas Common (1910, domínio público)",
+   "notes": "O texto continua descrevendo quem examina as forças e fraquezas da própria natureza e as integra num plano."
+  },
+  "nie-ci-8": {
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "Crepúsculo dos ídolos",
+   "reference": "“Máximas e flechas”, 8",
+   "tradition": "Filosofia alemã do séc. XIX",
+   "themes": [
+    "sofrimento",
+    "coragem"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa de A. M. Ludovici (1911, domínio público)",
+   "notes": "Não é uma promessa de que todo sofrimento nos fortalece; o texto não dá mais explicação."
+  },
+  "nie-ci-12": {
+   "author": "Friedrich Nietzsche",
+   "era": "1844–1900",
+   "work": "Crepúsculo dos ídolos",
+   "reference": "“Máximas e flechas”, 12",
+   "tradition": "Filosofia alemã do séc. XIX",
+   "themes": [
+    "sentido",
+    "sofrimento"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa de A. M. Ludovici (1911, domínio público)",
+   "notes": "Alemão: “Hat man sein warum? des Lebens, so verträgt man sich fast mit jedem wie?” Mais perto do alemão: quem tem o seu porquê da vida suporta quase qualquer como."
+  },
+  "kie-angest": {
+   "author": "Søren Kierkegaard",
+   "era": "1813–1855",
+   "work": "O conceito de angústia (Begrebet Angest, 1844)",
+   "reference": "trecho que começa com “Angest kan man sammenligne med Svimmelhed” (p. 58 na edição de 1991 da DSL)",
+   "tradition": "Existencialismo (precursor)",
+   "themes": [
+    "liberdade",
+    "escolha",
+    "angústia"
+   ],
+   "language": "Dinamarquês",
+   "translation": "Tradução inglesa do próprio projeto, a partir do original em dinamarquês.",
+   "notes": "Original: “Saaledes er Angest den Frihedens Svimlen …”; a frase continua: ela surge quando o espírito quer pôr a síntese e a liberdade olha para baixo, para a sua própria possibilidade. O livro saiu com o pseudônimo Vigilius Haufniensis. Logo antes, Kierkegaard compara: quem olha para um abismo fica tonto, e a causa é tanto o olho quanto o abismo."
+  },
+  "kie-diario-1843": {
+   "author": "Søren Kierkegaard",
+   "era": "1813–1855",
+   "work": "anotação de diário (1843)",
+   "reference": "",
+   "tradition": "Existencialismo (precursor)",
+   "themes": [
+    "tempo",
+    "escolha"
+   ],
+   "language": "Dinamarquês",
+   "translation": "Tradução inglesa do próprio projeto, a partir do original em dinamarquês (como citado em fontes secundárias).",
+   "notes": "Dinamarquês (“… Livet maa forstaaes baglænds … det maa leves forlænds”) encontrado só em fontes secundárias, sem conferir na edição crítica (Søren Kierkegaards Skrifter). Muito provavelmente é de Kierkegaard, mas fica como atribuição incerta até ser verificado."
+  },
+  "kaf-z5": {
+   "author": "Franz Kafka",
+   "era": "1883–1924",
+   "work": "Aforismos de Zürau (Betrachtungen über Sünde, Leid, Hoffnung und den wahren Weg)",
+   "reference": "aforismo 5",
+   "tradition": "Literatura",
+   "themes": [
+    "escolha",
+    "decisão"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa do próprio projeto, a partir do original em alemão.",
+   "notes": "Original: “Von einem gewissen Punkt an gibt es keine Rückkehr mehr. Dieser Punkt ist zu erreichen.” Kafka era escritor de ficção, não filósofo acadêmico. Escreveu estes aforismos em 1917–1918; Max Brod os publicou em 1931, depois da morte do autor."
+  },
+  "kaf-z26": {
+   "author": "Franz Kafka",
+   "era": "1883–1924",
+   "work": "Aforismos de Zürau (Betrachtungen über Sünde, Leid, Hoffnung und den wahren Weg)",
+   "reference": "aforismo 26, segundo parágrafo",
+   "tradition": "Literatura",
+   "themes": [
+    "caminho",
+    "decisão"
+   ],
+   "language": "Alemão",
+   "translation": "Tradução inglesa do próprio projeto, a partir do original em alemão.",
+   "notes": "Original: “Es gibt ein Ziel, aber keinen Weg; was wir Weg nennen, ist Zögern.” Kafka escreveu estes aforismos como escritor de ficção, não como filósofo acadêmico."
+  },
+  "mac-bc-160": {
+   "author": "Machado de Assis",
+   "era": "1839–1908",
+   "work": "Memórias póstumas de Brás Cubas (1881)",
+   "reference": "cap. CLX, “Das negativas”",
+   "tradition": "Literatura",
+   "themes": [
+    "condição humana",
+    "ironia"
+   ],
+   "language": "Português",
+   "translation": "Original em português (ortografia atualizada).",
+   "notes": "É a última frase do livro, dita pelo narrador defunto Brás Cubas: a amargura e a ironia são do personagem, não um conselho.",
+   "text": "Não tive filhos, não transmiti a nenhuma criatura o legado da nossa miséria."
+  },
+  "pes-mar-portugues": {
+   "author": "Fernando Pessoa",
+   "era": "1888–1935",
+   "work": "Mensagem (1934)",
+   "reference": "poema “Mar português”",
+   "tradition": "Literatura",
+   "themes": [
+    "sentido",
+    "coragem",
+    "sofrimento"
+   ],
+   "language": "Português",
+   "translation": "Original em português (ortografia atualizada).",
+   "notes": "Os versos respondem à dor das perdas no mar, nas navegações portuguesas: “quantas mães choraram”.",
+   "text": "Valeu a pena? Tudo vale a pena / Se a alma não é pequena."
+  },
+  "con-2-17": {
+   "author": "Confúcio",
+   "era": "551–479 a.C. (datas tradicionais)",
+   "work": "Analectos (Lunyu)",
+   "reference": "II, 17",
+   "tradition": "Confucionismo",
+   "themes": [
+    "conhecimento",
+    "humildade"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de James Legge (domínio público)",
+   "notes": "Os Analectos foram compilados por discípulos depois da morte de Confúcio. Ele fala a um discípulo (Zilu, chamado “Yu” no texto)."
+  },
+  "con-15-23": {
+   "author": "Confúcio",
+   "era": "551–479 a.C. (datas tradicionais)",
+   "work": "Analectos (Lunyu)",
+   "reference": "XV, 23 (numeração de Legge)",
+   "tradition": "Confucionismo",
+   "themes": [
+    "justiça",
+    "reciprocidade"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de James Legge (domínio público)",
+   "notes": "Resposta a quem pergunta se existe uma palavra que sirva de regra para a vida toda: “reciprocidade” (shu)."
+  },
+  "con-7-21": {
+   "author": "Confúcio",
+   "era": "551–479 a.C. (datas tradicionais)",
+   "work": "Analectos (Lunyu)",
+   "reference": "VII, 21 (numeração de Legge)",
+   "tradition": "Confucionismo",
+   "themes": [
+    "aprendizado",
+    "humildade"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de James Legge (domínio público)",
+   "notes": ""
+  },
+  "lao-33": {
+   "author": "Laozi",
+   "era": "séc. VI–IV a.C. (incerto)",
+   "work": "Daodejing (Tao Te Ching)",
+   "reference": "capítulo 33",
+   "tradition": "Taoísmo",
+   "themes": [
+    "autoconhecimento",
+    "temperança"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de James Legge (domínio público)",
+   "notes": "Chinês: “知人者智，自知者明。勝人者有力，自勝者強。” A autoria de Laozi é tradicional; o livro provavelmente reúne textos de várias épocas."
+  },
+  "lao-64": {
+   "author": "Laozi",
+   "era": "séc. VI–IV a.C. (incerto)",
+   "work": "Daodejing (Tao Te Ching)",
+   "reference": "capítulo 64",
+   "tradition": "Taoísmo",
+   "themes": [
+    "ação",
+    "paciência"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de James Legge (domínio público)",
+   "notes": "Chinês: “千里之行，始於足下”, ao pé da letra “começa debaixo dos pés”. O li é uma medida chinesa de distância. O contexto fala de agir enquanto as coisas ainda são pequenas."
+  },
+  "zhu-26": {
+   "author": "Zhuangzi",
+   "era": "c. 369–286 a.C.",
+   "work": "Zhuangzi",
+   "reference": "capítulo 26, “Coisas externas” (Wai wu)",
+   "tradition": "Taoísmo",
+   "themes": [
+    "linguagem",
+    "conhecimento"
+   ],
+   "language": "Chinês clássico",
+   "translation": "Tradução inglesa de Herbert A. Giles (1889, domínio público)",
+   "notes": "É o fim do capítulo. Os capítulos “externos” do livro podem ter sido escritos por discípulos."
+  },
+  "dha-5": {
+   "author": "Dhammapada (tradição budista)",
+   "era": "",
+   "work": "Dhammapada",
+   "reference": "verso 5",
+   "tradition": "Budismo",
+   "themes": [
+    "perdão",
+    "paz"
+   ],
+   "language": "Páli",
+   "translation": "Tradução inglesa de F. Max Müller (1881, domínio público)",
+   "notes": "Páli: “averena ca sammanti”: cessa pela ausência de ódio (Müller traduz por “love”). O Dhammapada é uma coletânea de versos que a tradição atribui ao Buda."
+  },
+  "dha-103": {
+   "author": "Dhammapada (tradição budista)",
+   "era": "",
+   "work": "Dhammapada",
+   "reference": "verso 103",
+   "tradition": "Budismo",
+   "themes": [
+    "autodomínio",
+    "temperança"
+   ],
+   "language": "Páli",
+   "translation": "Tradução inglesa de F. Max Müller (1881, domínio público)",
+   "notes": "O Dhammapada é uma coletânea de versos que a tradição atribui ao Buda."
+  },
+  "bg-2-47": {
+   "author": "Bhagavad Gita (Mahabharata)",
+   "era": "",
+   "work": "Bhagavad Gita",
+   "reference": "II, 47",
+   "tradition": "Hinduísmo",
+   "themes": [
+    "ação",
+    "desapego"
+   ],
+   "language": "Sânscrito",
+   "translation": "Tradução inglesa em versos de Edwin Arnold (1885, domínio público)",
+   "notes": "Palavras de Krishna a Arjuna antes da batalha. Sânscrito: “karmaṇy evādhikāras te mā phaleṣu kadācana”, ao pé da letra: teu direito é só à ação, nunca aos seus frutos."
+  }
+ }
+}

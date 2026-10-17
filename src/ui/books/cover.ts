@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "../../i18n";
 import { useApp } from "../context";
 
 // Book covers (SPEC 5.6): any picked image is shrunk to at most 800 px and stored as JPEG, so a
@@ -18,7 +19,7 @@ export async function shrinkImage(file: Blob): Promise<Uint8Array> {
   g.drawImage(img, 0, 0, canvas.width, canvas.height);
   img.close();
   const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, "image/jpeg", 0.85));
-  if (!blob) throw new Error("Could not read this image");
+  if (!blob) throw new Error(t.books.badImage);
   return new Uint8Array(await blob.arrayBuffer());
 }
 

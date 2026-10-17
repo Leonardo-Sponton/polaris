@@ -365,6 +365,19 @@ h3 {
   color: var(--on-accent);
 }
 
+.radio-row {
+  gap: 10px;
+  min-height: 38px;
+  cursor: pointer;
+}
+
+.radio-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .toasts {
   position: fixed;
   left: 50%;

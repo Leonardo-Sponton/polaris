@@ -1,13 +1,11 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cap, dateFmt, t } from "../../i18n";
 import { isoDate } from "../../data/dates";
 import { MOODS, type Mood } from "../../data/journal";
 
 // Month grid for the Journal and the Review (SPEC 5.7, 5.8): written days are marked, with the
 // mood color when there is one.
 // Weeks start on Sunday, as Brazilian calendars do.
-
-const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const MONTH = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" });
 
 interface Props {
   /** Shown month, "2026-10". */
@@ -35,18 +33,18 @@ export function Calendar({ month, setMonth, selected, entries, onPick }: Props) 
   for (let d = 1; d <= days; d++) cells.push(`${month}-${String(d).padStart(2, "0")}`);
 
   return (
-    <div className="calendar" aria-label="Calendar">
+    <div className="calendar" aria-label={t.journal.calendar}>
       <div className="cal-head">
-        <button className="btn ghost icon" aria-label="Previous month" onClick={() => setMonth(shiftMonth(month, -1))}>
+        <button className="btn ghost icon" aria-label={t.journal.prevMonth} onClick={() => setMonth(shiftMonth(month, -1))}>
           <ChevronLeft size={18} />
         </button>
-        <span className="cal-title">{MONTH.format(first)}</span>
-        <button className="btn ghost icon" aria-label="Next month" onClick={() => setMonth(shiftMonth(month, 1))}>
+        <span className="cal-title">{cap(dateFmt({ month: "long", year: "numeric" }).format(first))}</span>
+        <button className="btn ghost icon" aria-label={t.journal.nextMonth} onClick={() => setMonth(shiftMonth(month, 1))}>
           <ChevronRight size={18} />
         </button>
       </div>
       <div className="cal-grid">
-        {WEEKDAYS.map((w, i) => (
+        {t.journal.weekdays.map((w, i) => (
           <span key={i} className="cal-wd">
             {w}
           </span>
@@ -60,7 +58,7 @@ export function Calendar({ month, setMonth, selected, entries, onPick }: Props) 
             <button
               key={day}
               className={cls.join(" ")}
-              aria-label={`${day}${e ? `, written${mood ? `, ${mood.label}` : ""}` : ""}`}
+              aria-label={`${day}${e ? `${t.journal.written}${mood ? `, ${t.journal.moods[mood.id]}` : ""}` : ""}`}
               aria-pressed={day === selected}
               onClick={() => onPick(day)}
             >

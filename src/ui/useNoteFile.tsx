@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { t } from "../i18n";
 import type { Data } from "../data/frontmatter";
 import { ConflictError, type Note } from "../data/notes";
 import { onFlush } from "../data/pending";
@@ -12,12 +13,6 @@ import { useBack } from "./useBack";
 
 export type Status = "saved" | "unsaved" | "saving" | "error";
 
-export const STATUS_TEXT: Record<Status, string> = {
-  saved: "Saved",
-  unsaved: "Editing…",
-  saving: "Saving…",
-  error: "Not saved!",
-};
 
 export interface NoteFile {
   /** The version shown; replaced when the file is reloaded from disk. */
@@ -139,7 +134,7 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
       }
       if (disk === n.text) return;
       if (dirty()) return; // unsaved edits: the next save raises the conflict
-      if (disk === null) setGone("This file was deleted or moved outside the app.");
+      if (disk === null) setGone(t.note.gone);
       else show(await notes.load(path));
     });
   }, [version]);
@@ -186,10 +181,10 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
       try {
         if (choice === "both") {
           const copy = await notes.saveCopy(noteRef.current!, data.current, body.current);
-          toast({ text: `Your version was saved as ${copy.path.split("/").pop()}` });
+          toast({ text: t.note.savedAs(copy.path.split("/").pop()!) });
         }
         if (c.diskText === null) {
-          setGone("This file was deleted or moved outside the app.");
+          setGone(t.note.gone);
           return;
         }
         show(await notes.load(path));
@@ -203,23 +198,20 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
   const dialog = conflict && (
     <div className="dialog-backdrop">
       <div className="card stack dialog" role="alertdialog" aria-labelledby="conflict-title">
-        <h2 id="conflict-title">This note changed outside the app</h2>
+        <h2 id="conflict-title">{t.note.changedTitle}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          {conflict.diskText === null
-            ? "The file was deleted or moved while you were editing it."
-            : "Another program or a sync changed the file while you were editing it."}{" "}
-          Which version do you want to keep?
+          {conflict.diskText === null ? t.note.deletedWhile : t.note.changedWhile} {t.note.whichVersion}
         </p>
         <div className="row">
           <button className="btn primary" onClick={() => resolve("mine")}>
-            Keep mine
+            {t.note.keepMine}
           </button>
           <button className="btn" onClick={() => resolve("file")}>
-            {conflict.diskText === null ? "Discard mine" : "Keep the file's"}
+            {conflict.diskText === null ? t.note.discardMine : t.note.keepFile}
           </button>
           {conflict.diskText !== null && (
             <button className="btn" onClick={() => resolve("both")}>
-              Keep both
+              {t.note.keepBoth}
             </button>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useBack } from "./useBack";
+import { t } from "../i18n";
 
 // Small modal pieces. Electron has no window.prompt, so text questions use AskText.
 
@@ -54,10 +55,10 @@ export function AskText(props: {
       />
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={props.onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" disabled={!props.optional && !text.trim()} onClick={ok}>
-          {props.okLabel ?? "OK"}
+          {props.okLabel ?? t.common.ok}
         </button>
       </div>
     </Dialog>
@@ -72,7 +73,7 @@ export function Confirm(props: { title: string; text: string; okLabel: string; o
       </p>
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={props.onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" onClick={props.onOk}>
           {props.okLabel}

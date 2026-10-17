@@ -123,6 +123,7 @@ const handlers = {
   },
   "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
   "reminders:set": (_e, list) => setReminders(list),
+  "app:labels": (_e, l) => setLabels(l),
   "sync:devices": () => adb.devices(),
   "sync:pcName": () => os.hostname(),
   "sync:localHashes": () => adb.localHashes(resolve("")),
@@ -156,7 +157,7 @@ function checkReminders() {
     const key = `${r.path}@${r.at}`;
     if (r.at > now || shown.has(key)) continue;
     shown.add(key);
-    const n = new Notification({ title: String(r.title), body: String(r.text || "Reminder"), icon: ICON });
+    const n = new Notification({ title: String(r.title), body: String(r.text || labels.reminder), icon: ICON });
     n.on("click", () => {
       showMain();
       mainWindow?.webContents.send("reminder:open", r.path);
@@ -172,6 +173,22 @@ function checkReminders() {
 const ICON = path.join(__dirname, "../resources/icon.png");
 let tray = null;
 let quitting = false;
+// Words of the tray menu and notifications, sent by the page in the app's language.
+const labels = { open: "Open Hypomnemata", capture: "Quick capture", quit: "Quit", reminder: "Reminder" };
+
+function setLabels(l) {
+  if (!l || typeof l !== "object") return;
+  for (const k of Object.keys(labels)) if (typeof l[k] === "string" && l[k]) labels[k] = l[k];
+  if (tray) tray.setContextMenu(trayMenu());
+}
+
+const trayMenu = () =>
+  Menu.buildFromTemplate([
+    { label: labels.open, click: showMain },
+    { label: labels.capture, click: () => createCaptureWindow() },
+    { type: "separator" },
+    { label: labels.quit, click: quit },
+  ]);
 
 function createTray() {
   if (tray) return;
@@ -182,14 +199,7 @@ function createTray() {
     return;
   }
   tray.setToolTip("Hypomnemata");
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: "Open Hypomnemata", click: showMain },
-      { label: "Quick capture", click: () => createCaptureWindow() },
-      { type: "separator" },
-      { label: "Quit", click: quit },
-    ]),
-  );
+  tray.setContextMenu(trayMenu());
   tray.on("click", showMain);
 }
 

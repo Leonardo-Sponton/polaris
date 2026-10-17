@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { t, type Words } from "../../i18n";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { addSection } from "../../data/ideas";
@@ -7,7 +8,7 @@ import { missingStepSections, stepIdOf, type Project } from "../../data/projects
 import { joinTitle, splitTitle } from "../../data/todo";
 import { useFiveW2H } from "../FiveW2H";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 
 // A note of a project step: title and free text, with buttons for the step's suggested sections
 // and the 5W2H block (SPEC 3.4, 5.5). Saved as you go.
@@ -26,15 +27,15 @@ export function StepNoteEditor({ path, project, onBack, onDelete }: Props) {
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back to the step">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.projects.backToStep}>
           <ArrowLeft size={20} />
         </button>
         <span className="quote-book muted small">{step?.name ?? stepIdOf(path)}</span>
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && (
-          <button className="btn ghost icon" aria-label="Delete note" title="Delete" onClick={() => onDelete(path)}>
+          <button className="btn ghost icon" aria-label={t.projects.deleteNote} title={t.common.delete} onClick={() => onDelete(path)}>
             <Trash2 size={18} />
           </button>
         )}
@@ -46,14 +47,14 @@ export function StepNoteEditor({ path, project, onBack, onDelete }: Props) {
           </div>
         </div>
       ) : (
-        f.note && <StepNoteForm key={f.rev} file={f} note={f.note} sections={step?.sections ?? []} />
+        f.note && <StepNoteForm key={f.rev} file={f} note={f.note} sections={step?.sectionWords ?? step?.sections ?? []} />
       )}
       {f.dialog}
     </div>
   );
 }
 
-function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note; sections: string[] }) {
+function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note; sections: (string | Words)[] }) {
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const [restRev, setRestRev] = useState(0);
@@ -78,8 +79,8 @@ function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note;
           className="task-title-input"
           rows={1}
           value={title}
-          placeholder="Note title"
-          aria-label="Title"
+          placeholder={t.projects.noteTitle}
+          aria-label={t.todo.title}
           onChange={e => {
             const v = e.target.value.replace(/\n/g, " ");
             setTitle(v);
@@ -93,7 +94,7 @@ function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note;
             key={restRev}
             text={rest}
             autoFocus={restRev > 0}
-            placeholder="Write it down as it comes…"
+            placeholder={t.ideas.draftPlaceholder}
             onSaveNow={f.saveNow}
             commands={{ "5w2h": w.insert }}
             onChange={text => {
@@ -104,7 +105,7 @@ function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note;
           />
         </div>
         {(missing.length > 0 || !w.has) && (
-          <div className="row idea-sections" aria-label="Add a section">
+          <div className="row idea-sections" aria-label={t.ideas.addSection}>
             {missing.map(s => (
               <button key={s} className="btn ghost" onClick={() => add(s)}>
                 <Plus size={16} /> {s}
@@ -119,7 +120,7 @@ function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note;
         )}
         {w.form}
         <div className="row task-actions">
-          <span className="muted small mono">Written {String(note.data.created ?? "").replace("T", " ")}</span>
+          <span className="muted small mono">{t.projects.written(String(note.data.created ?? "").replace("T", " "))}</span>
         </div>
       </div>
     </div>

@@ -11,18 +11,18 @@ export type BookStatus = "reading" | "want" | "read" | "dnf" | "wishlist";
 export type Format = "paper" | "ebook" | "audio";
 
 /** In the order of the shelf tabs. */
-export const STATUSES: { id: BookStatus; label: string }[] = [
-  { id: "reading", label: "Reading" },
-  { id: "want", label: "Want to read" },
-  { id: "read", label: "Read" },
-  { id: "dnf", label: "Did not finish" },
-  { id: "wishlist", label: "Wishlist" },
+export const STATUSES: { id: BookStatus }[] = [
+  { id: "reading" },
+  { id: "want" },
+  { id: "read" },
+  { id: "dnf" },
+  { id: "wishlist" },
 ];
 
-export const FORMATS: { id: Format; label: string }[] = [
-  { id: "paper", label: "Paper" },
-  { id: "ebook", label: "E-book" },
-  { id: "audio", label: "Audiobook" },
+export const FORMATS: { id: Format }[] = [
+  { id: "paper" },
+  { id: "ebook" },
+  { id: "audio" },
 ];
 
 export const BOOK_FILE = "book.md";

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "../../i18n";
 import { Flag, Pause, Pencil, Play, RotateCcw, Skull, Trash2 } from "lucide-react";
 import { DECISIONS, earlierSteps, type Decision, type Gate, type Project } from "../../data/projects";
 import { Dialog } from "../Dialog";
@@ -24,15 +25,15 @@ export function GateDialog({ project: p, initial = "go", onOk, onClose }: GatePr
   const ok = () => (!needsReason || reason.trim()) && onOk(decision, reason.trim(), decision === "recycle" ? to : undefined);
 
   const outcome: Record<Decision, string> = {
-    go: next ? `Next step: ${at + 2}. ${next.name}` : "This is the last step: the project will be marked Done.",
-    hold: "The project goes to On hold. Resume it any time.",
-    kill: "The project ends. Its notes stay where they are.",
+    go: next ? t.projects.nextStep(at + 2, next.name) : t.projects.lastStep,
+    hold: t.projects.holdOutcome,
+    kill: t.projects.killOutcome,
     recycle: "",
   };
 
   return (
-    <Dialog title={`End of step ${at + 1}: ${p.step.name}`} onClose={onClose}>
-      <div className="segmented" role="radiogroup" aria-label="Decision">
+    <Dialog title={t.projects.endOfStep(at + 1, p.step.name)} onClose={onClose}>
+      <div className="segmented" role="radiogroup" aria-label={t.projects.decision}>
         {DECISIONS.map(d => (
           <button
             key={d.id}
@@ -42,16 +43,16 @@ export function GateDialog({ project: p, initial = "go", onOk, onClose }: GatePr
             disabled={d.id === "recycle" && !back.length}
             onClick={() => setDecision(d.id)}
           >
-            {d.label}
+            {t.projects.decisions[d.id][0]}
           </button>
         ))}
       </div>
       <p className="muted small" style={{ margin: 0 }}>
-        {DECISIONS.find(d => d.id === decision)!.hint}
+        {t.projects.decisions[decision][1]}
       </p>
       {decision === "recycle" ? (
         <label className="stack" style={{ gap: 4 }}>
-          <span className="fl">Back to</span>
+          <span className="fl">{t.projects.backTo}</span>
           <select className="field" value={to} onChange={e => setTo(e.target.value)}>
             {back.map(s => (
               <option key={s.id} value={s.id}>
@@ -69,23 +70,21 @@ export function GateDialog({ project: p, initial = "go", onOk, onClose }: GatePr
         className="field"
         rows={3}
         value={reason}
-        placeholder={needsReason ? "Why? (required)" : "Why? (optional)"}
-        aria-label="Reason"
+        placeholder={needsReason ? t.projects.whyRequired : t.projects.whyOptional}
+        aria-label={t.projects.reason}
         onChange={e => setReason(e.target.value)}
       />
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={onClose}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button className="btn primary" disabled={needsReason && !reason.trim()} onClick={ok}>
-          Decide
+          {t.projects.decide}
         </button>
       </div>
     </Dialog>
   );
 }
-
-const LABEL: Record<Decision, string> = { go: "Go", hold: "Hold", kill: "Kill", recycle: "Recycle" };
 
 /** The decisions taken so far, newest first. */
 export function GateHistory({ project: p }: { project: Project }) {
@@ -95,11 +94,11 @@ export function GateHistory({ project: p }: { project: Project }) {
     return i < 0 ? id : `${i + 1}. ${p.flow.steps[i].name}`;
   };
   return (
-    <ul className="gates" aria-label="Decisions">
+    <ul className="gates" aria-label={t.projects.decisionsTitle}>
       {[...p.gates].reverse().map((g: Gate, i) => (
         <li key={i}>
           <div className="row gate-head">
-            <span className={`gate-tag ${g.decision}`}>{LABEL[g.decision]}</span>
+            <span className={`gate-tag ${g.decision}`}>{t.projects.decisions[g.decision][0]}</span>
             <span className="small">
               {name(g.step)}
               {g.to && ` → ${name(g.to)}`}
@@ -139,15 +138,15 @@ export function ProjectMenu({ project: p, onOpen, onGate, onResume, onDelete, on
   );
   const closed = p.status === "done" || p.status === "killed";
   return (
-    <Dialog title={p.title || "(untitled)"} onClose={onClose}>
+    <Dialog title={p.title || t.common.untitled} onClose={onClose}>
       <div className="stack" style={{ gap: 2 }}>
-        {item("Open", <Pencil size={18} />, onOpen)}
-        {p.status === "active" && item("Finish this step…", <Flag size={18} />, () => onGate("go"))}
-        {p.status === "active" && item("Put on hold…", <Pause size={18} />, () => onGate("hold"))}
-        {p.status === "on-hold" && item("Resume", <Play size={18} />, onResume)}
-        {closed && item("Reopen", <RotateCcw size={18} />, onResume)}
-        {!closed && item("Kill…", <Skull size={18} />, () => onGate("kill"))}
-        {item("Delete", <Trash2 size={18} />, onDelete, " danger")}
+        {item(t.common.open, <Pencil size={18} />, onOpen)}
+        {p.status === "active" && item(t.projects.finishStep, <Flag size={18} />, () => onGate("go"))}
+        {p.status === "active" && item(t.projects.putOnHold, <Pause size={18} />, () => onGate("hold"))}
+        {p.status === "on-hold" && item(t.projects.resume, <Play size={18} />, onResume)}
+        {closed && item(t.projects.reopen, <RotateCcw size={18} />, onResume)}
+        {!closed && item(t.projects.killDots, <Skull size={18} />, () => onGate("kill"))}
+        {item(t.common.delete, <Trash2 size={18} />, onDelete, " danger")}
       </div>
     </Dialog>
   );

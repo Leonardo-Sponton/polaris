@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { num, t } from "../../i18n";
 import { ArrowLeft, Star } from "lucide-react";
 import type { Book } from "../../data/books";
 import { bookStats, readYears } from "../../data/bookstats";
@@ -7,7 +8,7 @@ import { useBack } from "../useBack";
 // Reading stats (SPEC 5.6): pick a year (or all time), see books and pages read, the averages,
 // a bar per month (or per year), and the split by format and by status.
 
-const fmt = (n: number, digits = 0) => n.toLocaleString("en", { maximumFractionDigits: digits });
+const fmt = num;
 
 export function BookStats({ books, onBack }: { books: Book[]; onBack(): void }) {
   useBack(true, onBack);
@@ -24,29 +25,29 @@ export function BookStats({ books, onBack }: { books: Book[]; onBack(): void }) 
   return (
     <div className="note-editor">
       <div className="note-bar">
-        <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+        <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
-        <span className="note-status mono">Reading stats</span>
+        <span className="note-status mono">{t.books.stats}</span>
       </div>
       <div className="page">
         <div className="page-inner stats">
-          <div className="chips" aria-label="Period">
+          <div className="chips" aria-label={t.books.period}>
             {years.map(y => (
               <button key={y} className={`chip${year === y ? " active" : ""}`} onClick={() => setYear(y)}>
                 {y}
               </button>
             ))}
             <button className={`chip${year === null ? " active" : ""}`} onClick={() => setYear(null)}>
-              All time
+              {t.books.allTime}
             </button>
           </div>
 
           <div className="stat-tiles">
-            <Tile label="Books read" value={fmt(s.read.books)} />
-            <Tile label="Pages read" value={fmt(s.read.pages)} note={s.noPages ? `${s.noPages} without page count` : undefined} />
+            <Tile label={t.books.booksRead} value={fmt(s.read.books)} />
+            <Tile label={t.books.pagesRead} value={fmt(s.read.pages)} note={s.noPages ? t.books.withoutPages(s.noPages) : undefined} />
             <Tile
-              label="Average rating"
+              label={t.books.avgRating}
               value={
                 s.avgRating === null ? (
                   "–"
@@ -56,32 +57,32 @@ export function BookStats({ books, onBack }: { books: Book[]; onBack(): void }) 
                   </>
                 )
               }
-              note={s.rated ? `${s.rated} rated` : "No rated book"}
+              note={s.rated ? t.books.rated(s.rated) : t.books.noRated}
             />
             <Tile
-              label="Days to finish"
+              label={t.books.daysToFinish}
               value={s.avgDays === null ? "–" : fmt(s.avgDays)}
-              note={s.timed ? `average of ${s.timed}` : "Needs start and finish dates"}
+              note={s.timed ? t.books.averageOf(s.timed) : t.books.needDates}
             />
           </div>
 
           <section>
             <div className="stat-head">
-              <h2>{year === null ? "Per year" : "Per month"}</h2>
-              <div className="chips" aria-label="Measure">
+              <h2>{year === null ? t.books.perYear : t.books.perMonth}</h2>
+              <div className="chips" aria-label={t.books.measure}>
                 {(["books", "pages"] as const).map(m => (
                   <button key={m} className={`chip${measure === m ? " active" : ""}`} onClick={() => setMeasure(m)}>
-                    {m === "books" ? "Books" : "Pages"}
+                    {m === "books" ? t.books.mBooks : t.books.mPages}
                   </button>
                 ))}
               </div>
             </div>
             {s.bars.length === 0 ? (
-              <p className="muted">No book marked as read with a finish date yet.</p>
+              <p className="muted">{t.books.noBars}</p>
             ) : (
               <div className="bars" style={{ gridTemplateColumns: `repeat(${s.bars.length}, minmax(0, 1fr))` }}>
                 {s.bars.map(b => (
-                  <div key={b.key} className="bar-col" title={`${b.label}: ${b.books} books, ${fmt(b.pages)} pages`}>
+                  <div key={b.key} className="bar-col" title={t.books.bar(b.label, b.books, fmt(b.pages))}>
                     <span className="bar-num mono">{b[measure] ? fmt(b[measure]) : ""}</span>
                     <div className="bar-track">
                       <div className="bar" style={{ height: `${(b[measure] / top) * 100}%` }} />
@@ -92,20 +93,17 @@ export function BookStats({ books, onBack }: { books: Book[]; onBack(): void }) 
               </div>
             )}
             {s.undated > 0 && (
-              <p className="muted small">
-                {s.undated} read {s.undated === 1 ? "book has" : "books have"} no finish date, so {s.undated === 1 ? "it is" : "they are"} only in
-                the totals.
-              </p>
+              <p className="muted small">{t.books.undated(s.undated)}</p>
             )}
           </section>
 
           <section>
-            <h2>By format</h2>
+            <h2>{t.books.byFormat}</h2>
             <Rows rows={s.byFormat} top={formats} />
           </section>
 
           <section>
-            <h2>On the shelf now</h2>
+            <h2>{t.books.onShelf}</h2>
             <Rows rows={s.byStatus} top={statuses} />
           </section>
         </div>

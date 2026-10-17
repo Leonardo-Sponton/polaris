@@ -1,0 +1,73 @@
+# Portuguese words of business.yaml (same step ids). Terms as in Sebrae's guide.
+name: Negócio
+steps:
+  - id: 01-business-and-founders
+    name: O negócio e os sócios
+    guidance: >-
+      O que é o negócio, o que vende e onde. Quem vai tocá-lo: as habilidades, a experiência e as
+      tarefas de cada sócio. Havendo sócios, combinem por escrito metas, horários, retirada
+      (pró-labore), divisão dos lucros e o que acontece se alguém sair. Dados da empresa: setor de
+      atividade (indústria, comércio ou serviços), forma jurídica, enquadramento tributário (MEI,
+      Simples Nacional…) e capital social.
+    sections: [O negócio, Sócios e funções, Setor de atividade, Forma jurídica, Enquadramento tributário, Capital social]
+  - id: 02-market-study
+    name: Análise de mercado
+    guidance: >-
+      Clientes: quem são, o que compram, quanto, com que frequência, onde e o que os faz escolher.
+      Concorrentes: quem já vende, preços, qualidade, atendimento e localização. Fornecedores: quem
+      vende os materiais, preços, condições de pagamento e prazos de entrega; tenha mais de um.
+    sections: [Clientes, Concorrentes, Fornecedores]
+  - id: 03-marketing-plan
+    name: Plano de marketing
+    guidance: >-
+      Os produtos ou serviços em detalhe, o preço (precisa cobrir os custos e caber no que os
+      clientes pagam em outros lugares), como as pessoas vão conhecer o negócio (estratégias
+      promocionais) e como você vai vender (loja própria, feiras, revendedores, entrega, internet).
+    sections: [Produtos e serviços, Preço, Estratégias promocionais, Estrutura de comercialização]
+  - id: 04-operational-plan
+    name: Plano operacional
+    guidance: >-
+      Onde o negócio vai ficar e por quê (regras da prefeitura, clientes por perto, aluguel). O
+      arranjo físico (layout) do espaço. Quanto dá para produzir ou vender por mês. Cada etapa de
+      produzir e vender. Quantas pessoas são necessárias, com quais habilidades.
+    sections: [Localização, Layout, Capacidade produtiva, Processos operacionais, Necessidade de pessoal]
+  - id: 05-financial-plan
+    name: Plano financeiro
+    guidance: >-
+      Investimento total = investimentos fixos (equipamentos, móveis, ferramentas) + capital de
+      giro (estoque e o dinheiro para funcionar até as vendas entrarem) + investimentos
+      pré-operacionais (licenças, reforma, taxas). Depois, por mês: faturamento previsto, custo dos
+      materiais por unidade, custos de comercialização (impostos, taxas de cartão, comissões), mão
+      de obra, depreciação e custos fixos (aluguel, luz, telefone…). Demonstrativo de resultados:
+      vendas − custos variáveis = margem de contribuição; − custos fixos = lucro líquido.
+    sections:
+      - Investimento total
+      - Faturamento mensal
+      - Custo unitário
+      - Custos de comercialização
+      - Custos com mão de obra
+      - Custos fixos mensais
+      - Demonstrativo de resultados
+  - id: 06-viability
+    name: Indicadores de viabilidade
+    guidance: >-
+      Ponto de equilíbrio em vendas = custos fixos ÷ índice da margem de contribuição (margem de
+      contribuição ÷ vendas). Ponto de equilíbrio em unidades = custos fixos ÷ (preço unitário −
+      custo variável unitário). Lucratividade = lucro líquido ÷ vendas × 100. Rentabilidade = lucro
+      líquido ÷ investimento total × 100 (compare com o que o dinheiro renderia no banco). Prazo de
+      retorno do investimento = investimento total ÷ lucro líquido.
+    sections: [Ponto de equilíbrio, Lucratividade, Rentabilidade, Prazo de retorno do investimento]
+  - id: 07-scenarios-swot
+    name: Cenários e matriz F.O.F.A.
+    guidance: >-
+      Refaça as contas para um mês pessimista e um otimista (menos ou mais vendas, custos maiores)
+      e planeje o que faria em cada um. F.O.F.A. (SWOT): forças e fraquezas dentro do negócio,
+      oportunidades e ameaças fora dele.
+    sections: [Pessimista, Realista, Otimista, Forças, Fraquezas, Oportunidades, Ameaças]
+  - id: 08-summary-review
+    name: Sumário executivo e avaliação do plano
+    guidance: >-
+      Escreva por último, curto: o que é o negócio, os produtos, os clientes, onde vai ficar, o
+      investimento, o faturamento mensal, o lucro esperado e o prazo de retorno. Depois leia o
+      plano inteiro de novo: é viável? Decida abrir, mudar ou desistir.
+    sections: [Resumo, Indicadores, Avaliação do plano]

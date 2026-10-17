@@ -1,4 +1,6 @@
 import builtinFile from "../../data/thoughts.json";
+import { lang, t } from "../i18n";
+import builtinPt from "../../data/thoughts.pt.json";
 import type { Storage } from "../storage/types";
 import { isoDate, parseLocal, stamp } from "./dates";
 import type { Data } from "./frontmatter";
@@ -11,11 +13,8 @@ import type { Note, Notes } from "./notes";
 
 export type Kind = "mine" | "verified" | "uncertain";
 
-export const KINDS: { id: Kind; label: string; hint: string }[] = [
-  { id: "mine", label: "My reflection", hint: "A thought of your own." },
-  { id: "verified", label: "Verified quote", hint: "Checked in a source you can name." },
-  { id: "uncertain", label: "Uncertain attribution", hint: "Goes around under this name; the origin is not confirmed." },
-];
+/** Label and hint of each kind are in i18n (thoughts.kinds). */
+export const KINDS: { id: Kind }[] = [{ id: "mine" }, { id: "verified" }, { id: "uncertain" }];
 
 export interface Thought {
   id: string;
@@ -90,6 +89,31 @@ export const BUILTIN: Thought[] = (() => {
   return out;
 })();
 
+/**
+ * A built-in thought in the app's language. In Portuguese the facts around the quote (author,
+ * work, notes…) come from data/thoughts.pt.json; the quote stays in its English translation,
+ * except the Portuguese originals (Machado, Pessoa).
+ */
+const PT = (builtinPt as { thoughts: Record<string, Partial<Record<keyof Thought, unknown>>> }).thoughts;
+export function localized(th: Thought): Thought {
+  const p = lang === "pt-BR" ? PT[th.id] : undefined;
+  if (!p) return th;
+  const s = (k: keyof Thought) => (typeof p[k] === "string" ? (p[k] as string) : (th[k] as string));
+  return {
+    ...th,
+    text: s("text"),
+    author: s("author"),
+    era: s("era"),
+    work: s("work"),
+    reference: s("reference"),
+    tradition: s("tradition"),
+    language: s("language"),
+    translation: s("translation"),
+    notes: s("notes"),
+    themes: Array.isArray(p.themes) ? cleanThemes(p.themes.map(String)) : th.themes,
+  };
+}
+
 // --- State file ------------------------------------------------------------------------------
 
 export interface ThoughtsState {
@@ -111,7 +135,7 @@ export async function loadState(s: Storage): Promise<ThoughtsState> {
   try {
     raw = JSON.parse(await s.read(STATE_PATH));
   } catch {
-    throw new StateError(`${STATE_PATH} could not be read; favorites and picks are not saved until it is fixed.`);
+    throw new StateError(t.thoughts.stateBroken(STATE_PATH));
   }
   const days: Record<string, string> = {};
   if (raw.days && typeof raw.days === "object") {
@@ -176,7 +200,7 @@ export async function loadThoughts(notes: Notes, onError?: (path: string) => voi
     stateError = e instanceof Error ? e.message : String(e);
   }
   const fav = new Set(state.favorites);
-  const builtin = BUILTIN.map(t => ({ ...t, favorite: fav.has(t.id) }));
+  const builtin = BUILTIN.map(x => ({ ...localized(x), favorite: fav.has(x.id) }));
   return { all: [...builtin, ...own], state, stateError };
 }
 
@@ -195,13 +219,12 @@ export interface Fields {
 export function problems(f: Fields): string[] {
   const out: string[] = [];
   const text = f.text.trim();
-  if (!text) out.push("Write the thought.");
-  else if (text.length > MAX_TEXT) out.push(`Too long (${text.length} characters): keep a short passage, up to ${MAX_TEXT}.`);
+  if (!text) out.push(t.thoughts.writeIt);
+  else if (text.length > MAX_TEXT) out.push(t.thoughts.tooLong(text.length, MAX_TEXT));
   if (f.kind === "verified") {
-    if (!f.author?.trim()) out.push("A quote needs its author.");
-    if (!f.source?.trim())
-      out.push("A verified quote needs the source where you checked it (book and edition, page, link…). Without one, save it as an uncertain attribution.");
-  } else if (f.kind === "uncertain" && !f.author?.trim()) out.push("Say who it is usually attributed to.");
+    if (!f.author?.trim()) out.push(t.thoughts.needAuthor);
+    if (!f.source?.trim()) out.push(t.thoughts.needSource);
+  } else if (f.kind === "uncertain" && !f.author?.trim()) out.push(t.thoughts.needAttribution);
   return out;
 }
 
@@ -229,7 +252,7 @@ export class ThoughtError extends Error {}
 function check(all: Thought[], f: Fields, exceptId?: string) {
   const errs = problems(f);
   const dup = errs.length ? undefined : findDuplicate(all, f, exceptId);
-  if (dup) errs.push(`This thought is already in the library${dup.author ? ` (${dup.author})` : ""}.`);
+  if (dup) errs.push(t.thoughts.duplicate(dup.author));
   if (errs.length) throw new ThoughtError(errs.join("\n"));
 }
 
@@ -255,11 +278,11 @@ export async function createThought(notes: Notes, all: Thought[], f: Fields, now
 }
 
 /** Saves an own thought; keys the form does not know (favorite, hand-added ones) are kept. */
-export async function saveThought(notes: Notes, all: Thought[], t: Thought, f: Fields): Promise<Note> {
-  if (!t.note) throw new ThoughtError("Built-in thoughts cannot be edited.");
-  check(all, f, t.id);
-  const { type: _t, kind: _k, author: _a, work: _w, reference: _r, source: _s, themes: _th, quote: _q, ...rest } = t.note.data;
-  return notes.save(t.note, { ...header(f), ...rest, quote: empty(f.quote) ?? t.quote }, f.text.trim() + "\n");
+export async function saveThought(notes: Notes, all: Thought[], th: Thought, f: Fields): Promise<Note> {
+  if (!th.note) throw new ThoughtError(t.thoughts.builtinLocked);
+  check(all, f, th.id);
+  const { type: _t, kind: _k, author: _a, work: _w, reference: _r, source: _s, themes: _th, quote: _q, ...rest } = th.note.data;
+  return notes.save(th.note, { ...header(f), ...rest, quote: empty(f.quote) ?? th.quote }, f.text.trim() + "\n");
 }
 
 /** Marks or unmarks a favorite. Returns a function that puts it back (Undo). */

@@ -1,19 +1,11 @@
 import { useRef, useState } from "react";
+import { t, word } from "../i18n";
 import { X } from "lucide-react";
-import { emptyBlock, FIELDS, isEmpty, join, split, type Block, type Field } from "../data/fivew2h";
+import { emptyBlock, FIELD_NAMES, FIELDS, isEmpty, join, split, type Block, type Field } from "../data/fivew2h";
 import { useApp } from "./context";
 
 // The 5W2H block as a form (SPEC 3.4): seven labeled fields, written back as Markdown.
 
-const HINTS: Record<Field, string> = {
-  What: "What will be done?",
-  Why: "Why is it needed?",
-  Where: "Where will it happen?",
-  When: "When? Deadline or dates",
-  Who: "Who does it? Who is it for?",
-  How: "How will it be done?",
-  "How much": "Cost, time, effort",
-};
 
 export function FiveW2HForm(props: { block: Block; onChange(b: Block): void; onRemove(): void; autoFocus?: boolean }) {
   const { toast } = useApp();
@@ -28,25 +20,25 @@ export function FiveW2HForm(props: { block: Block; onChange(b: Block): void; onR
   const remove = () => {
     const old = b;
     props.onRemove();
-    if (!isEmpty(old)) toast({ text: "5W2H removed", action: { label: "Undo", run: () => props.onChange(old) } });
+    if (!isEmpty(old)) toast({ text: t.w2h.removed, action: { label: t.common.undo, run: () => props.onChange(old) } });
   };
 
   return (
     <section className="w2h" aria-label="5W2H">
       <div className="w2h-head">
         <span className="fl">5W2H</span>
-        <button className="btn ghost icon" aria-label="Remove 5W2H" title="Remove 5W2H" onClick={remove}>
+        <button className="btn ghost icon" aria-label={t.w2h.remove} title={t.w2h.remove} onClick={remove}>
           <X size={16} />
         </button>
       </div>
       <div className="task-fields">
         {FIELDS.map((f, i) => (
           <label key={f} className="contents">
-            <span className="fl">{f}</span>
+            <span className="fl">{word(FIELD_NAMES[f])}</span>
             <input
               className="field"
               value={b.values[f]}
-              placeholder={HINTS[f]}
+              placeholder={t.w2h.hints[f]}
               autoFocus={props.autoFocus && i === 0}
               onChange={e => set(f, e.target.value)}
             />
@@ -77,7 +69,7 @@ export function useFiveW2H(initial: string, write: () => void) {
   return {
     initialText: first.rest,
     text: () => textRef.current,
-    setText: (t: string) => (textRef.current = t),
+    setText: (s: string) => (textRef.current = s),
     body: () => join(textRef.current, blockRef.current),
     has: block !== null,
     /** Adds an empty block (or focuses the one there). */

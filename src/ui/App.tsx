@@ -8,10 +8,19 @@ import { FileAccess, FirstRun } from "./FirstRun";
 import { Shell } from "./Shell";
 import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
 import { SyncLock } from "./SyncView";
+import { lang, setLang, t } from "../i18n";
 
 // `#capture`: the small quick capture window (Linux, `hypomnemata --capture`).
 const CAPTURE_ONLY = location.hash === "#capture";
-if (CAPTURE_ONLY) document.title = "Hypomnemata capture";
+const setTitle = () => CAPTURE_ONLY && (document.title = t.capture.title);
+setTitle();
+
+/** Language of the screens, plus the words the desktop shows outside the page (tray, notifications). */
+function applyLang(s: Settings["language"], platform: Platform) {
+  setLang(s);
+  setTitle();
+  platform.setLabels?.({ ...t.tray });
+}
 
 type Boot =
   | { step: "loading" }
@@ -30,6 +39,8 @@ export function App({ platform }: { platform: Platform }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [version, setVersion] = useState(0);
   const [captureKey, setCaptureKey] = useState(0);
+  // After a language change the screens are drawn anew; this keeps the user in Settings.
+  const [startArea, setStartArea] = useState<"settings">();
   const nextId = useRef(1);
   const notes = useMemo(() => new Notes(platform.storage), [platform]);
 
@@ -40,6 +51,7 @@ export function App({ platform }: { platform: Platform }) {
       await initDataFolder(platform.storage);
       const settings = await loadSettings(platform.storage);
       applyTheme(settings.theme);
+      applyLang(settings.language, platform);
       setBoot({ step: "ready", settings });
     } catch (e) {
       setBoot({ step: "error", message: String(e) });
@@ -100,10 +112,10 @@ export function App({ platform }: { platform: Platform }) {
     return (
       <div className="center-screen">
         <div className="card stack">
-          <h1>Something went wrong</h1>
+          <h1>{t.common.somethingWrong}</h1>
           <p className="err mono">{boot.message}</p>
           <button className="btn" onClick={start}>
-            Try again
+            {t.common.tryAgain}
           </button>
         </div>
       </div>
@@ -120,6 +132,10 @@ export function App({ platform }: { platform: Platform }) {
       const settings = { ...boot.settings, ...s };
       await saveSettings(platform.storage, settings);
       applyTheme(settings.theme);
+      if (settings.language !== boot.settings.language) {
+        applyLang(settings.language, platform);
+        setStartArea("settings");
+      }
       setBoot({ step: "ready", settings });
     },
     toast,
@@ -129,7 +145,8 @@ export function App({ platform }: { platform: Platform }) {
 
   return (
     <Ctx.Provider value={ctx}>
-      {CAPTURE_ONLY ? <CaptureWindow /> : <Shell captureKey={captureKey} />}
+      {/* A new language draws every screen again (they read `t` while rendering). */}
+      {CAPTURE_ONLY ? <CaptureWindow key={lang} /> : <Shell key={lang} captureKey={captureKey} startArea={startArea} />}
       <SyncLock />
       <div className="toasts" aria-live="polite">
         {toasts.map(t => (

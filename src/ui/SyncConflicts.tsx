@@ -4,6 +4,7 @@ import { diffLines } from "../data/diff";
 import { canKeepBoth, type Choice, type Step } from "../data/sync";
 import type { Storage } from "../storage/types";
 import { useBack } from "./useBack";
+import { t } from "../i18n";
 
 // The conflicts screen (SPEC 6.2): files changed on both sides since the last sync, shown side
 // by side. The device stays locked while the user picks; nothing changes until Finish.
@@ -49,36 +50,35 @@ export function SyncConflicts(p: {
   const left = p.conflicts.length - choices.size;
   return (
     <div className="dialog-backdrop sync-lock">
-      <div className="card stack dialog sync-conflict" role="dialog" aria-label="Changed on both sides">
+      <div className="card stack dialog sync-conflict" role="dialog" aria-label={t.sync.bothSides}>
         <div className="row" style={{ justifyContent: "space-between" }}>
-          <h2>Changed on both sides</h2>
+          <h2>{t.sync.bothSides}</h2>
           {p.conflicts.length > 1 && (
             <span className="row">
-              <button className="btn ghost icon" title="Previous" onClick={() => setI((i + p.conflicts.length - 1) % p.conflicts.length)}>
+              <button className="btn ghost icon" title={t.common.previous} onClick={() => setI((i + p.conflicts.length - 1) % p.conflicts.length)}>
                 <ChevronLeft size={18} />
               </button>
               <span className="small">
-                {i + 1} of {p.conflicts.length}
+                {t.common.nOfM(i + 1, p.conflicts.length)}
               </span>
-              <button className="btn ghost icon" title="Next" onClick={() => setI((i + 1) % p.conflicts.length)}>
+              <button className="btn ghost icon" title={t.common.next} onClick={() => setI((i + 1) % p.conflicts.length)}>
                 <ChevronRight size={18} />
               </button>
             </span>
           )}
         </div>
         <p className="muted small" style={{ margin: 0 }}>
-          Choose which version to keep for each file. Nothing is changed until you press Finish; a
-          file you skip stays as it is on each side and comes back on the next sync.
+          {t.sync.chooseText}
         </p>
         <Compare key={s.path} step={s} {...p} choice={choices.get(s.path)} onPick={pick} />
         <div className="row" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
           {left > 0 && choices.size > 0 && (
             <span className="muted small">
-              {left} not decided yet
+              {t.sync.notDecided(left)}
             </span>
           )}
           <button className="btn primary" onClick={() => p.onDone(choices)}>
-            {choices.size === 0 ? "Decide later" : "Finish"}
+            {choices.size === 0 ? t.sync.decideLater : t.sync.finish}
           </button>
         </div>
       </div>
@@ -124,20 +124,20 @@ function Compare(p: { step: Step; pc: Storage; device: Storage; model: string; c
       </p>
       {err && <p className="err" style={{ margin: 0 }}>{err}</p>}
       <div className="conflict-sides">
-        <Side icon={<Monitor size={16} />} name="This PC" v={pc} marks={marks?.a} />
-        <Side icon={<Smartphone size={16} />} name={`The ${p.model}`} v={dev} marks={marks?.b} />
+        <Side icon={<Monitor size={16} />} name={t.sync.thisPc} v={pc} marks={marks?.a} />
+        <Side icon={<Smartphone size={16} />} name={t.sync.theDevice(p.model)} v={dev} marks={marks?.b} />
       </div>
       <div className="row" style={{ flexWrap: "wrap" }}>
-        {opt("pc", s.pc ? "Keep this PC's" : "Delete it, as on this PC")}
-        {opt("device", s.device ? `Keep the ${p.model}'s` : `Delete it, as on the ${p.model}`)}
+        {opt("pc", s.pc ? t.sync.keepPc : t.sync.deleteAsPc)}
+        {opt("device", s.device ? t.sync.keepDevice(p.model) : t.sync.deleteAsDevice(p.model))}
         {both && (
           <button
             className={`btn${p.choice === "both" ? " primary" : ""}`}
             aria-pressed={p.choice === "both"}
-            title="This PC's version keeps the name; the device's is kept next to it as a “(device copy)” file, on both sides"
+            title={t.sync.keepBothHint}
             onClick={() => p.onPick("both")}
           >
-            <Copy size={16} /> Keep both
+            <Copy size={16} /> {t.sync.keepBoth}
           </button>
         )}
       </div>
@@ -150,13 +150,13 @@ function Side(p: { icon: React.ReactNode; name: string; v: Version | null; marks
     <section className="conflict-side">
       <h3 className="row small">
         {p.icon} {p.name}
-        {p.v?.kind === "deleted" && <span className="err">deleted</span>}
+        {p.v?.kind === "deleted" && <span className="err">{t.sync.deleted}</span>}
       </h3>
       <div className="conflict-body">
         {!p.v ? (
-          <p className="muted small">Loading…</p>
+          <p className="muted small">{t.common.loading}</p>
         ) : p.v.kind === "deleted" ? (
-          <p className="muted small">The file was deleted here.</p>
+          <p className="muted small">{t.sync.deletedHere}</p>
         ) : p.v.kind === "image" ? (
           <img src={p.v.url} alt={p.name} />
         ) : (

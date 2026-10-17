@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
+import { t } from "../i18n";
 import { ArrowLeft } from "lucide-react";
 import { Editor } from "../editor/Editor";
 import { useBack } from "./useBack";
-import { STATUS_TEXT, useNoteFile } from "./useNoteFile";
+import { useNoteFile } from "./useNoteFile";
 
 // Opens one file in the editor and keeps it saved (see useNoteFile).
 // Render it with key={path}: one instance per file.
@@ -27,12 +28,12 @@ export function NoteEditor({ path, placeholder, onBack, removeIfEmpty, autoFocus
     <div className="note-editor">
       <div className="note-bar">
         {onBack && (
-          <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+          <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
             <ArrowLeft size={20} />
           </button>
         )}
         <span className={`note-status mono${f.status === "error" ? " err" : ""}`} aria-live="polite">
-          {f.note ? STATUS_TEXT[f.status] : ""}
+          {f.note ? t.note.status[f.status] : ""}
         </span>
         {f.note && actions}
       </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { cap, dateFmt, isWord, t, word } from "../../i18n";
 import { ArrowLeft, ChevronLeft, ChevronRight, Moon, Plus, Scale, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { isoDate } from "../../data/dates";
@@ -18,7 +19,7 @@ import type { Note } from "../../data/notes";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { useApp } from "../context";
 import { useBack } from "../useBack";
-import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { useNoteFile, type NoteFile } from "../useNoteFile";
 import { Calendar, monthOf } from "./Calendar";
 import { CloseDay } from "./CloseDay";
 
@@ -31,7 +32,7 @@ export function useJournal(): Entry[] {
   const [entries, setEntries] = useState<Entry[]>([]);
   useEffect(() => {
     let alive = true;
-    loadJournal(notes, p => toast({ text: `Could not read ${p}`, error: true })).then(l => alive && setEntries(l));
+    loadJournal(notes, p => toast({ text: t.common.couldNotRead(p), error: true })).then(l => alive && setEntries(l));
     return () => {
       alive = false;
     };
@@ -39,14 +40,14 @@ export function useJournal(): Entry[] {
   return entries;
 }
 
-const LONG = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-const ROW = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short" });
+const LONG = () => dateFmt({ weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const ROW = () => dateFmt({ weekday: "short", day: "numeric", month: "short" });
 const at = (day: string) => new Date(`${day}T12:00`);
 const wide = () => matchMedia("(min-width: 720px)").matches;
 
 export function MoodPicker({ mood, onPick }: { mood?: Mood; onPick(m: Mood | undefined): void }) {
   return (
-    <div className="moods" role="group" aria-label="The day was">
+    <div className="moods" role="group" aria-label={t.journal.dayWas}>
       {MOODS.map(m => (
         <button
           key={m.id}
@@ -55,7 +56,7 @@ export function MoodPicker({ mood, onPick }: { mood?: Mood; onPick(m: Mood | und
           aria-pressed={mood === m.id}
           onClick={() => onPick(mood === m.id ? undefined : m.id)}
         >
-          {m.label}
+          {t.journal.moods[m.id]}
         </button>
       ))}
     </div>
@@ -106,17 +107,15 @@ export function JournalView({ entries, openDay: target, onReview }: Props) {
     <div className={`split${open ? " has-detail" : ""}`}>
       <div className="list-pane">
         <div className="list-head">
-          <h1>Journal</h1>
+          <h1>{t.journal.title}</h1>
           <button className="btn primary" onClick={() => pick(isoDate())}>
-            Today
+            {t.journal.today}
           </button>
         </div>
         <Calendar month={month} setMonth={setMonth} selected={open} entries={byDay} onPick={pick} />
         {shown.length === 0 ? (
           <p className="muted empty-note">
-            {entries.length === 0
-              ? "No entries yet. Pick a day, or press Today, and write. An empty day keeps no file."
-              : "Nothing written this month."}
+            {entries.length === 0 ? t.journal.none : t.journal.nothingMonth}
           </p>
         ) : (
           <ul className="list">
@@ -126,16 +125,16 @@ export function JournalView({ entries, openDay: target, onReview }: Props) {
                 <li key={e.day}>
                   <button className={`list-item${open === e.day ? " active" : ""}`} onClick={() => pick(e.day)}>
                     <span className="list-meta mono">
-                      {ROW.format(at(e.day))}
+                      {cap(ROW().format(at(e.day)))}
                       {mood && (
                         <>
                           {" · "}
-                          <span style={{ color: `var(--${mood.color})` }}>{mood.label}</span>
+                          <span style={{ color: `var(--${mood.color})` }}>{t.journal.moods[mood.id]}</span>
                         </>
                       )}
                     </span>
                     <span className="list-title journal-preview">
-                      {e.preview || <span className="muted">(only the mood)</span>}
+                      {e.preview || <span className="muted">{t.shell.onlyMood}</span>}
                     </span>
                   </button>
                 </li>
@@ -155,7 +154,7 @@ export function JournalView({ entries, openDay: target, onReview }: Props) {
             onClose={() => setClosing(open)}
           />
         ) : (
-          <div className="detail-empty muted">Pick a day.</div>
+          <div className="detail-empty muted">{t.journal.pickDay}</div>
         )}
       </div>
       {closing && <CloseDay day={closing} onClose={() => setClosing(null)} />}
@@ -203,19 +202,19 @@ function JournalDay({ day, onBack, onDay, onReview, onClose }: DayProps) {
   const today = isoDate();
   const bar = (status: string, extra?: ReactNode) => (
     <div className="note-bar">
-      <button className="btn ghost icon back" onClick={onBack} aria-label="Back">
+      <button className="btn ghost icon back" onClick={onBack} aria-label={t.common.back}>
         <ArrowLeft size={20} />
       </button>
-      <button className="btn ghost icon" aria-label="Previous day" title="Previous day (Alt+←)" onClick={() => onDay(shiftDay(day, -1))}>
+      <button className="btn ghost icon" aria-label={t.journal.prevDay} title={t.journal.prevDayKey} onClick={() => onDay(shiftDay(day, -1))}>
         <ChevronLeft size={20} />
       </button>
-      <button className="btn ghost icon" aria-label="Next day" title="Next day (Alt+→)" onClick={() => onDay(shiftDay(day, 1))}>
+      <button className="btn ghost icon" aria-label={t.journal.nextDay} title={t.journal.nextDayKey} onClick={() => onDay(shiftDay(day, 1))}>
         <ChevronRight size={20} />
       </button>
       <span className="note-status mono" aria-live="polite">
         {status}
       </span>
-      <button className="btn ghost icon" aria-label="Review of this day" title="Review of this day" onClick={onReview}>
+      <button className="btn ghost icon" aria-label={t.journal.reviewOfDay} title={t.journal.reviewOfDay} onClick={onReview}>
         <Scale size={18} />
       </button>
       {extra}
@@ -224,8 +223,8 @@ function JournalDay({ day, onBack, onDay, onReview, onClose }: DayProps) {
 
   const head = (
     <div className="journal-head">
-      <h2 className="journal-date">{LONG.format(at(day))}</h2>
-      {day === today && <span className="muted small">Today</span>}
+      <h2 className="journal-date">{cap(LONG().format(at(day)))}</h2>
+      {day === today && <span className="muted small">{t.journal.today}</span>}
     </div>
   );
 
@@ -238,10 +237,10 @@ function JournalDay({ day, onBack, onDay, onReview, onClose }: DayProps) {
         <div className="page task-page">
           <div className="page-inner stack">
             {head}
-            <span className="fl">The day was</span>
+            <span className="fl">{t.journal.dayWas}</span>
             <MoodPicker onPick={m => m && create({ mood: m }, {})} />
             <button className="journal-empty" onClick={() => create({}, { focus: true })}>
-              Write about this day…
+              {t.journal.writeAbout}
             </button>
             <SectionButtons body="" onAdd={s => create({}, { section: s })} />
             <DayActions onClose={onClose} />
@@ -254,11 +253,11 @@ function JournalDay({ day, onBack, onDay, onReview, onClose }: DayProps) {
 }
 
 function SectionButtons({ body, onAdd }: { body: string; onAdd(s: string): void }) {
-  const have = new Set(sectionsOf(body).map(s => s.toLowerCase()));
-  const missing = JOURNAL_SECTIONS.filter(s => !have.has(s.toLowerCase()));
+  const have = sectionsOf(body);
+  const missing = JOURNAL_SECTIONS.filter(s => !have.some(h => isWord(s, h))).map(word);
   if (!missing.length) return null;
   return (
-    <div className="row idea-sections" aria-label="Add a section">
+    <div className="row idea-sections" aria-label={t.ideas.addSection}>
       {missing.map(s => (
         <button key={s} className="btn ghost" onClick={() => onAdd(s)}>
           <Plus size={16} /> {s}
@@ -272,7 +271,7 @@ function DayActions({ onClose }: { onClose(): void }) {
   return (
     <div className="row task-actions">
       <button className="btn" onClick={onClose}>
-        <Moon size={18} /> Close the day
+        <Moon size={18} /> {t.shell.closeDay}
       </button>
     </div>
   );
@@ -299,8 +298,8 @@ function DayPage({ path, head, bar, start, onClose, onGone }: PageProps) {
       onGone();
       bump();
       toast({
-        text: "Journal entry deleted",
-        action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
+        text: t.journal.deleted,
+        action: { label: t.common.undo, run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) },
       });
     } catch (e) {
       fail(e);
@@ -310,9 +309,9 @@ function DayPage({ path, head, bar, start, onClose, onGone }: PageProps) {
   return (
     <div className="note-editor">
       {bar(
-        f.note ? STATUS_TEXT[f.status] : "",
+        f.note ? t.note.status[f.status] : "",
         f.note && (
-          <button className="btn ghost icon" aria-label="Delete entry" title="Delete" onClick={remove}>
+          <button className="btn ghost icon" aria-label={t.journal.deleteEntry} title={t.common.delete} onClick={remove}>
             <Trash2 size={18} />
           </button>
         ),
@@ -353,7 +352,7 @@ function DayForm(props: { file: NoteFile; note: Note; head: ReactNode; start: Pa
     <div className="page task-page">
       <div className="page-inner stack">
         {props.head}
-        <span className="fl">The day was</span>
+        <span className="fl">{t.journal.dayWas}</span>
         <MoodPicker
           mood={mood}
           onPick={m => {
@@ -366,11 +365,11 @@ function DayForm(props: { file: NoteFile; note: Note; head: ReactNode; start: Pa
             key={rev}
             text={body}
             autoFocus={rev > 0 || !!start.focus || !!start.section}
-            placeholder="Write about this day…"
+            placeholder={t.journal.writeAbout}
             onSaveNow={f.saveNow}
-            onChange={t => {
-              setBody(t);
-              f.setBody(t);
+            onChange={text => {
+              setBody(text);
+              f.setBody(text);
             }}
           />
         </div>

@@ -1,4 +1,5 @@
 import { isoDate, slugify, stamp } from "./dates";
+import { isWord, t, word, type Words } from "../i18n";
 import { flowOf, type Flow, type FlowId, type FlowStep } from "./flows";
 import { titleOf, type Data } from "./frontmatter";
 import { sectionsOf } from "./ideas";
@@ -12,12 +13,7 @@ import { joinTitle, type Task } from "./todo";
 
 export type ProjectStatus = "active" | "on-hold" | "done" | "killed";
 
-export const STATUSES: { id: ProjectStatus; label: string }[] = [
-  { id: "active", label: "Active" },
-  { id: "on-hold", label: "On hold" },
-  { id: "done", label: "Done" },
-  { id: "killed", label: "Killed" },
-];
+export const STATUSES: { id: ProjectStatus }[] = [{ id: "active" }, { id: "on-hold" }, { id: "done" }, { id: "killed" }];
 
 export const PROJECT_FILE = "project.md";
 
@@ -160,9 +156,12 @@ export async function createStepNote(notes: Notes, dir: string, step: string, ti
 }
 
 /** Suggested sections of the step that the note does not have yet. */
-export function missingStepSections(sections: string[], body: string): string[] {
-  const have = new Set(sectionsOf(body).map(s => s.toLowerCase()));
-  return sections.filter(s => !have.has(s.toLowerCase()));
+/** The step's sections the note does not have yet. With both languages given, either counts. */
+export function missingStepSections(sections: (string | Words)[], body: string): string[] {
+  const have = sectionsOf(body);
+  return sections
+    .filter(s => !have.some(h => (typeof s === "string" ? h.toLowerCase() === s.toLowerCase() : isWord(s, h))))
+    .map(s => (typeof s === "string" ? s : word(s)));
 }
 
 /** Position of a step in the flow, from 1; 0 for a step not in the flow. */
@@ -172,12 +171,8 @@ export const stepNumber = (flow: Flow, id: string) => flow.steps.findIndex(s => 
 
 export type Decision = "go" | "hold" | "kill" | "recycle";
 
-export const DECISIONS: { id: Decision; label: string; hint: string }[] = [
-  { id: "go", label: "Go", hint: "The step is done: move on to the next one." },
-  { id: "hold", label: "Hold", hint: "Pause the project; resume it later on the same step." },
-  { id: "kill", label: "Kill", hint: "Stop the project for good. Say why." },
-  { id: "recycle", label: "Recycle", hint: "Go back to an earlier step and redo it." },
-];
+/** Names and hints are in i18n (projects.decisions). */
+export const DECISIONS: { id: Decision }[] = [{ id: "go" }, { id: "hold" }, { id: "kill" }, { id: "recycle" }];
 
 export interface Gate {
   /** The step the decision closed. */
@@ -209,7 +204,7 @@ export function gatesOf(d: Data): Gate[] {
  */
 export function gatePatch(p: Project, decision: Decision, reason: string, to?: string, now = new Date()): Data {
   const why = reason.trim();
-  if (decision === "kill" && !why) throw new Error("Say why the project is killed.");
+  if (decision === "kill" && !why) throw new Error(t.projects.sayWhyKill);
   const at = p.flow.steps.indexOf(p.step);
   const gate: Gate = { step: p.step.id, decision, reason: why, date: isoDate(now) };
   const patch: Data = {};
@@ -228,7 +223,7 @@ export function gatePatch(p: Project, decision: Decision, reason: string, to?: s
       break;
     case "recycle": {
       const back = p.flow.steps.findIndex(s => s.id === to);
-      if (back < 0 || back >= at) throw new Error("Pick an earlier step to go back to.");
+      if (back < 0 || back >= at) throw new Error(t.projects.pickEarlier);
       Object.assign(patch, { status: "active", step: to });
       gate.to = to;
       break;

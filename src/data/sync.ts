@@ -2,6 +2,7 @@ import { joinPath, parentOf, type Storage } from "../storage/types";
 import { isoMinute } from "./dates";
 import { SETTINGS_PATH } from "./settings";
 import { moveToTrash } from "./trash";
+import { t } from "../i18n";
 
 // USB sync (SPEC 6): the PC compares its files and the device's with the state of the last
 // successful sync (path → content hash) and decides, file by file, what to copy, what to move
@@ -103,7 +104,7 @@ export function canKeepBoth(path: string): boolean {
 export async function copyName(a: Storage, b: Storage, path: string): Promise<string> {
   const m = /^(.*?)(\.[^./]*)?$/.exec(path)!;
   for (let i = 1; ; i++) {
-    const to = `${m[1]} (device copy${i > 1 ? ` ${i}` : ""})${m[2] ?? ""}`;
+    const to = `${m[1]} (${t.sync.deviceCopy}${i > 1 ? ` ${i}` : ""})${m[2] ?? ""}`;
     if (!(await a.stat(to)) && !(await b.stat(to))) return to;
   }
 }
@@ -135,19 +136,19 @@ export async function sha256(data: Uint8Array): Promise<string> {
 /** A conflict is only settled on the versions the user saw: nothing changed since. */
 async function expectHash(s: Storage, path: string, hash: string | undefined) {
   const now = (await s.stat(path)) ? await sha256(await s.readBinary(path)) : undefined;
-  if (now !== hash) throw new Error(`${path} changed during the sync; sync again`);
+  if (now !== hash) throw new Error(t.sync.changedDuring(path));
 }
 
 /** Copies one file and checks what arrived against the hash it should have. */
 async function copy(from: Storage, to: Storage, path: string, hash: string, toPath = path) {
   const data = await from.readBinary(path);
-  if ((await sha256(data)) !== hash) throw new Error(`${path} changed during the sync; sync again`);
+  if ((await sha256(data)) !== hash) throw new Error(t.sync.changedDuring(path));
   await to.writeBinary(toPath, data);
 }
 
 /** Runs one sync over two sides. Conflicts are not touched. */
 export async function run(pc: Side, device: Side, base: Hashes, progress?: Progress): Promise<Result> {
-  progress?.("Comparing files…", 0, 0);
+  progress?.(t.sync.comparing, 0, 0);
   const [ph, dh] = await Promise.all([pc.hashes(), device.hashes()]);
   const steps = plan(ph, dh, base);
   const state: Hashes = new Map();
@@ -164,24 +165,24 @@ export async function run(pc: Side, device: Side, base: Hashes, progress?: Progr
     await copy(pc.storage, device.storage, s.path, s.pc!);
     state.set(s.path, s.pc!);
     counts.toDevice++;
-    tick(`Sending ${s.path}`);
+    tick(t.sync.sending(s.path));
   }
   for (const s of work.filter(s => s.kind === "toPC")) {
     await copy(device.storage, pc.storage, s.path, s.device!);
     state.set(s.path, s.device!);
     counts.toPC++;
-    tick(`Receiving ${s.path}`);
+    tick(t.sync.receiving(s.path));
   }
   const trashed = (k: Kind) => work.filter(s => s.kind === k).map(s => s.path);
   for (const item of trashItems(trashed("trashDevice"), ph, dh)) {
     await moveToTrash(device.storage, item);
     counts.trashDevice++;
-    tick(`Moving ${item} to the device's trash`);
+    tick(t.sync.toDeviceTrash(item));
   }
   for (const item of trashItems(trashed("trashPC"), dh, ph)) {
     await moveToTrash(pc.storage, item);
     counts.trashPC++;
-    tick(`Moving ${item} to the trash`);
+    tick(t.sync.toTrash(item));
   }
   return { state, conflicts: steps.filter(s => s.kind === "conflict"), counts, settled: 0 };
 }
@@ -202,7 +203,7 @@ export async function settle(pc: Side, device: Side, r: Result, choices: Map<str
       left.push(s);
       continue;
     }
-    progress?.(`Settling ${s.path}`, done, total);
+    progress?.(t.sync.settling(s.path), done, total);
     await expectHash(pc.storage, s.path, s.pc);
     await expectHash(device.storage, s.path, s.device);
     if (c === "both") {
@@ -223,7 +224,7 @@ export async function settle(pc: Side, device: Side, r: Result, choices: Map<str
       }
     }
     done++;
-    progress?.(`Settling ${s.path}`, done, total);
+    progress?.(t.sync.settling(s.path), done, total);
   }
   return { ...r, state, conflicts: left, settled: r.settled + done };
 }
@@ -274,17 +275,17 @@ const LOCK_REFRESH_MS = 2 * 60_000;
 export async function syncDevice(
   pc: Side,
   device: Side,
-  t: Target,
+  target: Target,
   progress?: Progress,
   wait = LOCK_WAIT_MS,
   resolve?: Resolver,
 ): Promise<Result> {
-  const lock = () => device.storage.write(LOCK_PATH, JSON.stringify({ pc: t.pcName, at: isoMinute(new Date()) }) + "\n");
-  progress?.("Waiting for the device to save…", 0, 0);
+  const lock = () => device.storage.write(LOCK_PATH, JSON.stringify({ pc: target.pcName, at: isoMinute(new Date()) }) + "\n");
+  progress?.(t.sync.waitingDevice, 0, 0);
   await lock();
   try {
     await new Promise(r => setTimeout(r, wait));
-    const last = await loadLast(pc.storage, t.serial);
+    const last = await loadLast(pc.storage, target.serial);
     let result = await run(pc, device, new Map(Object.entries(last?.files ?? {})), progress);
     if (resolve && result.conflicts.length) {
       const timer = setInterval(() => lock().catch(() => {}), LOCK_REFRESH_MS);
@@ -298,8 +299,8 @@ export async function syncDevice(
     }
     const files = Object.fromEntries([...result.state].sort(([a], [b]) => a.localeCompare(b)));
     const at = isoMinute(new Date());
-    await pc.storage.write(statePath(t.serial), toJson({ at, with: t.model, files }));
-    await device.storage.write(DEVICE_LAST, toJson({ at, with: t.pcName, files }));
+    await pc.storage.write(statePath(target.serial), toJson({ at, with: target.model, files }));
+    await device.storage.write(DEVICE_LAST, toJson({ at, with: target.pcName, files }));
     return result;
   } finally {
     await device.storage.remove(LOCK_PATH);
