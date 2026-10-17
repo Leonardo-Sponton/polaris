@@ -1319,3 +1319,137 @@ label.contents {
   flex: 1;
   min-width: 0;
 }
+
+/* ---- Books (SPEC 5.6) ---- */
+/* The shelf needs a wider list than the other areas on big screens. */
+.split.books {
+  grid-template-columns: minmax(300px, 480px) 1fr;
+}
+.book-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 10px;
+}
+.shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 14px 10px;
+}
+.book-li {
+  min-width: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.book-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  color: inherit;
+}
+.book-card:hover {
+  background: var(--hover);
+}
+.book-card.active {
+  background: var(--select);
+}
+.cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  -webkit-user-drag: none;
+}
+.cover.placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 8px;
+  overflow: hidden;
+  color: #10082a;
+  /* A plain color looks flat next to photos: a soft shade like a spine. */
+  background-image: linear-gradient(90deg, rgb(0 0 0 / 0.18) 0 6%, transparent 6% 100%);
+}
+.cover.placeholder .pt {
+  font-weight: 650;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cover.placeholder .pa {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+.book-title,
+.book-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.book-title {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--strong);
+}
+.book-author {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.book-rating {
+  display: flex;
+  gap: 1px;
+  color: var(--h3);
+}
+.book-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.book-cover-edit {
+  width: 120px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.book-main {
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+.book-author-input {
+  max-width: 320px;
+}
+.rating {
+  display: flex;
+  color: var(--h3);
+}
+.rating .btn {
+  color: inherit;
+}
+@media (max-width: 480px) {
+  .book-cover-edit {
+    width: 96px;
+  }
+  /* Three books per row on a phone, like a real shelf. */
+  .shelf {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 6px;
+  }
+}

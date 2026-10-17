@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { markSeen, resurface, type Idea } from "../data/ideas";
 import { isToday, type View } from "../data/todo";
+import { BooksView, useBooks } from "./books/BooksView";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
 import { useCapture } from "./useCapture";
@@ -15,12 +16,13 @@ import { useApp } from "./context";
 import { goBack } from "./useBack";
 import { useReminders } from "./useReminders";
 
-// The areas built so far. Books, Journal… join in later stages (SPEC 7).
-export type Area = "today" | "ideas" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
+// The areas built so far. Journal, Review… join in later stages (SPEC 7).
+export type Area = "today" | "ideas" | "books" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
 
 const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
   { id: "today", label: "Today", icon: <Sun size={20} /> },
   { id: "ideas", label: "Ideas", icon: <Lightbulb size={20} /> },
+  { id: "books", label: "Books", icon: <BookOpen size={20} /> },
   { id: "todo", label: "To-do", icon: <CheckSquare size={20} /> },
   { id: "inbox", label: "Inbox", icon: <Inbox size={20} /> },
   { id: "search", label: "Search", icon: <Search size={20} /> },
@@ -29,7 +31,7 @@ const AREAS: { id: Area; label: string; icon: ReactNode }[] = [
 ];
 
 // Phone bottom bar (SPEC 4.1); the rest lives under More.
-const BOTTOM: Area[] = ["today", "ideas", "todo", "more"];
+const BOTTOM: Area[] = ["today", "ideas", "books", "todo", "more"];
 
 function More({ go }: { go: (a: Area) => void }) {
   return (
@@ -79,6 +81,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const todo = useTodo();
   const inbox = useInbox();
   const ideas = useIdeas();
+  const books = useBooks();
   const capture = useCapture();
   const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
   const [searchKey, setSearchKey] = useState(0);
@@ -173,6 +176,9 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
     case "ideas":
       page = <IdeasView ideas={ideas} openPath={target} />;
       break;
+    case "books":
+      page = <BooksView books={books} openPath={target} />;
+      break;
     case "inbox":
       page = <InboxView items={inbox} openPath={target} />;
       break;
@@ -189,7 +195,8 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           setState={setSearch}
           focusKey={searchKey}
           openElsewhere={d => {
-            if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas") return false;
+            if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas" && d.area !== "books") return false;
+            if (d.area === "books" && !d.path.endsWith("/book.md")) return false;
             setTarget({ path: d.path, key: Date.now() });
             setArea(d.area);
             return true;

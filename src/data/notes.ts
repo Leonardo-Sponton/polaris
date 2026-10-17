@@ -82,6 +82,19 @@ export class Notes {
     return this.writeChecked(note.path, text);
   }
 
+  /**
+   * Merges `patch` into a file's header (undefined removes a key), for changes made outside the
+   * file's own screen (hold menus). Returns the old values of the changed keys: passing them
+   * back undoes it.
+   */
+  async patchHeader(path: string, patch: Data): Promise<Data> {
+    const n = await this.load(path);
+    const old: Data = {};
+    for (const k of Object.keys(patch)) old[k] = n.data[k];
+    await this.save(n, { ...n.data, ...patch }, n.body);
+    return old;
+  }
+
   /** "Keep both": writes my version next to the original as "<name> (my copy).md". */
   async saveCopy(note: Note, data: Data, body: string): Promise<Note> {
     const base = note.path.replace(/\.md$/, "");

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { RotateCcw, Trash2, X } from "lucide-react";
+import { BOOK_FILE } from "../data/books";
 import { areaOf } from "../data/files";
 import { parse, previewOf } from "../data/frontmatter";
 import { deleteForever, emptyTrash, listTrash, restore, type Trashed } from "../data/trash";
@@ -30,12 +31,14 @@ export function TrashView() {
       const out: Row[] = [];
       for (const t of await listTrash(notes.storage)) {
         let title = t.from.slice(t.from.lastIndexOf("/") + 1);
-        if (t.path.endsWith(".md")) {
-          try {
-            title = previewOf(parse(await notes.storage.read(t.path)).body) || "(empty)";
-          } catch {
-            /* keep the file name */
+        try {
+          if (t.path.endsWith(".md")) title = previewOf(parse(await notes.storage.read(t.path)).body) || "(empty)";
+          // A book folder: its title is in the header of book.md.
+          else if ((await notes.storage.stat(t.path))?.isDir) {
+            title = String(parse(await notes.storage.read(`${t.path}/${BOOK_FILE}`)).data.title ?? "") || title;
           }
+        } catch {
+          /* keep the file name */
         }
         out.push({ ...t, title });
       }

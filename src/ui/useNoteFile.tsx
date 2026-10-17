@@ -32,6 +32,8 @@ export interface NoteFile {
   setBody(text: string): void;
   /** Merges into the header (undefined removes a key) and saves now. */
   setData(patch: Data): void;
+  /** Same, but saved a moment later like typed text (for header fields edited key by key). */
+  editData(patch: Data): void;
   saveNow(): Promise<void>;
   /** The "changed outside the app" prompt, when open. */
   dialog: ReactNode;
@@ -160,6 +162,16 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
     [save],
   );
 
+  const editData = useCallback(
+    (patch: Data) => {
+      data.current = { ...data.current, ...patch };
+      setStatus("unsaved");
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => save(), 1000);
+    },
+    [save],
+  );
+
   const resolve = (choice: "mine" | "file" | "both") => {
     const c = conflict!;
     setConflict(null);
@@ -224,6 +236,7 @@ export function useNoteFile(path: string, opts: { removeIfEmpty?(body: string, d
     data: () => data.current,
     setBody,
     setData,
+    editData,
     saveNow: () => save(),
     dialog,
   };

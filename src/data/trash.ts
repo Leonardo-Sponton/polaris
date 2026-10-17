@@ -5,6 +5,7 @@ import { walkFiles } from "./files";
 // Deleting moves a file to .trash/ at the same relative path (SPEC 2.4); nothing is erased
 // until the user deletes it from the Trash screen. Where each file came from and when it was
 // deleted is kept in .trash/.deleted.json (a file moved by hand is still listed, guessed).
+// A folder (a book with its cover and quotes) is deleted and restored as one item.
 
 const TRASH = ".trash";
 const INDEX = `${TRASH}/.deleted.json`;
@@ -66,7 +67,10 @@ export async function restoreFromTrash(s: Storage, trashed: string, original: st
 export async function listTrash(s: Storage): Promise<Trashed[]> {
   const index = await readIndex(s);
   const files = (await walkFiles(s, TRASH)).filter(p => p !== INDEX);
-  return files
+  // A deleted folder (a book) is one item: its files are listed under the folder.
+  const folders = Object.keys(index).filter(k => files.some(f => f.startsWith(`${k}/`)));
+  const paths = new Set(files.map(f => folders.find(k => f.startsWith(`${k}/`)) ?? f));
+  return [...paths]
     .map(path => ({ path, from: index[path]?.from ?? guessFrom(path), at: index[path]?.at ?? "" }))
     .sort((a, b) => b.at.localeCompare(a.at) || a.from.localeCompare(b.from));
 }

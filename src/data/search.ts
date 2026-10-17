@@ -47,7 +47,9 @@ export async function loadDocs(notes: Notes): Promise<Doc[]> {
   for (const path of paths) {
     try {
       const n = await notes.load(path);
-      const title = previewOf(n.body);
+      // Books keep title and author in the header (SPEC 3.3).
+      const title =
+        n.data.type === "book" ? [n.data.title, n.data.author].filter(Boolean).join(" · ") : previewOf(n.body);
       // The "# Title" line is searched as the title; the snippet shows the rest.
       const body = titleOf(n.body) ? n.body.replace(/^#[ \t]+.*$/m, "").trim() : n.body;
       const date = String(n.data.modified ?? n.data.created ?? "");

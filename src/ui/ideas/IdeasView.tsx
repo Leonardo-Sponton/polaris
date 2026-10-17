@@ -8,7 +8,6 @@ import {
   loadIdeas,
   markSeen,
   reopenPatch,
-  updateIdea,
   type Idea,
   type Template,
 } from "../../data/ideas";
@@ -119,9 +118,9 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
   const change = async (i: Idea, patch: Data, text: string) => {
     try {
       await flushAll(); // an open idea screen writes its last edits first
-      const old = await updateIdea(notes, i.path, patch);
+      const old = await notes.patchHeader(i.path, patch);
       bump();
-      toast({ text, action: { label: "Undo", run: () => updateIdea(notes, i.path, old).then(bump, fail) } });
+      toast({ text, action: { label: "Undo", run: () => notes.patchHeader(i.path, old).then(bump, fail) } });
     } catch (e) {
       fail(e);
     }

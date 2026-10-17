@@ -40,7 +40,7 @@ interface Props {
   setState(s: SearchState): void;
   /** Changes on Ctrl+F: puts the caret back in the field. */
   focusKey: number;
-  /** Opens a to-do, inbox item or idea in its own screen. Returns false for other areas. */
+  /** Opens a to-do, inbox item, idea or book in its own screen. Returns false for other areas. */
   openElsewhere(doc: Doc): boolean;
 }
 

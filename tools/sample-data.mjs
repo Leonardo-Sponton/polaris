@@ -10,7 +10,7 @@
 //   node tools/sample-data.mjs add --phone        add to the phone's data folder over adb
 //   node tools/sample-data.mjs remove --phone
 //
-// Later stages add their own samples here (books, journal…); `add` again brings only new areas.
+// Later stages add their own samples here (journal…); `add` again brings only new areas.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -181,6 +181,26 @@ function samples() {
     status: "archived", template: "business", archived_reason: "The hills here make it too slow, and apps already do it",
   }, "Deliveries for the small shops on my street.\n", -40);
 
+  // ---- Books (stage 3) ----
+  // No covers: the shelf shows the colored cards; add a photo to see a real one.
+  const book = (created, data, notes = "") => {
+    const c = isoMinute(created);
+    out.push([`books/${slug(data.title)}/book.md`, file({ type: "book", created: c, modified: c, ...data }, notes)]);
+  };
+  book(at(-12, 21, 0), { title: "Meditations", author: "Marcus Aurelius", format: "paper", status: "reading", started: day(-12) },
+    "A few pages before sleeping. Book 2 so far.\n");
+  book(at(-5, 20, 10), { title: "Clean Code", author: "Robert C. Martin", year: 2008, format: "ebook", status: "reading", started: day(-5) },
+    "Reading it with the study task on Today.\n");
+  book(at(-40, 10, 0), { title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", year: 1999, status: "want" });
+  book(at(-60, 18, 30), { title: "Sapiens", author: "Yuval Noah Harari", year: 2011, status: "want" });
+  book(at(-90, 9, 0), { title: "Dom Casmurro", author: "Machado de Assis", year: 1899, status: "read", started: day(-80), finished: day(-50), rating: 5 },
+    "Capitu: did she or didn't she? The narrator is the one to doubt.\n");
+  book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4 });
+  book(at(-70, 22, 0), { title: "Ulysses", author: "James Joyce", year: 1922, status: "dnf", started: day(-70), finished: day(-62),
+    dnf_reason: "Not the right moment; try again some day" });
+  book(at(-3, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist" },
+    "Recommended by a classmate. Look for a used copy.\n");
+
   // ---- Trash ----
   const old = at(-12, 9, 0);
   const trashed = `.trash/todo/${stamp(old)}-print-the-boarding-pass.md`;
@@ -207,6 +227,14 @@ function local(dir) {
       fs.writeFileSync(abs(rel), text);
     },
     remove: rel => fs.rmSync(abs(rel), { force: true }),
+    /** Removes a folder only if it is empty (a sample book folder after its book.md went). */
+    removeDirIfEmpty: rel => {
+      try {
+        fs.rmdirSync(abs(rel));
+      } catch {
+        /* not empty or not there: keep it */
+      }
+    },
     /** Every .md file under the folder with a `sample: true` line. */
     findSamples: () => {
       const found = [];
@@ -242,6 +270,7 @@ function phone() {
       adb("push", f, `${PHONE_DIR}/${rel}`);
     },
     remove: rel => adb("shell", `rm -f ${q(rel)}`),
+    removeDirIfEmpty: rel => adb("shell", `rmdir ${q(rel)} 2>/dev/null || true`),
     findSamples: () =>
       adb("shell", `cd '${PHONE_DIR}' && grep -rlx --include='*.md' 'sample: true' . || true`)
         .split("\n")
@@ -299,6 +328,8 @@ function remove(io) {
   const m = readJson(io, MANIFEST, null);
   const files = io.findSamples();
   for (const rel of files) io.remove(rel);
+  // A sample book is a folder: drop it too when nothing of the user's is inside.
+  for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/book\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   const index = readJson(io, ".trash/.deleted.json", {});
   for (const k of files) delete index[k];
   if (Object.keys(index).length) io.write(".trash/.deleted.json", JSON.stringify(index, null, 2) + "\n");

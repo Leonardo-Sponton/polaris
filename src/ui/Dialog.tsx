@@ -32,13 +32,15 @@ export function AskText(props: {
   initial?: string;
   placeholder?: string;
   okLabel?: string;
+  /** The answer may be left empty. */
+  optional?: boolean;
   onOk(text: string): void;
   onClose(): void;
 }) {
   const [text, setText] = useState(props.initial ?? "");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => input.current?.select(), []);
-  const ok = () => text.trim() && props.onOk(text.trim());
+  const ok = () => (props.optional || text.trim()) && props.onOk(text.trim());
   return (
     <Dialog title={props.title} onClose={props.onClose}>
       <input
@@ -54,7 +56,7 @@ export function AskText(props: {
         <button className="btn" onClick={props.onClose}>
           Cancel
         </button>
-        <button className="btn primary" disabled={!text.trim()} onClick={ok}>
+        <button className="btn primary" disabled={!props.optional && !text.trim()} onClick={ok}>
           {props.okLabel ?? "OK"}
         </button>
       </div>
