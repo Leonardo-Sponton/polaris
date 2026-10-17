@@ -39,13 +39,14 @@ export function IdeasView({ ideas, openPath }: { ideas: Idea[]; openPath?: { pat
   const openIdea = useCallback(
     async (path: string) => {
       try {
-        await markSeen(notes, path);
+        // The Today card must stop showing it.
+        if (await markSeen(notes, path)) bump();
       } catch {
         /* only the resurface date: opening matters more */
       }
       setOpen(path);
     },
-    [notes],
+    [notes, bump],
   );
 
   useEffect(() => {

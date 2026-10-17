@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Ban, Check, ListPlus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ban, Check, ListPlus, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { addDays, isoDate, parseLocal, slugify } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
@@ -11,6 +11,7 @@ import type { Note } from "../../data/notes";
 import { reminderOf } from "../../data/reminders";
 import { useApp } from "../context";
 import { AskText } from "../Dialog";
+import { useFiveW2H } from "../FiveW2H";
 import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 import { ScheduleDialog } from "./Schedule";
@@ -77,12 +78,13 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const [d, setD] = useState<Data>(note.data);
-  const [rest, setRest] = useState(split.rest);
   const [notesRev, setNotesRev] = useState(0);
   const [picking, setPicking] = useState(false);
   const [newList, setNewList] = useState(false);
-  const restRef = useRef(split.rest);
   const titleRef = useRef(split.title);
+  const writeBody = () => f.setBody(joinTitle(titleRef.current, w.body()));
+  const w = useFiveW2H(split.rest, writeBody);
+  const [rest, setRest] = useState(w.initialText);
 
   const t = toTask({ ...note, data: d, body: joinTitle(title, rest) });
   const open = t.status === "open";
@@ -94,7 +96,6 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
     setD(old => ({ ...old, ...p }));
     f.setData(p);
   };
-  const writeBody = () => f.setBody(joinTitle(titleRef.current, restRef.current));
 
   const commitRepeat = () => {
     const text = repeatText.trim();
@@ -115,9 +116,9 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
   };
 
   const addSubtask = () => {
-    const base = restRef.current.replace(/\s+$/, "");
+    const base = w.text().replace(/\s+$/, "");
     const next = `${base}${base ? "\n" : ""}- [ ] `;
-    restRef.current = next;
+    w.setText(next);
     setRest(next);
     setNotesRev(r => r + 1);
     writeBody();
@@ -240,9 +241,16 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
 
         <div className="task-notes-head">
           <span className="fl">Notes and subtasks</span>
-          <button className="btn ghost" onClick={addSubtask}>
-            <ListPlus size={18} /> Subtask
-          </button>
+          <div className="row" style={{ gap: 2 }}>
+            {!w.has && (
+              <button className="btn ghost" onClick={w.insert}>
+                <Plus size={18} /> 5W2H
+              </button>
+            )}
+            <button className="btn ghost" onClick={addSubtask}>
+              <ListPlus size={18} /> Subtask
+            </button>
+          </div>
         </div>
         <div className="task-notes">
           <Editor
@@ -251,12 +259,14 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
             autoFocus={notesRev > 0}
             placeholder="Notes…"
             onSaveNow={f.saveNow}
+            commands={{ "5w2h": w.insert }}
             onChange={text => {
-              restRef.current = text;
+              w.setText(text);
               writeBody();
             }}
           />
         </div>
+        {w.form}
 
         <div className="row task-actions">
           {open ? (

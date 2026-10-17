@@ -17,8 +17,10 @@ import { joinTitle, splitTitle } from "../../data/todo";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText } from "../Dialog";
 import { useApp } from "../context";
+import { useFiveW2H } from "../FiveW2H";
 import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
+import { Viability } from "./Viability";
 
 // The idea screen (SPEC 5.4): title, status, template, tags, then the free draft with the
 // template's optional sections. Everything is saved as you go.
@@ -84,12 +86,13 @@ function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
   const split = splitTitle(note.body);
   const [title, setTitle] = useState(split.title);
   const [d, setD] = useState<Data>(note.data);
-  const [rest, setRest] = useState(split.rest);
   const [restRev, setRestRev] = useState(0);
   const [tagText, setTagText] = useState(toIdea(note).tags.join(", "));
   const [archiving, setArchiving] = useState(false);
   const titleRef = useRef(split.title);
-  const restRef = useRef(split.rest);
+  const writeBody = () => f.setBody(joinTitle(titleRef.current, w.body()));
+  const w = useFiveW2H(split.rest, writeBody);
+  const [rest, setRest] = useState(w.initialText);
 
   const idea = toIdea({ ...note, data: d });
   const missing = missingSections(idea.template, rest);
@@ -98,11 +101,10 @@ function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
     setD(old => ({ ...old, ...p }));
     f.setData(p);
   };
-  const writeBody = () => f.setBody(joinTitle(titleRef.current, restRef.current));
 
   const add = (name: string) => {
-    const next = addSection(restRef.current, name);
-    restRef.current = next;
+    const next = addSection(w.text(), name);
+    w.setText(next);
     setRest(next);
     setRestRev(r => r + 1);
     writeBody();
@@ -190,22 +192,31 @@ function IdeaForm({ file: f, note }: { file: NoteFile; note: Note }) {
             autoFocus={restRev > 0}
             placeholder="Write it down as it comes…"
             onSaveNow={f.saveNow}
+            commands={{ "5w2h": w.insert }}
             onChange={text => {
-              restRef.current = text;
+              w.setText(text);
               setRest(text);
               writeBody();
             }}
           />
         </div>
-        {missing.length > 0 && (
+        {(missing.length > 0 || !w.has) && (
           <div className="row idea-sections" aria-label="Add a section">
             {missing.map(s => (
               <button key={s} className="btn ghost" onClick={() => add(s)}>
                 <Plus size={16} /> {s}
               </button>
             ))}
+            {!w.has && (
+              <button className="btn ghost" onClick={w.insert}>
+                <Plus size={16} /> 5W2H
+              </button>
+            )}
           </div>
         )}
+        {w.form}
+
+        <Viability data={d} patch={patch} />
 
         <div className="row task-actions">
           {active ? (

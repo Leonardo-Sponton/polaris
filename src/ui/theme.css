@@ -1150,6 +1150,93 @@ h3 {
 .idea-sections {
   gap: 2px;
 }
+.fold-body {
+  padding: 10px 0 4px;
+}
+.checklist {
+  margin: 0;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.checklist li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.checklist li > span {
+  flex: 1 1 260px;
+}
+.viable {
+  color: var(--ok);
+}
+.assumption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.assumption .segmented {
+  align-self: flex-start;
+}
+.assumption.r-confirmed {
+  border-left-color: var(--ok);
+}
+.assumption.r-rejected {
+  border-left-color: var(--err);
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- 5W2H block (SPEC 3.4) ---- */
+.w2h {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.w2h-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.w2h .task-fields .field {
+  max-width: none;
+}
+label.contents {
+  display: contents;
+}
+@media (max-width: 480px) {
+  .w2h .task-fields label:not(:first-child) .fl {
+    margin-top: 6px;
+  }
+}
+
+/* ---- Resurface card on Today ---- */
+.resurface {
+  cursor: default;
+  flex-wrap: wrap;
+}
+.resurface .what {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.resurface .what b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ---- Quick capture window (Linux --capture) ---- */
 

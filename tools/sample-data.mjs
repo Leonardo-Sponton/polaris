@@ -57,10 +57,26 @@ const yamlValue = v =>
     ? JSON.stringify(v)
     : String(v);
 
+/** Objects and lists of objects (checklist, assumptions) as indented YAML blocks. */
+const yamlEntry = (k, v, ind = "") => {
+  if (Array.isArray(v)) {
+    const items = v.map(o =>
+      Object.entries(o)
+        .map(([kk, vv], i) => `${ind}${i ? "  " : "- "}${kk}: ${yamlValue(vv)}`)
+        .join("\n"),
+    );
+    return `${ind}${k}:\n${items.join("\n")}`;
+  }
+  if (v && typeof v === "object") {
+    return `${ind}${k}:\n${Object.entries(v).map(([kk, vv]) => yamlEntry(kk, vv, `${ind}  `)).join("\n")}`;
+  }
+  return `${ind}${k}: ${yamlValue(v)}`;
+};
+
 function file(data, body) {
   const head = Object.entries(data)
     .filter(([, v]) => v !== undefined)
-    .map(([k, v]) => `${k}: ${yamlValue(v)}`)
+    .map(([k, v]) => yamlEntry(k, v))
     .join("\n");
   return `---\n${head}\nsample: true\n---\n${body}`;
 }
@@ -115,7 +131,8 @@ function samples() {
 
   // ---- Someday ----
   task(at(-30, 23, 0), "Learn to play the guitar", { when: "someday" });
-  task(at(-25, 19, 0), "Visit Ouro Preto", { when: "someday" }, "Best in the dry season (May to September).\n");
+  task(at(-25, 19, 0), "Visit Ouro Preto", { when: "someday" },
+    "Best in the dry season (May to September).\n\n## 5W2H\n- **What:** A 3-day trip to Ouro Preto\n- **Why:** See the baroque churches and the museums\n- **Where:** Ouro Preto, MG\n- **When:** July, in the holidays\n- **Who:** Me and a friend\n- **How:** Bus to Belo Horizonte, then the local bus\n- **How much:** About 1,200 with the hostel\n");
 
   // ---- Logbook ----
   task(at(-4, 8, 0), "Install Hypomnemata on the tablet", { status: "done", done_at: isoMinute(at(-1, 20, 10)) });
@@ -136,9 +153,26 @@ function samples() {
     const d = { type: "idea", created: isoMinute(c), modified: isoMinute(c), status: "draft", template: "blank", ...data };
     out.push([rel, file({ ...d, last_seen: day(seen) }, body)]);
   };
-  idea(at(-2, 22, 40), "Study group app for classmates", { template: "software", tags: "[app, study]" },
-    "Something to split the subjects and share summaries before the tests.\n\n## Problem\n\nEveryone studies alone and the group chat gets lost.\n\n## For whom\n\nMy class (about 30 people).\n", -2);
-  idea(at(-20, 19, 15), "Sell homemade granola at the fair", { status: "maturing", template: "business", tags: "[money]" },
+  const w2h = v =>
+    `## 5W2H\n${["What", "Why", "Where", "When", "Who", "How", "How much"].map((f, i) => `- **${f}:** ${v[i]}`.trimEnd()).join("\n")}\n`;
+  idea(at(-2, 22, 40), "Study group app for classmates", {
+    template: "software", tags: "[app, study]",
+    checklist: { "problem-real": "yes", who: "yes", "would-use": "unsure", "can-build": "yes", "cost-ok": "yes" },
+  },
+    "Something to split the subjects and share summaries before the tests.\n\n## Problem\n\nEveryone studies alone and the group chat gets lost.\n\n## For whom\n\nMy class (about 30 people).\n\n" +
+    w2h(["An app to split subjects and share summaries", "The group chat loses everything", "Phone, offline first", "Before the next test week", "Me; for my class", "React + Capacitor, like Hypomnemata", ""]), -2);
+  idea(at(-20, 19, 15), "Sell homemade granola at the fair", {
+    status: "maturing", template: "business", tags: "[money]",
+    checklist: {
+      "problem-real": "yes", who: "yes", "would-use": "yes", better: "unsure", "can-build": "yes",
+      "cost-ok": "no", "still-want": "yes", "riskiest-known": "yes",
+    },
+    assumptions: [
+      { text: "People at the fair will pay 25 for a jar", test: "Take 10 jars next Saturday and count the sales", result: "confirmed", notes: "Sold 8 of 10 in two hours" },
+      { text: "I can buy the oats cheaply in bulk", test: "Ask the price at the wholesale market", result: "rejected", notes: "Only cheaper above 25 kg" },
+      { text: "The city lets me sell food without a licence", test: "Call the city hall", result: "untested" },
+    ],
+  },
     "Saturday fair near home. Start with 20 jars and see.\n\n## Problem\n\nPeople there ask for healthy snacks and there are none.\n\n## Risks\n\n- Health rules for selling food\n- The cost of the jars\n", -18);
   idea(at(-1, 8, 5), "Morning routine without the phone", { template: "personal", tags: "[life]" },
     "First hour of the day: water, stretch, read. Phone only after breakfast.\n", -1);

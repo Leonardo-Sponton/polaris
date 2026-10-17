@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
+import { markSeen, resurface, type Idea } from "../data/ideas";
 import { isToday, type View } from "../data/todo";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
@@ -48,6 +49,29 @@ function More({ go }: { go: (a: Area) => void }) {
   );
 }
 
+/** An idea not opened for a while comes back (SPEC 5.4). "Not now" hides it for 14 days. */
+function ResurfaceCard(props: { idea: Idea; today: string; onOpen(): void; onLater(): void }) {
+  const seen = (props.idea.lastSeen ?? props.idea.created).slice(0, 10);
+  const days = Math.round((Date.parse(props.today) - Date.parse(seen)) / 86400000);
+  return (
+    <div className="today-card resurface" aria-label="An old idea">
+      <Lightbulb size={18} />
+      <span className="what">
+        <span className="muted small">Not opened for {days} days</span>
+        <b>{props.idea.title || "(untitled idea)"}</b>
+      </span>
+      <span className="row" style={{ gap: 4 }}>
+        <button className="btn ghost" onClick={props.onLater}>
+          Not now
+        </button>
+        <button className="btn" onClick={props.onOpen}>
+          Open
+        </button>
+      </span>
+    </div>
+  );
+}
+
 export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const [area, setArea] = useState<Area>("today");
   const [view, setView] = useState<View>("today");
@@ -71,7 +95,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   };
 
   // Android back: first whatever is open (ui/useBack), then back to Today, then leave the app.
-  const { platform } = useApp();
+  const { platform, notes, bump, toast } = useApp();
   const areaRef = useRef(area);
   areaRef.current = area;
   useEffect(
@@ -97,6 +121,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
     return () => removeEventListener("keydown", onKey);
   }, []);
   const todayCount = todo.tasks.filter(t => isToday(t, today)).length;
+  const old = resurface(ideas, today);
 
   // The Android "Capture" shortcut: go to Today, where the field gets the focus.
   useEffect(() => {
@@ -114,13 +139,32 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           home={{
             onCapture: capture,
             focusKey: captureKey,
-            footer: inbox.length > 0 && (
-              <button className="today-card" onClick={() => go("inbox")}>
-                <Inbox size={18} />
-                <span>Inbox</span>
-                <span className="count">{inbox.length}</span>
-                <ChevronRight size={18} className="muted" />
-              </button>
+            footer: (
+              <>
+                {old && (
+                  <ResurfaceCard
+                    idea={old}
+                    today={today}
+                    onOpen={() => {
+                      setTarget({ path: old.path, key: Date.now() });
+                      setArea("ideas");
+                    }}
+                    onLater={() =>
+                      markSeen(notes, old.path).then(bump, e =>
+                        toast({ text: e instanceof Error ? e.message : String(e), error: true }),
+                      )
+                    }
+                  />
+                )}
+                {inbox.length > 0 && (
+                  <button className="today-card" onClick={() => go("inbox")}>
+                    <Inbox size={18} />
+                    <span>Inbox</span>
+                    <span className="count">{inbox.length}</span>
+                    <ChevronRight size={18} className="muted" />
+                  </button>
+                )}
+              </>
             ),
           }}
         />

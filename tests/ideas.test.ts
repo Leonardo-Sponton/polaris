@@ -3,14 +3,21 @@ import { MemoryStorage } from "../src/storage/memory";
 import { Notes } from "../src/data/notes";
 import {
   addSection,
+  answerPatch,
+  answersOf,
   archivePatch,
+  assumptionsOf,
+  assumptionsPatch,
   createIdea,
   loadIdeas,
   markSeen,
   missingSections,
   parseTags,
   reopenPatch,
+  resurface,
+  score,
   sectionsOf,
+  toIdea,
 } from "../src/data/ideas";
 import { createInboxItem, inboxToIdea } from "../src/data/inbox";
 
@@ -83,5 +90,60 @@ describe("ideas", () => {
     const back = await notes.load(n.path);
     expect(back.data.last_seen).toBe("2026-11-01");
     expect(back.data.modified).toBe(n.data.modified);
+  });
+});
+
+describe("viability checklist", () => {
+  it("scores yes answers and reads YAML 1.1 booleans", () => {
+    const a = answersOf({ checklist: { "problem-real": "yes", who: true, "would-use": false, better: "maybe" } });
+    expect(a).toEqual({ "problem-real": "yes", who: "yes", "would-use": "no" });
+    expect(score(a)).toEqual({ yes: 2, answered: 3, total: 8, viable: false });
+  });
+
+  it("is maybe viable only with every answer yes", () => {
+    const all = Object.fromEntries(
+      ["problem-real", "who", "would-use", "better", "can-build", "cost-ok", "still-want", "riskiest-known"].map(k => [k, "yes"]),
+    );
+    expect(score(answersOf({ checklist: all })).viable).toBe(true);
+  });
+
+  it("sets, changes and clears an answer", () => {
+    let d: Record<string, unknown> = {};
+    d = { ...d, ...answerPatch(d, "who", "yes") };
+    expect(d.checklist).toEqual({ who: "yes" });
+    d = { ...d, ...answerPatch(d, "who", "no") };
+    expect(d.checklist).toEqual({ who: "no" });
+    d = { ...d, ...answerPatch(d, "who", "no") };
+    expect(d.checklist).toBeUndefined();
+  });
+});
+
+describe("riskiest assumptions", () => {
+  it("reads with defaults and writes without empty notes", () => {
+    const list = assumptionsOf({ assumptions: [{ text: "People pay", result: "odd" }, "junk"] });
+    expect(list).toEqual([{ text: "People pay", test: "", result: "untested", notes: "" }]);
+    expect(assumptionsPatch(list)).toEqual({ assumptions: [{ text: "People pay", test: "", result: "untested" }] });
+    expect(assumptionsPatch([])).toEqual({ assumptions: undefined });
+  });
+});
+
+describe("resurface", () => {
+  const idea = (path: string, status: string, last_seen?: string, created = "2026-09-01T10:00") =>
+    toIdea({ path, data: { type: "idea", status, last_seen, created }, body: `# ${path}\n` } as never);
+
+  it("picks the open idea seen longest ago, 14+ days back", () => {
+    const list = [
+      idea("a", "draft", "2026-10-04"),
+      idea("b", "maturing", "2026-10-02"),
+      idea("c", "archived", "2026-01-01"),
+      idea("d", "draft", "2026-10-10"),
+    ];
+    expect(resurface(list, "2026-10-17")?.path).toBe("b");
+    expect(resurface([list[3]], "2026-10-17")).toBeUndefined();
+    expect(resurface([idea("a", "draft", "2026-10-03")], "2026-10-17")?.path).toBe("a");
+  });
+
+  it("uses the creation date when the idea was never seen", () => {
+    expect(resurface([idea("e", "draft", undefined, "2026-09-30T08:00")], "2026-10-17")?.path).toBe("e");
   });
 });

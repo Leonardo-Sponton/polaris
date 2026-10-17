@@ -15,6 +15,8 @@ interface Props {
   onSaveNow?(): void;
   placeholder?: string;
   autoFocus?: boolean;
+  /** Slash commands: typing "/name" alone on a line removes it and runs commands[name]. */
+  commands?: Record<string, () => void>;
 }
 
 const theme = EditorView.theme({
@@ -27,11 +29,11 @@ const theme = EditorView.theme({
   ".cm-cursor": { borderLeftColor: "var(--accent)", borderLeftWidth: "2px" },
 });
 
-export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus }: Props) {
+export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus, commands }: Props) {
   const host = useRef<HTMLDivElement>(null);
   // Latest callbacks, so the editor is created once per mount.
-  const cb = useRef({ onChange, onSaveNow });
-  cb.current = { onChange, onSaveNow };
+  const cb = useRef({ onChange, onSaveNow, commands });
+  cb.current = { onChange, onSaveNow, commands };
 
   useEffect(() => {
     const view = new EditorView({
@@ -62,7 +64,9 @@ export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus }: Pr
           livePreview,
           theme,
           EditorView.updateListener.of(u => {
-            if (u.docChanged) cb.current.onChange(u.state.doc.toString());
+            if (!u.docChanged) return;
+            if (u.transactions.some(t => t.isUserEvent("input")) && runCommand(u.view, cb.current.commands)) return;
+            cb.current.onChange(u.state.doc.toString());
           }),
         ],
       }),
@@ -76,4 +80,20 @@ export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus }: Pr
   }, []);
 
   return <div className="editor" ref={host} />;
+}
+
+/** When the caret line is exactly "/name" for a known command: removes it and runs the command. */
+function runCommand(view: EditorView, commands?: Record<string, () => void>): boolean {
+  if (!commands) return false;
+  const sel = view.state.selection.main;
+  const line = view.state.doc.lineAt(sel.head);
+  const m = /^\s*\/(\S+)\s*$/.exec(line.text);
+  const run = m && sel.head === line.to && commands[m[1].toLowerCase()];
+  if (!run) return false;
+  // Dispatching inside an update listener is not allowed: do it right after.
+  queueMicrotask(() => {
+    view.dispatch({ changes: { from: line.from, to: line.to }, userEvent: "delete" });
+    run();
+  });
+  return true;
 }
