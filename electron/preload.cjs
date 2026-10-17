@@ -9,6 +9,12 @@ contextBridge.exposeInMainWorld("hypo", {
   openFolder: call("shell:openFolder"),
   closeWindow: call("capture:close"),
   saveBackup: call("dialog:saveBackup"),
+  setReminders: call("reminders:set"),
+  onReminderOpen: cb => {
+    const listener = (_e, path) => cb(path);
+    ipcRenderer.on("reminder:open", listener);
+    return () => ipcRenderer.removeListener("reminder:open", listener);
+  },
   fs: {
     list: call("fs:list"),
     stat: call("fs:stat"),

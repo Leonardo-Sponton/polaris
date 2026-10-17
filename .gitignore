@@ -7,3 +7,7 @@ android/build/
 android/.gradle/
 android/local.properties
 android/app/src/main/assets/public/
+release/
+packaging/arch/src/
+packaging/arch/pkg/
+packaging/arch/*.tar.*

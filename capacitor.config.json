@@ -2,5 +2,13 @@
   "appId": "io.github.leonardo_sponton.hypomnemata",
   "appName": "Hypomnemata",
   "webDir": "dist",
-  "android": { "allowMixedContent": false }
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_hypo",
+      "iconColor": "#A67CFF"
+    }
+  }
 }

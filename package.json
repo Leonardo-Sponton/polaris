@@ -11,11 +11,13 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "electron": "npm run build && electron .",
-    "android": "npm run build && cap sync android"
+    "android": "npm run build && cap sync android",
+    "dist": "npm run build && electron-builder --linux"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-markdown": "^6.5.2",
     "@codemirror/language": "^6.13.1",
@@ -37,8 +39,50 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.5"
-  }
+  },
+  "author": {
+    "name": "Leonardo Sponton",
+    "email": "230742162+Leonardo-Sponton@users.noreply.github.com"
+  },
+  "build": {
+    "appId": "io.github.leonardo_sponton.hypomnemata",
+    "productName": "Hypomnemata",
+    "directories": {
+      "output": "release",
+      "buildResources": "resources"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "resources/icon.png",
+      "resources/tray.png",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "icon": "resources/icon.png",
+      "category": "Office",
+      "executableName": "hypomnemata",
+      "synopsis": "Offline notes, to-do, ideas and books",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "Hypomnemata"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "appImage": {
+      "artifactName": "Hypomnemata-${version}-${arch}.AppImage"
+    },
+    "artifactName": "hypomnemata-${version}-${arch}.${ext}"
+  },
+  "desktopName": "hypomnemata.desktop"
 }

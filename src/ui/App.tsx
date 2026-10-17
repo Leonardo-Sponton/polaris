@@ -79,6 +79,13 @@ export function App({ platform }: { platform: Platform }) {
 
   useEffect(() => platform.onCaptureRequest?.(() => setCaptureKey(k => k + 1)), [platform]);
 
+  // Android: files may have changed while the app was in the background (USB sync, a file
+  // manager), and reminders that fired since are no longer upcoming: reload on return.
+  useEffect(() => {
+    if (boot.step !== "ready" || !platform.onResume) return;
+    return platform.onResume(() => setVersion(v => v + 1));
+  }, [boot.step, platform]);
+
   const bump = useCallback(() => setVersion(v => v + 1), []);
 
   const toast = useCallback((t: Omit<Toast, "id">) => {

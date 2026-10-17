@@ -78,6 +78,8 @@ export function SettingsView() {
           </div>
         </section>
 
+        <RemindersCard />
+
         <section className="card stack">
           <h2>Data folder</h2>
           <p className="mono" style={{ wordBreak: "break-all", margin: 0 }}>
@@ -127,5 +129,57 @@ export function SettingsView() {
         />
       )}
     </div>
+  );
+}
+
+/** Reminder permissions on Android; on the PC, how reminders keep working (SPEC 5.3). */
+function RemindersCard() {
+  const { platform } = useApp();
+  const [access, setAccess] = useState<{ notifications: boolean; exact: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!platform.reminderAccess) return;
+    let alive = true;
+    const check = () => platform.reminderAccess!().then(a => alive && setAccess(a));
+    check();
+    const stop = platform.onResume?.(check);
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, [platform]);
+
+  if (platform.name === "electron")
+    return (
+      <section className="card stack">
+        <h2>Reminders</h2>
+        <p className="muted" style={{ margin: 0 }}>
+          Reminders show while Hypomnemata runs. Closing the window keeps it running in the tray;
+          use Quit in the tray menu to stop it. To have reminders right after logging in, start it
+          with <span className="mono">hypomnemata --background</span>.
+        </p>
+      </section>
+    );
+  if (!access) return null;
+  return (
+    <section className="card stack">
+      <h2>Reminders</h2>
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <span>{access.notifications ? "Notifications allowed" : "Notifications are off"}</span>
+        {!access.notifications && (
+          <button className="btn" onClick={() => platform.askNotifications!()}>
+            Allow
+          </button>
+        )}
+      </div>
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <span>{access.exact ? "Reminders come on the minute" : "Reminders may come a few minutes late"}</span>
+        {!access.exact && (
+          <button className="btn" onClick={() => platform.openExactAlarmSettings!()}>
+            Allow exact time
+          </button>
+        )}
+      </div>
+    </section>
   );
 }

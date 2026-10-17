@@ -16,6 +16,8 @@ export interface Task {
   evening: boolean;
   due?: string;
   time?: string;
+  /** ISO minute, or "none" to turn off the reminder at `time` (see data/reminders). */
+  remind?: string;
   repeat?: string;
   list?: string;
   priority?: 1 | 2 | 3;
@@ -27,6 +29,7 @@ export interface Task {
 export type View = "today" | "upcoming" | "anytime" | "someday" | "logbook" | { list: string };
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+const isMinute = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v) && !!parseLocal(v);
 const isDate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && !!parseLocal(v);
 
 export function toTask(n: Note): Task {
@@ -43,6 +46,7 @@ export function toTask(n: Note): Task {
     evening: d.evening === true,
     due: isDate(d.due) ? d.due : undefined,
     time: time && /^\d{1,2}:\d{2}$/.test(time) ? time.padStart(5, "0") : undefined,
+    remind: d.remind === "none" ? "none" : isMinute(d.remind) ? d.remind : undefined,
     repeat: parseRule(d.repeat) ? String(d.repeat) : undefined,
     list: str(d.list),
     priority: p === 1 || p === 2 || p === 3 ? p : undefined,
@@ -246,13 +250,12 @@ export async function finishTask(
   const base = parseLocal(t.when !== "someday" ? (t.when ?? t.due) : t.due) ?? today;
   const when = nextDue(rule, base, today);
   if (!when) return { note };
-  const { created: _c, modified: _m, done_at: _d, status: _s, remind: _r, ...keep } = n.data;
+  const { created: _c, modified: _m, done_at: _d, status: _s, ...keep } = n.data;
   const data: Data = { ...keep, status: "open", when };
-  // The due date moves by the same number of days as the task date.
-  if (t.due) {
-    const shift = Math.round((parseLocal(when)!.getTime() - base.getTime()) / 86_400_000);
-    data.due = isoDate(addDays(parseLocal(t.due)!, shift));
-  }
+  // The due date and a set reminder move by the same number of days as the task date.
+  const shift = Math.round((parseLocal(when)!.getTime() - base.getTime()) / 86_400_000);
+  if (t.due) data.due = isoDate(addDays(parseLocal(t.due)!, shift));
+  if (t.remind && t.remind !== "none") data.remind = isoMinute(addDays(parseLocal(t.remind)!, shift));
   const next = await notes.create(await taskPath(notes, t.title, now), data, resetSubtasks(n.body));
   return { note, next };
 }

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { CalendarClock, Check, ListChecks, Moon, Repeat } from "lucide-react";
+import { Bell, CalendarClock, Check, ListChecks, Moon, Repeat } from "lucide-react";
 import type { TodoList } from "../../data/lists";
 import { dayLabel, isOverdue, type Task } from "../../data/todo";
+import { reminderOf } from "../../data/reminders";
 
 // One task in a list. Tap opens it; the box completes it. Holding it (or right-clicking on
 // the PC) shows its options. On touch screens a swipe right also completes and a swipe left
@@ -84,6 +85,7 @@ export function TaskRow({ task: t, today, lists, active, hideDay, onOpen, onTogg
   }
   if (t.evening && !done) chips.push(<Moon key="eve" size={13} aria-label="Evening" />);
   if (t.time) chips.push(<span key="time">{t.time}</span>);
+  if (!done && reminderOf(t)) chips.push(<Bell key="bell" size={13} aria-label="Reminder" />);
   if (t.due) {
     chips.push(
       <span key="due" className={t.due < today && !done ? "late" : ""}>

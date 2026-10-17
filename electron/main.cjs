@@ -1,6 +1,6 @@
 // Electron main process: opens the window and gives the page a small, restricted file API.
 // The page itself has no Node.js access (contextIsolation on, nodeIntegration off).
-const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, Notification, Tray, nativeImage } = require("electron");
 const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
@@ -116,13 +116,91 @@ const handlers = {
   "fs:remove": (_e, rel) => fsp.rm(resolve(rel), { recursive: true, force: true }),
   "shell:openFolder": () => dataDir && shell.openPath(dataDir),
   "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
+  "reminders:set": (_e, list) => setReminders(list),
 };
+
+// ---- Reminders (SPEC 5.3) ----
+// The page sends the upcoming reminders whenever tasks change; this process shows them as
+// desktop notifications. It checks every 20 s instead of keeping long timers, so a reminder
+// that came due while the laptop slept still shows on waking up.
+
+let reminders = [];
+const shown = new Set();
+
+function setReminders(list) {
+  if (!Array.isArray(list)) return;
+  reminders = list.filter(r => r && typeof r.at === "string" && typeof r.path === "string").slice(0, 200);
+}
+
+const localMinute = (d = new Date()) => {
+  const p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
+function checkReminders() {
+  const now = localMinute();
+  for (const r of reminders) {
+    const key = `${r.path}@${r.at}`;
+    if (r.at > now || shown.has(key)) continue;
+    shown.add(key);
+    const n = new Notification({ title: String(r.title), body: String(r.text || "Reminder"), icon: ICON });
+    n.on("click", () => {
+      showMain();
+      mainWindow?.webContents.send("reminder:open", r.path);
+    });
+    n.show();
+  }
+}
+
+// ---- Tray ----
+// With the tray, closing the main window only hides it, so reminders keep coming; "Quit" ends
+// the app. The page stays loaded while hidden and keeps its file watcher.
+
+const ICON = path.join(__dirname, "../resources/icon.png");
+let tray = null;
+let quitting = false;
+
+function createTray() {
+  if (tray) return;
+  try {
+    tray = new Tray(nativeImage.createFromPath(path.join(__dirname, "../resources/tray.png")));
+  } catch {
+    tray = null; // no tray on this desktop: closing the window quits, as before
+    return;
+  }
+  tray.setToolTip("Hypomnemata");
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: "Open Hypomnemata", click: showMain },
+      { label: "Quick capture", click: () => createCaptureWindow() },
+      { type: "separator" },
+      { label: "Quit", click: quit },
+    ]),
+  );
+  tray.on("click", showMain);
+}
+
+function showMain() {
+  if (!mainWindow) return createWindow();
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function quit() {
+  quitting = true;
+  if (mainWindow) mainWindow.close();
+  else app.quit();
+}
 
 let watcher = null;
 let mainWindow = null;
 let captureWindow = null;
 
 const wantsCapture = argv => argv.includes("--capture");
+// `--background`: start in the tray only, e.g. from Hyprland's exec-once, so reminders work
+// before the window is ever opened.
+const wantsBackground = argv => argv.includes("--background");
 
 const PAGE = path.join(__dirname, "../dist/index.html");
 
@@ -204,8 +282,10 @@ function startWatch() {
   }
 }
 
-function createWindow() {
+function createWindow({ hidden = false } = {}) {
   mainWindow = new BrowserWindow({
+    show: !hidden,
+    icon: ICON,
     width: 1200,
     height: 800,
     minWidth: 360,
@@ -218,18 +298,34 @@ function createWindow() {
   lockDown(mainWindow);
   load(mainWindow);
   attachShot(mainWindow);
-  // Closing: give the page up to 3 s to write unsaved edits (SPEC 2.4), then close.
+  // Closing: give the page up to 3 s to write unsaved edits (SPEC 2.4), then close, or only
+  // hide when the tray keeps the app running.
   let closing = false;
   mainWindow.on("close", e => {
     if (closing) return;
     e.preventDefault();
     closing = true;
-    const done = () => mainWindow && mainWindow.destroy();
-    ipcMain.once("app:flushed", done);
+    const win = mainWindow;
+    let finished = false;
+    const done = () => {
+      if (finished || win.isDestroyed()) return;
+      finished = true;
+      ipcMain.removeListener("app:flushed", done);
+      if (tray && !quitting) {
+        closing = false;
+        win.hide();
+      } else {
+        win.destroy();
+      }
+    };
+    ipcMain.on("app:flushed", done);
     setTimeout(done, 3000);
-    mainWindow.webContents.send("app:closing");
+    win.webContents.send("app:closing");
   });
-  mainWindow.on("closed", () => (mainWindow = null));
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+    if (quitting) app.quit();
+  });
 }
 
 if (process.env.HYPO_CONFIG_DIR) app.setPath("userData", process.env.HYPO_CONFIG_DIR);
@@ -240,16 +336,22 @@ if (!app.requestSingleInstanceLock()) {
   // A second launch hands its command line to this running instance and exits.
   app.on("second-instance", (_e, argv) => {
     if (wantsCapture(argv)) return createCaptureWindow();
-    if (!mainWindow) return createWindow();
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
+    if (!process.env.HYPO_SHOT) createTray();
+    if (wantsBackground(argv) && tray) return;
+    showMain();
   });
   app.whenReady().then(() => {
     dataDir = readConfig().dataDir || null;
     for (const [name, fn] of Object.entries(handlers)) ipcMain.handle(name, fn);
     startWatch();
-    if (wantsCapture(process.argv)) createCaptureWindow();
-    else createWindow();
+    setInterval(checkReminders, 20_000);
+    if (wantsCapture(process.argv)) return createCaptureWindow();
+    // Test runs (HYPO_SHOT) never leave a tray process behind.
+    if (!process.env.HYPO_SHOT) createTray();
+    createWindow({ hidden: wantsBackground(process.argv) && !!tray });
   });
-  app.on("window-all-closed", () => app.quit());
+  // Without a tray (or when started only for a quick capture) the last closed window ends the app.
+  app.on("window-all-closed", () => {
+    if (!tray || quitting) app.quit();
+  });
 }

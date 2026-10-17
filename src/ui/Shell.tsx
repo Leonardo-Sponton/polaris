@@ -9,6 +9,7 @@ import { SettingsView } from "./SettingsView";
 import { TrashView } from "./TrashView";
 import { NewListButton, sameView, TodoView, VIEWS } from "./todo/TodoView";
 import { useTodo } from "./todo/useTodo";
+import { useReminders } from "./useReminders";
 
 // The areas built so far. Ideas, Books, Journal… join in later stages (SPEC 7).
 export type Area = "today" | "todo" | "inbox" | "search" | "trash" | "settings" | "more";
@@ -55,6 +56,10 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   // A search result to open in To-do or Inbox (key: open it again even if it is the same path).
   const [target, setTarget] = useState<{ path: string; key: number } | undefined>();
   const today = isoDate();
+  useReminders(todo.tasks, todo.loaded, path => {
+    setTarget({ path, key: Date.now() });
+    setArea("todo");
+  });
   const go = (a: Area) => {
     setTarget(undefined);
     setArea(a);

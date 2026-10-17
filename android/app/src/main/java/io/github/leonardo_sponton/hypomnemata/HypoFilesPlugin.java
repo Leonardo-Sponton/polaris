@@ -110,6 +110,15 @@ public class HypoFilesPlugin extends Plugin {
         call.resolve();
     }
 
+    /** The app's own Android settings page (notifications refused before can be allowed there). */
+    @PluginMethod
+    public void openAppSettings(PluginCall call) {
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getContext().getPackageName()));
+        getActivity().startActivity(i);
+        call.resolve();
+    }
+
     @PluginMethod
     public void storageRoot(PluginCall call) {
         JSObject r = new JSObject();

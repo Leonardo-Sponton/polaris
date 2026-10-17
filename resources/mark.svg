@@ -1,0 +1,10 @@
+<!-- The notebook mark alone, on a transparent 512 grid (used inside the icon and the splash). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect x="146" y="104" width="220" height="304" rx="26" fill="#0f1a4a" stroke="#d4ccf5" stroke-width="20"/>
+  <path d="M290 94 h48 v118 l-24 -20 l-24 20 z" fill="#a67cff"/>
+  <g stroke-width="20" stroke-linecap="round">
+    <path d="M190 252 h132" stroke="#e6958c"/>
+    <path d="M190 302 h132" stroke="#daa069"/>
+    <path d="M190 352 h86" stroke="#e0c07a"/>
+  </g>
+</svg>

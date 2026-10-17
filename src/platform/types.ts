@@ -1,3 +1,4 @@
+import type { Reminder } from "../data/reminders";
 import type { Storage } from "../storage/types";
 
 // What each launcher (Electron, Android) gives the app besides file access.
@@ -26,4 +27,14 @@ export interface Platform {
   onCaptureRequest?(cb: () => void): () => void;
   /** Android: opens the keyboard for the focused field (focus() alone does not without a tap). */
   showKeyboard?(): Promise<void>;
+  /** Replaces every scheduled reminder with this list (SPEC 5.3). */
+  setReminders?(list: Reminder[]): Promise<void>;
+  /** A reminder was tapped or clicked: gives its task's path. Returns a function that stops it. */
+  onReminderOpen?(cb: (path: string) => void): () => void;
+  /** Android: whether reminders can be shown, and whether they fire on the minute. */
+  reminderAccess?(): Promise<{ notifications: boolean; exact: boolean }>;
+  askNotifications?(): Promise<void>;
+  openExactAlarmSettings?(): Promise<void>;
+  /** Android: the app came back to the front (files may have changed meanwhile, e.g. by sync). */
+  onResume?(cb: () => void): () => void;
 }

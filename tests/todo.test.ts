@@ -208,7 +208,7 @@ describe("tasks", () => {
     expect(c.note.data).toMatchObject({ status: "done", done_at: "2026-10-17T09:30" });
     const next = toTask(c.next!);
     expect(next).toMatchObject({ title: "Water plants", status: "open", when: "2026-10-18", due: "2026-10-19" });
-    expect(c.next!.data.remind).toBeUndefined();
+    expect(c.next!.data.remind).toBe("2026-10-18T08:00");
     expect(c.next!.body).toBe("# Water plants\n\n- [ ] front\n- [ ] back\n");
     expect((await loadTasks(notes)).length).toBe(2);
 

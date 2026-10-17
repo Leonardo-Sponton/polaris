@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Hypomnemata
+Comment=Offline notes, to-do, ideas and books
+Exec=hypomnemata %U
+Icon=hypomnemata
+Terminal=false
+Type=Application
+Categories=Office;
+StartupWMClass=Hypomnemata
+Actions=capture;
+
+[Desktop Action capture]
+Name=Quick capture
+Exec=hypomnemata --capture

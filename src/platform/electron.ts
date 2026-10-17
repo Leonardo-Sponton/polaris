@@ -1,3 +1,4 @@
+import type { Reminder } from "../data/reminders";
 import type { FileInfo, Storage } from "../storage/types";
 import type { Platform } from "./types";
 
@@ -11,6 +12,8 @@ interface HypoBridge {
   openFolder(): Promise<void>;
   closeWindow(): Promise<void>;
   saveBackup(name: string, data: Uint8Array): Promise<string | null>;
+  setReminders(list: Reminder[]): Promise<void>;
+  onReminderOpen(cb: (path: string) => void): () => void;
   fs: {
     list(dir: string): Promise<FileInfo[]>;
     stat(path: string): Promise<FileInfo | null>;
@@ -50,5 +53,7 @@ export function electronPlatform(): Platform {
     onClosing: flush => b.onClosing(flush),
     closeWindow: () => b.closeWindow(),
     saveBackup: (name, data) => b.saveBackup(name, data),
+    setReminders: list => b.setReminders(list),
+    onReminderOpen: cb => b.onReminderOpen(cb),
   };
 }

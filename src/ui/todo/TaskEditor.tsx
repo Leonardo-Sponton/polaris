@@ -1,13 +1,15 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Ban, Check, ListPlus, RotateCcw, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
-import { isoDate, parseLocal, slugify } from "../../data/dates";
+import { addDays, isoDate, parseLocal, slugify } from "../../data/dates";
 import type { Data } from "../../data/frontmatter";
 import type { TodoList } from "../../data/lists";
 import { parseQuickAdd } from "../../data/quickadd";
 import { describeRule, firstOnOrAfter, formatRule, parseRule, pinRule } from "../../data/recur";
 import { dayLabel, joinTitle, splitTitle, toTask } from "../../data/todo";
 import type { Note } from "../../data/notes";
+import { reminderOf } from "../../data/reminders";
+import { useApp } from "../context";
 import { AskText } from "../Dialog";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 import { ScheduleDialog } from "./Schedule";
@@ -177,6 +179,9 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
             />
           </div>
 
+          <span className="fl">Reminder</span>
+          <ReminderField task={t} patch={patch} />
+
           <span className="fl">Deadline</span>
           <div className="row">
             <input
@@ -283,6 +288,69 @@ function TaskForm({ file: f, note, lists, ensureList, onFinish, onReopen }: Prop
             patch({ list: await ensureList(slugify(name), name) });
           }}
         />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Reminder (SPEC 5.3): by default a task with a date and a time reminds at that time. It can be
+ * turned off (`remind: none`) or set to any other moment (`remind: <date>T<time>`).
+ */
+function ReminderField({ task: t, patch }: { task: ReturnType<typeof toTask>; patch(p: Data): void }) {
+  const { platform } = useApp();
+  const [blocked, setBlocked] = useState(false);
+  const hasAuto = !!t.time && !!t.when && t.when !== "someday";
+  const mode = t.remind === "none" ? "none" : t.remind ? "custom" : hasAuto ? "auto" : "none";
+  const at = reminderOf(t);
+
+  // Shown only when a reminder is set but Android does not allow notifications.
+  useEffect(() => {
+    if (!at || !platform.reminderAccess) return setBlocked(false);
+    let alive = true;
+    const check = () => platform.reminderAccess!().then(a => alive && setBlocked(!a.notifications));
+    check();
+    const stop = platform.onResume?.(check);
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, [at, platform]);
+
+  const choose = (m: string) => {
+    if (m === "none") patch({ remind: hasAuto ? "none" : undefined });
+    else if (m === "auto") patch({ remind: undefined });
+    else {
+      const day = t.when && t.when !== "someday" ? t.when : isoDate(addDays(new Date(), 1));
+      patch({ remind: at ?? `${day}T${t.time ?? "09:00"}` });
+    }
+  };
+
+  return (
+    <div className="stack" style={{ gap: 6 }}>
+      <select className="field" value={mode} onChange={e => choose(e.target.value)} aria-label="Reminder">
+        <option value="none">None</option>
+        <option value="auto" disabled={!hasAuto}>
+          {hasAuto ? `At the task time (${t.time})` : "At the task time (set a date and time)"}
+        </option>
+        <option value="custom">Other time…</option>
+      </select>
+      {mode === "custom" && (
+        <input
+          type="datetime-local"
+          className="field"
+          value={t.remind}
+          aria-label="Reminder time"
+          onChange={e => e.target.value && patch({ remind: e.target.value.slice(0, 16) })}
+        />
+      )}
+      {blocked && (
+        <div className="row">
+          <span className="err small">Notifications are off for Hypomnemata.</span>
+          <button className="btn" onClick={() => platform.askNotifications?.()}>
+            Allow
+          </button>
+        </div>
       )}
     </div>
   );
