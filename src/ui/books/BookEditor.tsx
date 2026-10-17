@@ -1,25 +1,31 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, Camera, ExternalLink, ImagePlus, Star, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, ExternalLink, ImagePlus, Plus, Star, Trash2, X } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { FORMATS, STATUSES, removeCover, statusPatch, toBook, webLink, writeCover, type Book, type BookStatus, type Format } from "../../data/books";
 import type { Data } from "../../data/frontmatter";
 import type { Note } from "../../data/notes";
+import type { Quote } from "../../data/quotes";
 import { useApp } from "../context";
 import { useBack } from "../useBack";
 import { STATUS_TEXT, useNoteFile, type NoteFile } from "../useNoteFile";
 import { Cover } from "./BooksView";
 import { shrinkImage } from "./cover";
+import { quotePlace } from "./QuoteReview";
 
 // The book screen (SPEC 5.6): cover, info, status with its dates, rating and free notes.
-// Everything is saved as you go. Quote notes come in stage 3b.
+// Everything is saved as you go. Quote notes are listed by page; each opens its own screen.
 
 interface Props {
   path: string;
   onBack(): void;
   onDelete(b: Book): void;
+  /** This book's quotes, by page. */
+  quotes: Quote[];
+  onAddQuote(b: Book): void;
+  onOpenQuote(path: string): void;
 }
 
-export function BookEditor({ path, onBack, onDelete }: Props) {
+export function BookEditor({ path, onBack, onDelete, ...rest }: Props) {
   const f = useNoteFile(path);
   useBack(true, onBack);
   return (
@@ -44,7 +50,7 @@ export function BookEditor({ path, onBack, onDelete }: Props) {
           </div>
         </div>
       ) : (
-        f.note && <BookForm key={f.rev} file={f} note={f.note} />
+        f.note && <BookForm key={f.rev} file={f} note={f.note} {...rest} />
       )}
       {f.dialog}
     </div>
@@ -52,9 +58,11 @@ export function BookEditor({ path, onBack, onDelete }: Props) {
 }
 
 /** Whole numbers are stored as numbers, anything else (e.g. "c. 65 AD") as typed. */
-const numberOrText = (v: string) => (v.trim() === "" ? undefined : /^-?\d+$/.test(v.trim()) ? Number(v.trim()) : v.trim());
+export const numberOrText = (v: string) => (v.trim() === "" ? undefined : /^-?\d+$/.test(v.trim()) ? Number(v.trim()) : v.trim());
 
-function BookForm({ file: f, note }: { file: NoteFile; note: Note }) {
+type FormProps = { file: NoteFile; note: Note } & Pick<Props, "quotes" | "onAddQuote" | "onOpenQuote">;
+
+function BookForm({ file: f, note, quotes, onAddQuote, onOpenQuote }: FormProps) {
   const { notes, platform, toast, bump } = useApp();
   const [d, setD] = useState<Data>(note.data);
   const photo = useRef<HTMLInputElement>(null);
@@ -233,6 +241,32 @@ function BookForm({ file: f, note }: { file: NoteFile; note: Note }) {
           {text("publisher", "Publisher")}
           {text("isbn", "ISBN")}
         </div>
+
+        <div className="task-notes-head">
+          <span className="fl">Quotes{quotes.length > 0 && ` · ${quotes.length}`}</span>
+          <button className="btn ghost" onClick={() => onAddQuote(b)}>
+            <Plus size={16} /> Add quote
+          </button>
+        </div>
+        {quotes.length === 0 ? (
+          <p className="muted small">Lines worth keeping, with the page they are on.</p>
+        ) : (
+          <ul className="quote-list">
+            {quotes.map(q => (
+              <li key={q.path}>
+                <button className="quote-item" onClick={() => onOpenQuote(q.path)}>
+                  <span className="qi-text">{q.text || <span className="muted">(no quote text)</span>}</span>
+                  {(quotePlace(q) || q.comment.trim()) && (
+                    <span className="qi-meta muted small">
+                      {quotePlace(q)}
+                      {q.comment.trim() && <span className="qi-has-comment"> · comment</span>}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="task-notes-head">
           <span className="fl">Notes</span>

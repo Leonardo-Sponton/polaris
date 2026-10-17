@@ -3,6 +3,7 @@ import { Plus, Search, Star } from "lucide-react";
 import { STATUSES, createBook, loadBooks, matches, statusPatch, type Book, type BookStatus } from "../../data/books";
 import type { Data } from "../../data/frontmatter";
 import { flushAll } from "../../data/pending";
+import { bookPathOf, createQuote, isQuotePath, type Quote } from "../../data/quotes";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { AskText, Dialog } from "../Dialog";
 import { useApp } from "../context";
@@ -10,9 +11,11 @@ import { useHold } from "../useHold";
 import { BookEditor } from "./BookEditor";
 import { BookMenu } from "./BookMenu";
 import { placeholderColor, useCoverUrl } from "./cover";
+import { QuoteEditor } from "./QuoteEditor";
+import { QuoteReview } from "./QuoteReview";
 
 // Books (SPEC 5.6): the shelf of cover cards with a tab per status, and the book screen on the
-// right (one at a time on the phone).
+// right (one at a time on the phone). A quote opens over its book; back returns to the book.
 
 /** Books, reloaded whenever data on disk changes. */
 export function useBooks(): Book[] {
@@ -81,9 +84,17 @@ function NewBook({ status, onOk, onClose }: { status: BookStatus; onOk(title: st
   );
 }
 
-export function BooksView({ books, openPath }: { books: Book[]; openPath?: { path: string; key: number } }) {
+interface Props {
+  books: Book[];
+  quotes: Quote[];
+  /** A book or a quote to open (from search, Today…). */
+  openPath?: { path: string; key: number };
+}
+
+export function BooksView({ books, quotes, openPath }: Props) {
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
+  const [quote, setQuote] = useState<string | null>(null);
   const [tab, setTab] = useState<BookStatus>("reading");
   const [query, setQuery] = useState("");
   const [adding, setAdding] = useState(false);
@@ -96,8 +107,24 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
   );
 
   useEffect(() => {
-    if (openPath) setOpen(openPath.path);
+    if (!openPath) return;
+    if (isQuotePath(openPath.path)) {
+      setOpen(bookPathOf(openPath.path));
+      setQuote(openPath.path);
+    } else {
+      setOpen(openPath.path);
+      setQuote(null);
+    }
   }, [openPath]);
+
+  const openBook = (path: string | null) => {
+    setOpen(path);
+    setQuote(null);
+  };
+  const openQuote = (q: Quote) => {
+    setOpen(q.bookPath);
+    setQuote(q.path);
+  };
 
   // Ctrl+N: new book (SPEC 4.4).
   useEffect(() => {
@@ -116,7 +143,7 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
     try {
       const n = await createBook(notes, { title, author, status: tab });
       bump();
-      setOpen(n.path);
+      openBook(n.path);
     } catch (e) {
       fail(e);
     }
@@ -140,7 +167,7 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
   const remove = async (b: Book) => {
     try {
       await flushAll();
-      if (open === b.path) setOpen(null);
+      if (open === b.path) openBook(null);
       const trashed = await moveToTrash(notes.storage, b.dir);
       bump();
       toast({
@@ -151,6 +178,30 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
       fail(e);
     }
   };
+
+  const addQuote = async (b: Book) => {
+    try {
+      const n = await createQuote(notes, b.dir);
+      bump();
+      setQuote(n.path);
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const removeQuote = async (path: string) => {
+    try {
+      await flushAll();
+      setQuote(null);
+      const trashed = await moveToTrash(notes.storage, path);
+      bump();
+      toast({ text: "Quote deleted", action: { label: "Undo", run: () => restoreFromTrash(notes.storage, trashed, path).then(bump, fail) } });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const openTitle = books.find(b => b.path === open)?.title ?? "";
 
   // A search looks at every tab.
   const searching = query.trim() !== "";
@@ -179,6 +230,7 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
             />
           </div>
         )}
+        {!searching && <QuoteReview quotes={quotes} onOpen={openQuote} />}
         {!searching && (
           <div className="chips" aria-label="Status">
             {STATUSES.map(s => (
@@ -199,7 +251,7 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
                 key={b.path}
                 book={b}
                 active={open === b.path}
-                onOpen={() => setOpen(b.path)}
+                onOpen={() => openBook(b.path)}
                 onMenu={() => setMenu(b)}
               />
             ))}
@@ -207,8 +259,18 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
         )}
       </div>
       <div className="detail-pane">
-        {open ? (
-          <BookEditor key={open} path={open} onBack={() => setOpen(null)} onDelete={b => remove(b)} />
+        {open && quote ? (
+          <QuoteEditor key={quote} path={quote} bookTitle={openTitle} onBack={() => setQuote(null)} onDelete={removeQuote} />
+        ) : open ? (
+          <BookEditor
+            key={open}
+            path={open}
+            onBack={() => openBook(null)}
+            onDelete={b => remove(b)}
+            quotes={quotes.filter(q => q.bookPath === open)}
+            onAddQuote={addQuote}
+            onOpenQuote={setQuote}
+          />
         ) : (
           <div className="detail-empty muted">Pick a book or press New.</div>
         )}
@@ -217,7 +279,7 @@ export function BooksView({ books, openPath }: { books: Book[]; openPath?: { pat
         <BookMenu
           book={menu}
           onClose={() => setMenu(null)}
-          onOpen={() => setOpen(menu.path)}
+          onOpen={() => openBook(menu.path)}
           onStatus={s => (s === "dnf" ? setDnf(menu) : setStatus(menu, s))}
           onDelete={() => remove(menu)}
         />

@@ -1,9 +1,11 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, ChevronRight, CheckSquare, Inbox, Lightbulb, Menu, Search, Settings as SettingsIcon, Sun, Trash2 } from "lucide-react";
 import { isoDate } from "../data/dates";
+import { isQuotePath } from "../data/quotes";
 import { markSeen, resurface, type Idea } from "../data/ideas";
 import { isToday, type View } from "../data/todo";
 import { BooksView, useBooks } from "./books/BooksView";
+import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
 import { useCapture } from "./useCapture";
@@ -82,6 +84,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
   const inbox = useInbox();
   const ideas = useIdeas();
   const books = useBooks();
+  const quotes = useQuotes(books);
   const capture = useCapture();
   const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
   const [searchKey, setSearchKey] = useState(0);
@@ -159,6 +162,13 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
                     }
                   />
                 )}
+                <QuoteReview
+                  quotes={quotes}
+                  onOpen={q => {
+                    setTarget({ path: q.path, key: Date.now() });
+                    setArea("books");
+                  }}
+                />
                 {inbox.length > 0 && (
                   <button className="today-card" onClick={() => go("inbox")}>
                     <Inbox size={18} />
@@ -177,7 +187,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
       page = <IdeasView ideas={ideas} openPath={target} />;
       break;
     case "books":
-      page = <BooksView books={books} openPath={target} />;
+      page = <BooksView books={books} quotes={quotes} openPath={target} />;
       break;
     case "inbox":
       page = <InboxView items={inbox} openPath={target} />;
@@ -196,7 +206,7 @@ export function Shell({ captureKey = 0 }: { captureKey?: number }) {
           focusKey={searchKey}
           openElsewhere={d => {
             if (d.area !== "todo" && d.area !== "inbox" && d.area !== "ideas" && d.area !== "books") return false;
-            if (d.area === "books" && !d.path.endsWith("/book.md")) return false;
+            if (d.area === "books" && !d.path.endsWith("/book.md") && !isQuotePath(d.path)) return false;
             setTarget({ path: d.path, key: Date.now() });
             setArea(d.area);
             return true;

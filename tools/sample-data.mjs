@@ -189,6 +189,19 @@ function samples() {
   };
   book(at(-12, 21, 0), { title: "Meditations", author: "Marcus Aurelius", format: "paper", status: "reading", started: day(-12) },
     "A few pages before sleeping. Book 2 so far.\n");
+  // Quote notes (stage 3b). Text from George Long's public-domain translation (Project Gutenberg
+  // #15877), checked word for word; the page numbers are made up for the sample.
+  const quote = (created, data, text, comment = "") => {
+    const c = isoMinute(created);
+    const body = `> ${text}\n` + (comment ? `\n${comment}` : "");
+    out.push([`books/meditations/quotes/${stamp(created)}.md`, file({ type: "quote", created: c, modified: c, ...data }, body)]);
+  };
+  quote(at(-11, 21, 40), { page: 31, chapter: "Book IV, 3", tags: "[change]" }, "The universe is transformation: life is opinion.");
+  quote(at(-10, 22, 5), { page: 33, chapter: "Book IV, 17", tags: "[time, death]", last_reviewed: day(-5) },
+    "Do not act as if thou wert going to live ten thousand years. Death hangs over thee. While thou livest, while it is in thy power, be good.",
+    "Read it again before planning the week.\n");
+  quote(at(-2, 22, 30), { page: 141, chapter: "Book X, 16", tags: "[action]" },
+    "No longer talk at all about the kind of man that a good man ought to be, but be such.");
   book(at(-5, 20, 10), { title: "Clean Code", author: "Robert C. Martin", year: 2008, format: "ebook", status: "reading", started: day(-5) },
     "Reading it with the study task on Today.\n");
   book(at(-40, 10, 0), { title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", year: 1999, status: "want" });
@@ -330,6 +343,7 @@ function remove(io) {
   const files = io.findSamples();
   for (const rel of files) io.remove(rel);
   // A sample book is a folder: drop it too when nothing of the user's is inside.
+  for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/quotes\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   for (const rel of files) if (/^(\.trash\/)?books\/[^/]+\/book\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   const index = readJson(io, ".trash/.deleted.json", {});
   for (const k of files) delete index[k];
