@@ -220,6 +220,21 @@ function samples() {
     buy_url: "https://dataintensive.net/" },
     "Recommended by a classmate. Look for a used copy.\n");
 
+  // ---- Thoughts (stage 4a) ----
+  // Own thoughts only: the built-in library already shows checked quotes.
+  const thought = (created, data, text) => {
+    const c = isoMinute(created);
+    out.push([`thoughts/${stamp(created)}.md`, file({ type: "thought", created: c, modified: c, ...data }, `${text}\n`)]);
+  };
+  thought(at(-6, 22, 10), { kind: "mine", themes: "[action, work]", favorite: true },
+    "Finishing a small thing today beats planning a big thing for next month.");
+  thought(at(-2, 7, 45), { kind: "mine", themes: "[learning]" },
+    "When I feel behind, it helps to list what I already learned this year.");
+  thought(at(-20, 19, 30), {
+    kind: "uncertain", author: "Plato", themes: "[kindness]",
+    notes: "Shared online as Plato, but it is not in his dialogues. Quote Investigator traces a similar line to Ian Maclaren (1897).",
+  }, "Be kind, for everyone you meet is fighting a hard battle.");
+
   // ---- Trash ----
   const old = at(-12, 9, 0);
   const trashed = `.trash/todo/${stamp(old)}-print-the-boarding-pass.md`;
