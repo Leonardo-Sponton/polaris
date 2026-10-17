@@ -90,9 +90,8 @@ export const BUILTIN: Thought[] = (() => {
 })();
 
 /**
- * A built-in thought in the app's language. In Portuguese the facts around the quote (author,
- * work, notes…) come from data/thoughts.pt.json; the quote stays in its English translation,
- * except the Portuguese originals (Machado, Pessoa).
+ * A built-in thought in the app's language. In Portuguese the quote and the facts around it
+ * (author, work, notes…) come from data/thoughts.pt.json.
  */
 const PT = (builtinPt as { thoughts: Record<string, Partial<Record<keyof Thought, unknown>>> }).thoughts;
 export function localized(th: Thought): Thought {
@@ -109,6 +108,7 @@ export function localized(th: Thought): Thought {
     tradition: s("tradition"),
     language: s("language"),
     translation: s("translation"),
+    source: s("source"),
     notes: s("notes"),
     themes: Array.isArray(p.themes) ? cleanThemes(p.themes.map(String)) : th.themes,
   };

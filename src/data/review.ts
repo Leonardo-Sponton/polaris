@@ -17,23 +17,47 @@ export interface Question {
   pt: string;
   /** A short text from the tradition, with the built-in thought it comes from (data/thoughts.json).
    *  Who says it is in i18n (review.leads). */
-  support?: { text: string; thought: string };
+  support?: { text: string; textPt: string; thought: string };
 }
 
 // The supporting quotes are the built-in thoughts sen-ira-3-36a/b (Aubrey Stewart's translation
 // of De Ira III.36) and ept-man-1 (George Long's Enchiridion 1), checked verbatim in stage 4a.
+// textPt is taken from the same thoughts in data/thoughts.pt.json.
 export const QUESTIONS: Question[] = [
   { title: "Gratitude", pt: "Gratidão" },
-  { title: "Done well", pt: "O que fiz bem", support: { text: "…in what respect are you better?", thought: "sen-ira-3-36a" } },
+  {
+    title: "Done well",
+    pt: "O que fiz bem",
+    support: { text: "…in what respect are you better?", textPt: "…em que estás melhor?", thought: "sen-ira-3-36a" },
+  },
   {
     title: "Difficulties",
     pt: "Dificuldades",
-    support: { text: "What bad habit of yours have you cured to-day? what vice have you checked?", thought: "sen-ira-3-36a" },
+    support: {
+      text: "What bad habit of yours have you cured to-day? what vice have you checked?",
+      textPt: "Que mal teu curaste hoje? A que vício resististe?",
+      thought: "sen-ira-3-36a" },
   },
-  { title: "Up to me", pt: "Depende de mim", support: { text: "Of things some are in our power, and others are not.", thought: "ept-man-1" } },
+  {
+    title: "Up to me",
+    pt: "Depende de mim",
+    support: {
+      text: "Of things some are in our power, and others are not.",
+      textPt: "Algumas coisas dependem de nós, outras não.",
+      thought: "ept-man-1",
+    },
+  },
   { title: "Not up to me", pt: "Não depende de mim" },
   { title: "Virtues", pt: "Virtudes" },
-  { title: "Repair", pt: "Reparar", support: { text: "I pardon you this time: see that you never do that any more.", thought: "sen-ira-3-36b" } },
+  {
+    title: "Repair",
+    pt: "Reparar",
+    support: {
+      text: "I pardon you this time: see that you never do that any more.",
+      textPt: "Vê que não o faças mais; desta vez eu te perdoo.",
+      thought: "sen-ira-3-36b",
+    },
+  },
   { title: INTENTIONS.en, pt: INTENTIONS.pt },
 ];
 

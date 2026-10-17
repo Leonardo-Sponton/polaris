@@ -141,14 +141,17 @@ describe("files written in either language", () => {
     expect(step.name).toBe("Requirements");
   });
 
-  it("built-in thoughts: Portuguese facts, English quote except Portuguese originals", async () => {
+  it("built-in thoughts: Portuguese quote and facts", async () => {
     const { BUILTIN, localized } = await import("../src/data/thoughts");
     setLang("pt-BR");
     const sen = localized(BUILTIN.find(x => x.id === "sen-ep1-3a")!);
     expect(sen.author).toBe("Sêneca");
-    expect(sen.text).toBe("Nothing, Lucilius, is ours, except time.");
+    expect(sen.text).toBe("Tudo, Lucílio, nos é alheio; só o tempo é nosso.");
     const pes = localized(BUILTIN.find(x => x.id === "pes-mar-portugues")!);
     expect(pes.text).toBe("Valeu a pena? Tudo vale a pena / Se a alma não é pequena.");
-    for (const b of BUILTIN) expect(localized(b).work, b.id).toBeTruthy();
+    for (const b of BUILTIN) {
+      expect(localized(b).work, b.id).toBeTruthy();
+      if (!/^(mac|pes)-/.test(b.id)) expect(localized(b).text, b.id).not.toBe(b.text);
+    }
   });
 });

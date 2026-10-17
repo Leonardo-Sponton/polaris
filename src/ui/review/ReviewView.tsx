@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { cap, dateFmt, t } from "../../i18n";
+import { cap, dateFmt, lang, t } from "../../i18n";
 import { ArrowLeft, ChevronLeft, ChevronRight, Feather, Moon, NotebookPen, Shuffle, Trash2 } from "lucide-react";
 import { Editor } from "../../editor/Editor";
 import { isoDate } from "../../data/dates";
@@ -309,7 +309,7 @@ function QuestionBlock({ q, title, note, children }: { q?: Question; title?: str
       {q && <p className="review-question">{t.review.questions[q.title]}</p>}
       {q?.support && (
         <p className="review-support muted small">
-          {t.review.leads[q.title]} “{q.support.text}”
+          {t.review.leads[q.title]} “{lang === "pt-BR" ? q.support.textPt : q.support.text}”
         </p>
       )}
       {note && <p className="review-support muted small">{note}</p>}
