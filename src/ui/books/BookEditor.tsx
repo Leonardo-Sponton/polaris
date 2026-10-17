@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, Camera, ImagePlus, Star, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, ExternalLink, ImagePlus, Star, Trash2, X } from "lucide-react";
 import { Editor } from "../../editor/Editor";
-import { FORMATS, STATUSES, removeCover, statusPatch, toBook, writeCover, type Book, type BookStatus, type Format } from "../../data/books";
+import { FORMATS, STATUSES, removeCover, statusPatch, toBook, webLink, writeCover, type Book, type BookStatus, type Format } from "../../data/books";
 import type { Data } from "../../data/frontmatter";
 import type { Note } from "../../data/notes";
 import { useApp } from "../context";
@@ -189,6 +189,33 @@ function BookForm({ file: f, note }: { file: NoteFile; note: Note }) {
                 placeholder="Optional"
                 onChange={e => edit({ dnf_reason: e.target.value.trim() ? e.target.value : undefined })}
               />
+            </>
+          )}
+          {(b.status === "wishlist" || b.buyUrl) && (
+            <>
+              <span className="fl">Where to buy</span>
+              <div className="link-field">
+                <input
+                  className="field"
+                  type="url"
+                  inputMode="url"
+                  value={String(d.buy_url ?? "")}
+                  placeholder="Paste the store link"
+                  aria-label="Where to buy"
+                  onChange={e => edit({ buy_url: e.target.value.trim() ? e.target.value.trim() : undefined })}
+                />
+                {platform.openLink && (
+                  <button
+                    className="btn ghost icon"
+                    title="Open in the browser"
+                    aria-label="Open in the browser"
+                    disabled={!webLink(b.buyUrl)}
+                    onClick={() => platform.openLink!(webLink(b.buyUrl)!).catch(fail)}
+                  >
+                    <ExternalLink size={18} />
+                  </button>
+                )}
+              </div>
             </>
           )}
           {b.status !== "want" && b.status !== "wishlist" && date("started", "Started")}

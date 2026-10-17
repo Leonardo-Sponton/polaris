@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MemoryStorage } from "../src/storage/memory";
 import { Notes } from "../src/data/notes";
-import { createBook, loadBooks, matches, removeCover, statusPatch, toBook, writeCover } from "../src/data/books";
+import { createBook, loadBooks, matches, removeCover, statusPatch, toBook, webLink, writeCover } from "../src/data/books";
 import { listTrash, moveToTrash, restore } from "../src/data/trash";
 
 describe("books", () => {
@@ -52,6 +52,16 @@ describe("books", () => {
     const b = toBook(await createBook(notes, { title: "Memórias Póstumas", author: "Machado de Assis" }));
     expect(matches(b, "memorias machado")).toBe(true);
     expect(matches(b, "assis brás")).toBe(false);
+  });
+
+  it("accepts pasted store links, with or without https", () => {
+    expect(webLink("  https://www.amazon.com.br/dp/8535914846 ")).toBe("https://www.amazon.com.br/dp/8535914846");
+    expect(webLink("amazon.com.br/dp/8535914846")).toBe("https://amazon.com.br/dp/8535914846");
+    expect(webLink("")).toBeNull();
+    expect(webLink("a book I saw")).toBeNull();
+    expect(webLink("javascript:alert(1)")).toBeNull();
+    expect(webLink("file:///etc/passwd")).toBeNull();
+    expect(webLink("localhost")).toBeNull();
   });
 
   it("a deleted book folder is one trash item and comes back whole", async () => {

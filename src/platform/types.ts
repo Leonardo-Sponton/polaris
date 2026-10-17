@@ -14,6 +14,8 @@ export interface Platform {
   hasFileAccess?(): Promise<boolean>;
   openFileAccessSettings?(): Promise<void>;
   openDataFolder?(): Promise<void>;
+  /** Opens a web link in the system browser (http/https only). */
+  openLink?(url: string): Promise<void>;
   /** Saves a backup .zip outside the data folder. Returns where it went, or null if canceled. */
   saveBackup?(name: string, data: Uint8Array): Promise<string | null>;
   storage: Storage;

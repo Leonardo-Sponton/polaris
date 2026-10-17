@@ -21,6 +21,7 @@ interface HypoFiles {
   move(o: { root: string; from: string; to: string }): Promise<void>;
   remove(o: { root: string; path: string }): Promise<void>;
   showKeyboard(): Promise<void>;
+  openLink(o: { url: string }): Promise<void>;
   addListener(event: "capture", cb: () => void): Promise<{ remove(): Promise<void> }>;
 }
 
@@ -104,6 +105,7 @@ export function androidPlatform(): Platform {
       return `${dir}/${name}`;
     },
     showKeyboard: () => Native.showKeyboard(),
+    openLink: url => Native.openLink({ url }),
     setReminders,
     onReminderOpen: cb => {
       const handle = LocalNotifications.addListener("localNotificationActionPerformed", a => {

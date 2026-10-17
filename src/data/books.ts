@@ -40,6 +40,8 @@ export interface Book {
   publisher: string;
   pages: number | null;
   isbn: string;
+  /** Where to buy it (a web link, for wishlist books). */
+  buyUrl: string;
   format: Format;
   status: BookStatus;
   dnfReason: string;
@@ -78,6 +80,7 @@ export function toBook(note: Note): Book {
     publisher: str(d.publisher),
     pages: int(d.pages, 1, 100000),
     isbn: str(d.isbn),
+    buyUrl: str(d.buy_url),
     format: pick(d.format, FORMATS, "paper"),
     status: pick(d.status, STATUSES, "want"),
     dnfReason: str(d.dnf_reason),
@@ -140,6 +143,22 @@ export function statusPatch(d: Data, status: BookStatus, opts: { reason?: string
     dnf_reason: status === "dnf" && opts.reason?.trim() ? opts.reason.trim() : undefined,
     ...datesFor(status, d, opts.today ?? isoDate()),
   };
+}
+
+/**
+ * The web link to open for a typed or pasted buy link, or null when it is not one. A link pasted
+ * without "https://" (e.g. "amazon.com.br/dp/…") gets it added.
+ */
+export function webLink(text: string): string | null {
+  const t = text.trim();
+  if (!t || /\s/.test(t)) return null;
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
+  try {
+    const u = new URL(withScheme);
+    return (u.protocol === "https:" || u.protocol === "http:") && u.hostname.includes(".") ? u.href : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Matches a search on title and author, ignoring accents and case. */

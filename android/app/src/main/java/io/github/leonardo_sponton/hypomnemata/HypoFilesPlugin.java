@@ -81,6 +81,31 @@ public class HypoFilesPlugin extends Plugin {
         call.resolve();
     }
 
+    // ---- Web links ----
+
+    /**
+     * Opens a web link (a book's buy link) in the browser. The app itself has no INTERNET
+     * permission; the browser is a separate app. Only http/https links are passed on.
+     */
+    @PluginMethod
+    public void openLink(PluginCall call) {
+        String url = call.getString("url", "");
+        Uri uri = Uri.parse(url);
+        if (!"https".equals(uri.getScheme()) && !"http".equals(uri.getScheme())) {
+            call.reject("Not a web link");
+            return;
+        }
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW, uri);
+            i.addCategory(Intent.CATEGORY_BROWSABLE);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getActivity().startActivity(i);
+            call.resolve();
+        } catch (android.content.ActivityNotFoundException e) {
+            call.reject("No app can open this link");
+        }
+    }
+
     // ---- "All files access" (SPEC 2.3) ----
 
     @PluginMethod

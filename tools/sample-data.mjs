@@ -198,7 +198,8 @@ function samples() {
   book(at(-120, 9, 30), { title: "Nineteen Eighty-Four", author: "George Orwell", year: 1949, format: "audio", status: "read", started: day(-110), finished: day(-95), rating: 4 });
   book(at(-70, 22, 0), { title: "Ulysses", author: "James Joyce", year: 1922, status: "dnf", started: day(-70), finished: day(-62),
     dnf_reason: "Not the right moment; try again some day" });
-  book(at(-3, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist" },
+  book(at(-3, 12, 0), { title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", year: 2017, status: "wishlist",
+    buy_url: "https://dataintensive.net/" },
     "Recommended by a classmate. Look for a used copy.\n");
 
   // ---- Trash ----

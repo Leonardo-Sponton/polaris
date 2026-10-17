@@ -10,6 +10,7 @@ interface HypoBridge {
   };
   pickFolder(): Promise<string | null>;
   openFolder(): Promise<void>;
+  openLink(url: string): Promise<void>;
   closeWindow(): Promise<void>;
   saveBackup(name: string, data: Uint8Array): Promise<string | null>;
   setReminders(list: Reminder[]): Promise<void>;
@@ -49,6 +50,7 @@ export function electronPlatform(): Platform {
     setDataDir: async dir => void (await b.config.setDataDir(dir)),
     pickFolder: () => b.pickFolder(),
     openDataFolder: () => b.openFolder(),
+    openLink: url => b.openLink(url),
     onFileChanged: cb => b.onFileChanged(cb),
     onClosing: flush => b.onClosing(flush),
     closeWindow: () => b.closeWindow(),

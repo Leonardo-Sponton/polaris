@@ -115,6 +115,11 @@ const handlers = {
   },
   "fs:remove": (_e, rel) => fsp.rm(resolve(rel), { recursive: true, force: true }),
   "shell:openFolder": () => dataDir && shell.openPath(dataDir),
+  // Only web links: the page never gets to open files or other programs this way.
+  "shell:openLink": (_e, url) => {
+    if (!/^https?:\/\//i.test(String(url))) throw new Error("Not a web link");
+    return shell.openExternal(String(url));
+  },
   "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
   "reminders:set": (_e, list) => setReminders(list),
 };
