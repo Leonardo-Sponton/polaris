@@ -1,7 +1,7 @@
 # Arch package made from the Linux build of this repo (`npm run dist` → release/*.tar.gz).
 # Build and install:  cd packaging/arch && makepkg -si
 pkgname=polaris
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Offline notes, to-do, ideas and books in plain Markdown files"
 arch=('x86_64')
