@@ -98,7 +98,7 @@ export const en = {
   settings: {
     title: "Settings",
     theme: "Theme",
-    themes: { dark: "Dark", light: "Light", system: "System" },
+    themes: { dark: "Dark", minimal: "Minimal", light: "Light", system: "System" },
     language: "Language",
     systemLang: (name: string) => `Device (${name})`,
     dataFolder: "Data folder",

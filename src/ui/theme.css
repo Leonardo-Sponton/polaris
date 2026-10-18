@@ -43,6 +43,30 @@
   color-scheme: light;
 }
 
+/* Minimal: dark and nearly colorless. Grays only, white as the accent; the status colors
+   (done, late, priority) stay, toned down. Text colors at least 4.5:1 on --bg and --surface. */
+:root[data-theme="minimal"] {
+  --bg: #0b0b0c;
+  --surface: #111113;
+  --header: #0b0b0c;
+  --line: #1f1f22;
+  --hover: #17171a;
+  --select: #1d1d21;
+  --text: #b9b9be;
+  --strong: #ececee;
+  --muted: #85858c;
+  --accent: #e6e6e9;
+  --on-accent: #0b0b0c;
+  --h1: #cf9a92;
+  --h2: #c9a57a;
+  --h3: #c8b88a;
+  --ok: #96bfa0;
+  --cyan: #98c0c4;
+  --err: #d98b81;
+  --radius: 6px;
+  color-scheme: dark;
+}
+
 :root {
   --sans: "Inter Variable", system-ui, sans-serif;
   --mono: "JetBrains Mono Variable", ui-monospace, monospace;
@@ -2317,4 +2341,75 @@ label.contents {
   margin: 4px 0 0;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+/* ---- Minimal theme: flatter shapes on top of its palette ---- */
+
+[data-theme="minimal"] h1,
+[data-theme="minimal"] h2,
+[data-theme="minimal"] h3,
+[data-theme="minimal"] .cm-hm-h1,
+[data-theme="minimal"] .cm-hm-h2,
+[data-theme="minimal"] .cm-hm-h3 {
+  color: var(--strong);
+  font-weight: 500;
+}
+
+[data-theme="minimal"] h1 {
+  letter-spacing: -0.01em;
+}
+
+[data-theme="minimal"] h2,
+[data-theme="minimal"] h3 {
+  color: var(--text);
+}
+
+/* Boxes without outlines: the slightly lighter surface is enough. */
+
+[data-theme="minimal"] .card,
+[data-theme="minimal"] .today-card {
+  border-color: transparent;
+}
+
+[data-theme="minimal"] .btn {
+  background: transparent;
+}
+
+@media (hover: hover) {
+  [data-theme="minimal"] .btn:not(.primary):hover {
+    background: var(--hover);
+  }
+}
+
+[data-theme="minimal"] .btn.primary {
+  background: var(--accent);
+}
+
+[data-theme="minimal"] .sidebar,
+[data-theme="minimal"] .bottombar,
+[data-theme="minimal"] .list-pane {
+  background: var(--bg);
+}
+
+[data-theme="minimal"] .sidebar .brand {
+  color: var(--strong);
+  font-weight: 500;
+}
+
+/* The current area: a thin line instead of a filled background. */
+
+[data-theme="minimal"] .nav-item.active {
+  background: transparent;
+  color: var(--strong);
+  box-shadow: inset 2px 0 var(--strong);
+}
+
+[data-theme="minimal"] .bottombar .nav-item.active {
+  box-shadow: inset 0 2px var(--strong);
+}
+
+[data-theme="minimal"] .toast,
+[data-theme="minimal"] .more-pop,
+[data-theme="minimal"] .cover {
+  box-shadow: none;
 }

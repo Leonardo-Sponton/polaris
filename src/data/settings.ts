@@ -3,7 +3,7 @@ import type { LangSetting } from "../i18n";
 
 // Per-device settings in .polaris/settings.json (not synced, SPEC 6.2).
 
-export type Theme = "dark" | "light" | "system";
+export type Theme = "dark" | "minimal" | "light" | "system";
 
 export interface Settings {
   theme: Theme;

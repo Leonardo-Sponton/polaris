@@ -61,7 +61,7 @@ export function SettingsView() {
     platform.getDataDir().then(setDir);
   }, [platform]);
 
-  const themes: Theme[] = ["dark", "light", "system"];
+  const themes: Theme[] = ["dark", "minimal", "light", "system"];
 
   return (
     <div className="page">

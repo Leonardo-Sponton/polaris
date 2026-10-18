@@ -99,7 +99,7 @@ export const pt: Messages = {
   settings: {
     title: "Configurações",
     theme: "Tema",
-    themes: { dark: "Escuro", light: "Claro", system: "Sistema" },
+    themes: { dark: "Escuro", minimal: "Minimalista", light: "Claro", system: "Sistema" },
     language: "Idioma",
     systemLang: (name: string) => `Do aparelho (${name})`,
     dataFolder: "Pasta de dados",
