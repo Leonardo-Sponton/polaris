@@ -94,7 +94,7 @@ export type Resolver = (conflicts: Step[]) => Promise<Map<string, Choice>>;
  */
 export function canKeepBoth(path: string): boolean {
   return (
-    /^(inbox|todo|ideas|thoughts)\/[^/]+\.md$/.test(path) ||
+    /^(inbox|todo|ideas|notes|thoughts)\/[^/]+\.md$/.test(path) ||
     /^books\/[^/]+\/quotes\/[^/]+\.md$/.test(path) ||
     /^projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(path)
   );

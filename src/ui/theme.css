@@ -545,6 +545,33 @@ h3 {
   color: var(--muted);
 }
 
+/* ---- Notes ---- */
+
+.note-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 10px;
+}
+.note-filter .field {
+  min-height: 38px;
+}
+.note-pin {
+  margin-right: 6px;
+  vertical-align: -2px;
+  color: var(--accent);
+}
+.note-preview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+
 .detail-pane {
   min-width: 0;
   min-height: 0;
@@ -603,6 +630,27 @@ h3 {
   min-height: 44px;
   padding: 4px 12px;
   border-bottom: 1px solid var(--line);
+}
+
+.note-bar .btn.on {
+  background: var(--select);
+  color: var(--strong);
+}
+
+/* Quick formatting strip (FormatBar): one row that scrolls sideways on narrow screens. */
+.format-bar {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.format-bar .btn {
+  flex-shrink: 0;
+  min-width: 40px;
+  justify-content: center;
 }
 
 .note-status {
@@ -690,6 +738,15 @@ h3 {
   background: linear-gradient(var(--line), var(--line)) center / 100% 2px no-repeat;
 }
 
+/* Tables: same-width letters, so columns padded with spaces line up. */
+.cm-hm-table {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+.cm-hm-pipe {
+  color: var(--muted);
+}
+
 /* Task box: drawn, so it looks the same on Linux and Android. */
 .cm-hm-check {
   display: inline-block;
@@ -726,7 +783,8 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  /* Android draws behind the status and navigation bars: keep dialogs clear of them. */
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
   background: rgb(0 0 0 / 0.5);
   z-index: 60;
 }
@@ -734,8 +792,68 @@ h3 {
 .dialog {
   width: 100%;
   max-width: 460px;
-  max-height: calc(100dvh - 32px);
+  max-height: 100%;
   overflow-y: auto;
+}
+
+/* Formatting guide (MarkdownGuide). */
+.md-guide,
+.md-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.md-guide th,
+.md-guide td {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.md-guide th {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.md-src {
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.md-guide .cm-hm-h1,
+.md-guide .cm-hm-h2 {
+  padding-top: 0 !important;
+}
+.md-quote {
+  display: inline-block;
+  padding: 0 8px !important;
+}
+.md-hr {
+  border: 0;
+  border-top: 2px solid var(--line);
+  margin: 4px 0 0;
+}
+.md-guide-h {
+  margin: 8px 0 0;
+  font-size: 1rem;
+}
+.md-table-src {
+  margin: 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--select);
+}
+.md-table th,
+.md-table td {
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  text-align: left;
+}
+.md-tips {
+  margin: 0;
+  padding-left: 18px;
+}
+.md-tips li + li {
+  margin-top: 4px;
 }
 
 .small {
@@ -1021,6 +1139,7 @@ h3 {
 }
 /* Same for the other rows that open a menu when held. */
 .inbox-li,
+.note-li,
 .project-li,
 .idea-li {
   user-select: none;

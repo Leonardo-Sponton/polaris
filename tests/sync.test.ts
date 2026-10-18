@@ -239,7 +239,7 @@ describe("sync conflicts (SPEC 6.2)", () => {
   });
 
   it("knows which files can be kept twice", () => {
-    for (const p of ["todo/a.md", "inbox/a.md", "ideas/a.md", "thoughts/a.md", "books/x/quotes/1.md", "projects/p/01-step/a.md"]) expect(canKeepBoth(p)).toBe(true);
+    for (const p of ["todo/a.md", "inbox/a.md", "ideas/a.md", "notes/a.md", "thoughts/a.md", "books/x/quotes/1.md", "projects/p/01-step/a.md"]) expect(canKeepBoth(p)).toBe(true);
     for (const p of ["books/x/book.md", "books/x/cover.jpg", "journal/2026-10-17.md", "review/2026-10-17.md", ".polaris/lists.json", "projects/p/project.md"])
       expect(canKeepBoth(p)).toBe(false);
   });

@@ -17,6 +17,8 @@ interface Props {
   autoFocus?: boolean;
   /** Slash commands: typing "/name" alone on a line removes it and runs commands[name]. */
   commands?: Record<string, () => void>;
+  /** Gets the CodeMirror view while mounted (the format bar writes through it). */
+  viewRef?: { current: EditorView | null };
 }
 
 const theme = EditorView.theme({
@@ -29,7 +31,7 @@ const theme = EditorView.theme({
   ".cm-cursor": { borderLeftColor: "var(--accent)", borderLeftWidth: "2px" },
 });
 
-export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus, commands }: Props) {
+export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus, commands, viewRef }: Props) {
   const host = useRef<HTMLDivElement>(null);
   // Latest callbacks, so the editor is created once per mount.
   const cb = useRef({ onChange, onSaveNow, commands });
@@ -71,11 +73,15 @@ export function Editor({ text, onChange, onSaveNow, placeholder, autoFocus, comm
         ],
       }),
     });
+    if (viewRef) viewRef.current = view;
     if (autoFocus) {
       view.focus();
       view.dispatch({ selection: { anchor: view.state.doc.length }, scrollIntoView: true });
     }
-    return () => view.destroy();
+    return () => {
+      if (viewRef?.current === view) viewRef.current = null;
+      view.destroy();
+    };
     // Created once per mount on purpose (see the comment at the top).
   }, []);
 

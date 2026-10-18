@@ -36,9 +36,10 @@ Um só app para <b>Linux</b> e <b>Android</b>, 100% offline, com os dados guarda
 
 | Área | O que faz |
 | --- | --- |
-| **Hoje** | Campo de captura rápida, tarefas de hoje e atrasadas, "Esta noite", pensamento do dia, citações para revisar, uma ideia antiga que volta à tona e o cartão do diário. |
+| **Hoje** | Campo de captura rápida, tarefas de hoje e atrasadas, "Esta noite", pensamento do dia, citações para revisar, uma ideia antiga que volta à tona e o cartão do diário. Segure o botão Hoje para uma nova nota. |
 | **Tarefas** | Listas no estilo Things (Hoje, Próximas, A qualquer hora, Algum dia, Concluídas) e listas próprias; adição em uma linha (`pagar aluguel todo dia 5 #casa !1`), repetição, subtarefas, prioridade e lembretes (notificações no Android, bandeja no Linux). |
 | **Ideias** | Rascunhos com modelos e seções opcionais, tags, bloco 5W2H, checklist de viabilidade com nota, suposições mais arriscadas com como testar, e arquivo que guarda o motivo. |
+| **Notas** | Textos mais longos, do jeito que você escreveu: fixe no topo, filtre por palavras ou transforme um item da Entrada em nota. |
 | **Projetos** | Transforme uma ideia num projeto que segue um fluxo: **Negócio** (guia de plano de negócio do Sebrae), **Startup de tecnologia** ou **Software**. Cada etapa tem orientação, notas, tarefas e uma decisão: seguir, pausar, encerrar ou refazer. |
 | **Livros** | Estante com capas, abas por situação de leitura, citações por página com seus comentários, revisão diária de citações e estatísticas de leitura. |
 | **Diário** | Uma entrada por dia com calendário, palavras de humor e seções opcionais; "Fechar o dia" em três perguntas. |
@@ -61,6 +62,7 @@ Um só app para <b>Linux</b> e <b>Android</b>, 100% offline, com os dados guarda
 Polaris/
 ├── todo/        um arquivo por tarefa
 ├── inbox/       capturas rápidas
+├── notes/       notas
 ├── ideas/
 ├── projects/    <projeto>/project.md + uma pasta por etapa
 ├── books/       <livro>/book.md, cover.jpg, quotes/

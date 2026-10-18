@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { CheckSquare, Lightbulb, Pencil, Plus, Trash2 } from "lucide-react";
+import { CheckSquare, FileText, Lightbulb, Pencil, Plus, Trash2 } from "lucide-react";
 import { previewOf } from "../data/frontmatter";
+import { inboxToNote } from "../data/fullnotes";
 import { createInboxItem, inboxToIdea, inboxToTodo, loadInbox, undoMove, type Moved } from "../data/inbox";
 import type { Note } from "../data/notes";
 import { flushAll } from "../data/pending";
@@ -27,7 +28,7 @@ export function useInbox(): Note[] {
   return items;
 }
 
-type Action = "todo" | "idea" | "delete";
+type Action = "todo" | "idea" | "note" | "delete";
 
 function ItemRow({
   note,
@@ -93,10 +94,11 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
         });
         return;
       }
-      const m: Moved = action === "todo" ? await inboxToTodo(notes, path) : await inboxToIdea(notes, path);
+      const m: Moved =
+        action === "todo" ? await inboxToTodo(notes, path) : action === "idea" ? await inboxToIdea(notes, path) : await inboxToNote(notes, path);
       bump();
       toast({
-        text: action === "todo" ? t.inbox.movedTodo : t.inbox.movedIdea,
+        text: action === "todo" ? t.inbox.movedTodo : action === "idea" ? t.inbox.movedIdea : t.inbox.movedNote,
         action: { label: t.common.undo, run: () => undoMove(notes, m).then(bump, fail) },
       });
     } catch (e) {
@@ -160,6 +162,9 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
                 <button className="btn ghost icon" title={t.inbox.makeIdea} aria-label={t.inbox.makeIdea} onClick={() => act(open.path, "idea")}>
                   <Lightbulb size={18} />
                 </button>
+                <button className="btn ghost icon" title={t.inbox.makeNote} aria-label={t.inbox.makeNote} onClick={() => act(open.path, "note")}>
+                  <FileText size={18} />
+                </button>
                 <button className="btn ghost icon" title={t.common.delete} aria-label={t.inbox.deleteItem} onClick={() => act(open.path, "delete")}>
                   <Trash2 size={18} />
                 </button>
@@ -176,6 +181,7 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
             {item(t.common.open, <Pencil size={18} />, () => setOpen({ path: menu.path, isNew: false }))}
             {item(t.inbox.makeTodo, <CheckSquare size={18} />, () => act(menu.path, "todo"))}
             {item(t.inbox.makeIdea, <Lightbulb size={18} />, () => act(menu.path, "idea"))}
+            {item(t.inbox.makeNote, <FileText size={18} />, () => act(menu.path, "note"))}
             {item(t.common.delete, <Trash2 size={18} />, () => act(menu.path, "delete"), " danger")}
           </div>
         </Dialog>

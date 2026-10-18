@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, FolderKanban, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, FilePlus, FileText, FolderKanban, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
 import { isoDate } from "../data/dates";
+import { createFullNote } from "../data/fullnotes";
 import { dayOfPath, MOODS, type Entry } from "../data/journal";
 import { isProjectPath, isStepNotePath } from "../data/projects";
 import { isQuotePath } from "../data/quotes";
@@ -11,6 +12,7 @@ import { BooksView, useBooks } from "./books/BooksView";
 import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
+import { NotesView, useFullNotes } from "./notes/NotesView";
 import { ProjectsView, useProjects } from "./projects/ProjectsView";
 import { CloseDay } from "./journal/CloseDay";
 import { JournalView, useJournal } from "./journal/JournalView";
@@ -30,11 +32,12 @@ import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
 import { t } from "../i18n";
 
-export type Area = "today" | "ideas" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
+export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
 const AREAS: { id: Area; icon: ReactNode }[] = [
   { id: "today", icon: <Sun size={20} /> },
   { id: "ideas", icon: <Lightbulb size={20} /> },
+  { id: "notes", icon: <FileText size={20} /> },
   { id: "projects", icon: <FolderKanban size={20} /> },
   { id: "books", icon: <BookOpen size={20} /> },
   { id: "todo", icon: <CheckSquare size={20} /> },
@@ -70,13 +73,29 @@ function More({ go }: { go: (a: Area) => void }) {
 }
 
 // Hold More (right-click on PC) for these without leaving the current page.
-const QUICK: Area[] = ["projects", "journal", "review", "thoughts", "inbox"];
+const QUICK: Area[] = ["notes", "projects", "journal", "review", "thoughts", "inbox"];
 
-/** Small window above the More button. While the finger that opened it is still down, sliding
- *  onto an item and lifting picks it; otherwise it stays open to be tapped. */
-function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
-  const [over, setOver] = useState<Area>();
-  const overRef = useRef<Area>(undefined);
+interface PopItem {
+  id: string;
+  icon: ReactNode;
+  label: string;
+  count?: number;
+}
+
+/** Where a popup goes: above a button low on the screen (bottom bar), below one high up (sidebar). */
+function popAt(el: HTMLElement): CSSProperties {
+  const r = el.getBoundingClientRect();
+  const at: CSSProperties = { right: "auto", bottom: "auto", left: Math.max(8, Math.min(r.left + 4, innerWidth - 208)) };
+  if (r.top > innerHeight / 2) at.bottom = innerHeight - r.top + 8;
+  else at.top = r.bottom + 4;
+  return at;
+}
+
+/** Small window next to a held button (More, Today). While the finger that opened it is still
+ *  down, sliding onto an item and lifting picks it; otherwise it stays open to be tapped. */
+function QuickPop(props: { label: string; items: PopItem[]; at?: CSSProperties; pick(id: string): void; onClose(): void }) {
+  const [over, setOver] = useState<string>();
+  const overRef = useRef<string>(undefined);
   const down = useRef(true);
   // The click that follows the lift lands later; only a new touch may close the window.
   const touched = useRef(false);
@@ -85,7 +104,7 @@ function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
   useEffect(() => {
     const pick = (e: PointerEvent) => {
       const el = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-pick]");
-      overRef.current = el?.dataset.pick as Area | undefined;
+      overRef.current = el?.dataset.pick;
       setOver(overRef.current);
     };
     const move = (e: PointerEvent) => down.current && pick(e);
@@ -93,7 +112,7 @@ function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
       if (!down.current) return;
       pick(e);
       down.current = false;
-      if (overRef.current) props.go(overRef.current);
+      if (overRef.current) props.pick(overRef.current);
     };
     const press = () => (touched.current = !down.current);
     addEventListener("pointermove", move);
@@ -109,23 +128,20 @@ function MorePop(props: { inbox: number; go(a: Area): void; onClose(): void }) {
   return (
     <>
       <div className="more-backdrop" onClick={() => touched.current && props.onClose()} />
-      <div className="more-pop" role="menu" aria-label={t.shell.quickAreas}>
-        {QUICK.map(id => {
-          const a = AREAS.find(x => x.id === id)!;
-          return (
-            <button
-              key={id}
-              data-pick={id}
-              role="menuitem"
-              className={`menu-item${over === id ? " active" : ""}`}
-              onClick={() => props.go(id)}
-            >
-              {a.icon}
-              <span>{t.area[a.id]}</span>
-              {id === "inbox" && props.inbox > 0 && <span className="count">{props.inbox}</span>}
-            </button>
-          );
-        })}
+      <div className="more-pop" role="menu" aria-label={props.label} style={props.at}>
+        {props.items.map(i => (
+          <button
+            key={i.id}
+            data-pick={i.id}
+            role="menuitem"
+            className={`menu-item${over === i.id ? " active" : ""}`}
+            onClick={() => props.pick(i.id)}
+          >
+            {i.icon}
+            <span>{i.label}</span>
+            {!!i.count && <span className="count">{i.count}</span>}
+          </button>
+        ))}
       </div>
     </>
   );
@@ -193,6 +209,7 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
   const [homeView, setHomeView] = useState<View>("today");
   const todo = useTodo();
   const inbox = useInbox();
+  const fullNotes = useFullNotes();
   const ideas = useIdeas();
   const projects = useProjects();
   const books = useBooks();
@@ -221,7 +238,7 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
   const [search, setSearch] = useState<SearchState>({ text: "", area: "", since: "any" });
   const [searchKey, setSearchKey] = useState(0);
   // A search result to open in To-do or Inbox (key: open it again even if it is the same path).
-  const [target, setTarget] = useState<{ path: string; key: number } | undefined>();
+  const [target, setTarget] = useState<{ path: string; key: number; isNew?: boolean } | undefined>();
   const today = isoDate();
   useReminders(todo.tasks, todo.loaded, path => {
     setTarget({ path, key: Date.now() });
@@ -334,6 +351,9 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
     case "ideas":
       page = <IdeasView ideas={ideas} openPath={target} onOpenProject={path => openIn("projects", path)} />;
       break;
+    case "notes":
+      page = <NotesView list={fullNotes} openPath={target} />;
+      break;
     case "projects":
       page = <ProjectsView projects={projects} todo={todo} openPath={target} onOpenIdea={path => openIn("ideas", path)} />;
       break;
@@ -377,7 +397,7 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
               (d.area === "journal" ? openJournal : openReview)(day);
               return true;
             }
-            if (!["todo", "inbox", "ideas", "books", "projects"].includes(d.area)) return false;
+            if (!["todo", "inbox", "ideas", "notes", "books", "projects"].includes(d.area)) return false;
             if (d.area === "books" && !d.path.endsWith("/book.md") && !isQuotePath(d.path)) return false;
             if (d.area === "projects" && !isProjectPath(d.path) && !isStepNotePath(d.path)) return false;
             setTarget({ path: d.path, key: Date.now() });
@@ -401,6 +421,20 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
   const inMore = !BOTTOM.includes(area);
   const [morePop, setMorePop] = useState(false);
   const moreHold = useHold(() => setMorePop(true));
+  // Hold Today (right-click on PC): create something new without leaving the current page.
+  const [todayPop, setTodayPop] = useState<CSSProperties>();
+  const todayHold = useHold(el => setTodayPop(popAt(el)));
+  const newNote = async () => {
+    try {
+      const n = await createFullNote(notes);
+      bump();
+      setTarget({ path: n.path, key: Date.now(), isNew: true });
+      setArea("notes");
+    } catch (e) {
+      toast({ text: e instanceof Error ? e.message : String(e), error: true });
+    }
+  };
+  const held = (id: Area) => (id === "more" ? moreHold : id === "today" ? todayHold : undefined);
 
   // To-do lists right under "To-do" in the sidebar (wide screens; narrow ones use chips).
   const todoNav = (
@@ -438,7 +472,8 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
           <Fragment key={a.id}>
             <button
               className={`nav-item${area === a.id ? " active" : ""}`}
-              onClick={() => go(a.id)}
+              onClick={() => !(a.id === "today" && todayHold.eaten()) && go(a.id)}
+              {...(a.id === "today" ? todayHold.handlers : {})}
               title={t.area[a.id]}
             >
               {a.icon}
@@ -456,12 +491,13 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
         {BOTTOM.map(id => {
           const a = AREAS.find(x => x.id === id);
           const active = id === "more" ? inMore : area === id;
+          const hold = held(id);
           return (
             <button
               key={id}
               className={`nav-item${active ? " active" : ""}`}
-              onClick={() => !(id === "more" && moreHold.eaten()) && go(id)}
-              {...(id === "more" ? { ...moreHold.handlers, style: { touchAction: "none" } } : {})}
+              onClick={() => !hold?.eaten() && go(id)}
+              {...(hold ? { ...hold.handlers, style: { touchAction: "none" } } : {})}
             >
               {a ? a.icon : <Menu size={20} />}
               <span>{t.area[id]}</span>
@@ -470,13 +506,31 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
         })}
       </nav>
       {morePop && (
-        <MorePop
-          inbox={inbox.length}
-          go={a => {
+        <QuickPop
+          label={t.shell.quickAreas}
+          items={QUICK.map(id => ({
+            id,
+            icon: AREAS.find(x => x.id === id)!.icon,
+            label: t.area[id],
+            count: id === "inbox" ? inbox.length : undefined,
+          }))}
+          pick={a => {
             setMorePop(false);
-            go(a);
+            go(a as Area);
           }}
           onClose={() => setMorePop(false)}
+        />
+      )}
+      {todayPop && (
+        <QuickPop
+          label={t.shell.quickNew}
+          at={todayPop}
+          items={[{ id: "note", icon: <FilePlus size={20} />, label: t.shell.newNote }]}
+          pick={() => {
+            setTodayPop(undefined);
+            void newNote();
+          }}
+          onClose={() => setTodayPop(undefined)}
         />
       )}
     </div>

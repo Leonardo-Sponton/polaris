@@ -169,6 +169,25 @@ function samples(lang = "en", demo = false) {
   inbox(at(-2, 14, 3), T("Song to learn: Clair de Lune, Debussy\n", "Música para aprender: Clair de Lune, Debussy\n"));
   inbox(at(0, 9, 2), T("Does the library open on Saturday?\n", "A biblioteca abre no sábado?\n"));
 
+  // ---- Notes ----
+  const note = (created, modified, body, extra = {}) => {
+    const c = new Date(created.getTime() + sec++ * 1000);
+    out.push([`notes/${stamp(c)}.md`, file({ type: "note", created: isoMinute(c), modified: isoMinute(modified), ...extra }, body)]);
+  };
+  note(at(-20, 19, 5), at(-1, 22, 10), T(
+    "# Trip to the coast\n\n## Before going\n- [x] Book the bus tickets\n- [ ] Ask about the hostel breakfast\n- [ ] Sun cream and a hat\n\n## Days\n**Day 1.** Arrive at noon, walk on the beach, dinner at the fish market.\n\n**Day 2.** Boat trip to the island (leaves at 9). Take cash: card is not accepted on the boat.\n\n**Day 3.** Free morning, bus back at 16:00.\n\n## Budget\n| Item              | Cost |\n| ----------------- | ---- |\n| Bus               | 180  |\n| Hostel, 2 nights  | 240  |\n| Food              | 200  |\n",
+    "# Viagem para o litoral\n\n## Antes de ir\n- [x] Comprar as passagens de ônibus\n- [ ] Perguntar sobre o café da manhã do hostel\n- [ ] Protetor solar e boné\n\n## Dias\n**Dia 1.** Chegar ao meio-dia, caminhar na praia, jantar no mercado de peixe.\n\n**Dia 2.** Passeio de barco até a ilha (sai às 9). Levar dinheiro: o barco não aceita cartão.\n\n**Dia 3.** Manhã livre, ônibus de volta às 16h.\n\n## Orçamento\n| Item              | Custo |\n| ----------------- | ----- |\n| Ônibus            | 180   |\n| Hostel, 2 noites  | 240   |\n| Comida            | 200   |\n"),
+    { pinned: true });
+  note(at(-8, 21, 30), at(-2, 20, 45), T(
+    "# How Git branches work\n\nA branch is only a name that points to a commit. Making a new commit moves the name forward.\n\n- `git switch -c topic` makes a branch and moves to it.\n- `git merge topic` brings its commits into the current branch.\n- `git rebase main` replays my commits on top of main: cleaner history, but never on commits others already have.\n\n> Commit early, push when it works.\n",
+    "# Como funcionam os branches do Git\n\nUm branch é só um nome que aponta para um commit. Fazer um novo commit move o nome para frente.\n\n- `git switch -c topico` cria um branch e muda para ele.\n- `git merge topico` traz os commits dele para o branch atual.\n- `git rebase main` refaz meus commits por cima da main: histórico mais limpo, mas nunca em commits que outros já têm.\n\n> Faça commit cedo, dê push quando funcionar.\n"));
+  note(at(-4, 7, 50), at(-4, 8, 20), T(
+    "# Letter to myself in five years\n\nI hope you still write things down. This year I started studying software at night after work, and some days it felt like too much.\n\nIf you are reading this, check: did you keep going? Whatever the answer, be kind to the person who wrote this.\n",
+    "# Carta para mim daqui a cinco anos\n\nEspero que você ainda escreva as coisas. Este ano comecei a estudar software à noite depois do trabalho, e tem dias que parece demais.\n\nSe você está lendo isto, confira: você continuou? Seja qual for a resposta, seja gentil com quem escreveu isto.\n"));
+  note(at(-1, 12, 15), at(0, 8, 5), T(
+    "# Meeting notes: neighbourhood association\n\n- Street lights: the city answered, work starts next month.\n- Saturday market: needs two more volunteers.\n- Next meeting on the first Tuesday, 19:00.\n",
+    "# Ata: associação de moradores\n\n- Iluminação da rua: a prefeitura respondeu, a obra começa no mês que vem.\n- Feira de sábado: faltam dois voluntários.\n- Próxima reunião na primeira terça, às 19h.\n"));
+
   // ---- Ideas ----
   const idea = (created, title, data, rest = "", seen = 0) => {
     const c = new Date(created.getTime() + sec++ * 1000);

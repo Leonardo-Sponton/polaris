@@ -114,6 +114,12 @@ export function buildDecorations(
           case "CodeBlock":
             eachLine(node.from, node.to, "cm-hm-codeblock");
             return false;
+          case "Table":
+            eachLine(node.from, node.to, "cm-hm-table");
+            break;
+          case "TableDelimiter":
+            decos.push(mark("cm-hm-pipe").range(node.from, node.to));
+            break;
           case "Link":
             decos.push(mark("cm-hm-link").range(node.from, node.to));
             break;

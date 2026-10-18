@@ -36,9 +36,10 @@ One app for <b>Linux</b> and <b>Android</b>, 100% offline, with your data kept a
 
 | Area | What it does |
 | --- | --- |
-| **Today** | Quick capture field, today's and overdue tasks, "This Evening", thought of the day, quotes to review, an old idea resurfacing, the day's journal card. |
+| **Today** | Quick capture field, today's and overdue tasks, "This Evening", thought of the day, quotes to review, an old idea resurfacing, the day's journal card. Hold the Today button for a new note. |
 | **To-do** | Things-style lists (Today, Upcoming, Anytime, Someday, Logbook) and your own lists; one-line quick add (`pay rent every month on the 5th #home !1`), recurrence, subtasks, priorities and reminders (Android notifications, Linux tray). |
 | **Ideas** | Drafts with templates and optional sections, tags, a 5W2H block, a viability checklist with a score, the riskiest assumptions with how to test them, and an archive that keeps the reason. |
+| **Notes** | Longer writing kept as you wrote it: pin to the top, filter by words, or turn an inbox item into a note. |
 | **Projects** | Turn an idea into a project that follows a flow: **Business** (Sebrae's business plan guide), **Tech startup** or **Software**. Each step has guidance, notes, to-dos and a gate: go, hold, kill or recycle. |
 | **Books** | A shelf with covers, reading status tabs, quotes by page with your comments, a daily quote review and reading stats. |
 | **Journal** | One entry per day with a calendar, mood words and optional sections; "Close the day" in three questions. |
@@ -61,6 +62,7 @@ One app for <b>Linux</b> and <b>Android</b>, 100% offline, with your data kept a
 Polaris/
 ├── todo/        one file per task
 ├── inbox/       quick captures
+├── notes/
 ├── ideas/
 ├── projects/    <project>/project.md + one folder per step
 ├── books/       <book>/book.md, cover.jpg, quotes/
