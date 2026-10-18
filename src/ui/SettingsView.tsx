@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, FolderOpen, Upload } from "lucide-react";
+import { BookOpen, Download, Feather, FileText, FolderKanban, FolderOpen, Lightbulb, NotebookPen, Plus, Sun, Upload } from "lucide-react";
 import { useApp } from "./context";
 import type { Theme } from "../data/settings";
 import { BEFORE_RESTORE, backupName, exportBackup, readBackup, restoreBackup, type Backup } from "../data/backup";
@@ -97,6 +97,7 @@ export function SettingsView() {
         </section>
 
         <RemindersCard />
+        <WidgetsCard />
 
         <section className="card stack">
           <h2>{t.settings.dataFolder}</h2>
@@ -196,6 +197,52 @@ function RemindersCard() {
           </button>
         )}
       </div>
+    </section>
+  );
+}
+
+const WIDGETS = [
+  { id: "today", icon: <Sun size={18} /> },
+  { id: "capture", icon: <Plus size={18} /> },
+  { id: "notes", icon: <FileText size={18} /> },
+  { id: "ideas", icon: <Lightbulb size={18} /> },
+  { id: "projects", icon: <FolderKanban size={18} /> },
+  { id: "reading", icon: <BookOpen size={18} /> },
+  { id: "thought", icon: <Feather size={18} /> },
+  { id: "day", icon: <NotebookPen size={18} /> },
+] as const;
+
+/** Android: the home-screen widgets, each with a button that asks the launcher to add it. */
+function WidgetsCard() {
+  const { platform, toast } = useApp();
+  if (!platform.pinWidget) return null;
+  const add = (id: string) =>
+    platform.pinWidget!(id).then(
+      ok => !ok && toast({ text: t.settings.widgetsManual }),
+      e => toast({ text: e instanceof Error ? e.message : String(e), error: true }),
+    );
+  return (
+    <section className="card stack">
+      <h2>{t.settings.widgets}</h2>
+      <p className="muted" style={{ margin: 0 }}>
+        {t.settings.widgetsText}
+      </p>
+      {WIDGETS.map(w => (
+        <div key={w.id} className="row" style={{ justifyContent: "space-between", flexWrap: "nowrap" }}>
+          <span className="row" style={{ gap: 10, flex: 1, minWidth: 0, flexWrap: "nowrap" }}>
+            <span style={{ flexShrink: 0, display: "flex" }}>{w.icon}</span>
+            <span style={{ minWidth: 0 }}>
+              {t.settings.widgetNames[w.id]}
+              <span className="muted small" style={{ display: "block" }}>
+                {t.settings.widgetDescs[w.id]}
+              </span>
+            </span>
+          </span>
+          <button className="btn" style={{ flexShrink: 0 }} onClick={() => add(w.id)}>
+            {t.settings.addWidget}
+          </button>
+        </div>
+      ))}
     </section>
   );
 }

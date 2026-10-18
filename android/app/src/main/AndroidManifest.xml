@@ -27,6 +27,94 @@
 
         </activity>
 
+        <!-- Home-screen widgets (PolarisWidget, Widgets). -->
+        <receiver
+            android:name=".PolarisWidget$Today"
+            android:exported="false"
+            android:label="@string/widget_today">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_today" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Capture"
+            android:exported="false"
+            android:label="@string/widget_capture">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_capture" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Notes"
+            android:exported="false"
+            android:label="@string/widget_notes">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_notes" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Ideas"
+            android:exported="false"
+            android:label="@string/widget_ideas">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ideas" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Projects"
+            android:exported="false"
+            android:label="@string/widget_projects">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_projects" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Reading"
+            android:exported="false"
+            android:label="@string/widget_reading">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_reading" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Thought"
+            android:exported="false"
+            android:label="@string/widget_thought">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_thought" />
+        </receiver>
+        <receiver
+            android:name=".PolarisWidget$Day"
+            android:exported="false"
+            android:label="@string/widget_day">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_day" />
+        </receiver>
+
+        <service
+            android:name=".WidgetListService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Widget row taps: invisible, in its own task, so ticking a task does not bring the app up. -->
+        <activity
+            android:name=".WidgetActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

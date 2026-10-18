@@ -63,6 +63,14 @@ export interface Platform {
   openExactAlarmSettings?(): Promise<void>;
   /** Android: the app came back to the front (files may have changed meanwhile, e.g. by sync). */
   onResume?(cb: () => void): () => void;
+  /** Android: what the home-screen widgets show (data/widgets Snapshot as JSON). */
+  setWidgetData?(json: string): Promise<void>;
+  /** Android: asks the launcher to add a widget (data/widgets kinds). False: it cannot. */
+  pinWidget?(kind: string): Promise<boolean>;
+  /** Android: a widget asks to open a place in the app (see ui/widgetTarget). */
+  onOpenRequest?(cb: (target: string) => void): () => void;
+  /** Android: a widget changed files (a task completed from the home screen). */
+  onWidgetChange?(cb: () => void): () => void;
   /** Android: the back button or back swipe. Returns a function that stops it. */
   onBackButton?(cb: () => void): () => void;
   /** Android: leaves the app (sends it to the background, as Android does by default). */

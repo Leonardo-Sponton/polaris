@@ -1,6 +1,8 @@
 package io.github.leonardo_sponton.polaris;
 
 import android.Manifest;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +22,9 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,6 +50,20 @@ public class PolarisFilesPlugin extends Plugin {
     /** Action of the "Capture" home-screen shortcut (res/xml/shortcuts.xml). */
     static final String ACTION_CAPTURE = "io.github.leonardo_sponton.polaris.CAPTURE";
 
+    /** The running plugin, for the widgets to tell the app that files changed. */
+    private static PolarisFilesPlugin running;
+
+    @Override
+    public void load() {
+        running = this;
+    }
+
+    /** A widget changed files (a task completed): the app reloads, if it is running. */
+    static void widgetChanged() {
+        PolarisFilesPlugin p = running;
+        if (p != null) p.notifyListeners("widgetChange", new JSObject());
+    }
+
     // ---- "Capture" shortcut (SPEC 5.2) ----
 
     /**
@@ -53,9 +72,62 @@ public class PolarisFilesPlugin extends Plugin {
      */
     @Override
     protected void handleOnNewIntent(Intent intent) {
-        if (intent == null || !ACTION_CAPTURE.equals(intent.getAction())) return;
-        intent.setAction(Intent.ACTION_MAIN); // handled once, not again after a reload
-        notifyListeners("capture", new JSObject(), true);
+        if (intent == null) return;
+        if (ACTION_CAPTURE.equals(intent.getAction())) {
+            intent.setAction(Intent.ACTION_MAIN); // handled once, not again after a reload
+            notifyListeners("capture", new JSObject(), true);
+        } else if (Widgets.ACTION_OPEN.equals(intent.getAction())) {
+            // A widget: open a place in the app (src/ui/Shell.tsx OpenRequest).
+            String target = intent.getStringExtra(Widgets.EXTRA_TARGET);
+            intent.setAction(Intent.ACTION_MAIN);
+            if (target == null) return;
+            JSObject e = new JSObject();
+            e.put("target", target);
+            notifyListeners("open", e, true);
+        }
+    }
+
+    // ---- Home-screen widgets ----
+
+    /**
+     * What the widgets show (src/data/widgets.ts). The undo data of tasks completed on the home
+     * screen (the next copy of a repeating task) is kept when the app sends a new snapshot.
+     */
+    @PluginMethod
+    public void setWidgetData(PluginCall call) {
+        guard(call, () -> {
+            JSONObject snap = new JSONObject(call.getString("json", "{}"));
+            JSONObject old = Widgets.load(getContext());
+            JSONArray oldTasks = old.optJSONArray("tasks");
+            JSONArray tasks = snap.optJSONArray("tasks");
+            for (int i = 0; tasks != null && oldTasks != null && i < tasks.length(); i++) {
+                JSONObject k = tasks.getJSONObject(i);
+                if (!k.optBoolean("done")) continue;
+                for (int j = 0; j < oldTasks.length(); j++) {
+                    JSONObject o = oldTasks.optJSONObject(j);
+                    if (o == null || !o.optString("path").equals(k.optString("path")) || !o.has("next")) continue;
+                    k.put("next", o.optString("next"));
+                    k.put("nextText", o.optString("nextText"));
+                }
+            }
+            Widgets.save(getContext(), snap);
+            Widgets.updateAll(getContext());
+            call.resolve();
+        });
+    }
+
+    /** Asks the launcher to add a widget (it shows its own confirmation). ok false: not supported. */
+    @PluginMethod
+    public void pinWidget(PluginCall call) {
+        guard(call, () -> {
+            Class<?> provider = Widgets.provider(call.getString("kind", ""));
+            AppWidgetManager m = AppWidgetManager.getInstance(getContext());
+            boolean ok = provider != null && m.isRequestPinAppWidgetSupported()
+                    && m.requestPinAppWidget(new ComponentName(getContext(), provider), null, null);
+            JSObject r = new JSObject();
+            r.put("ok", ok);
+            call.resolve(r);
+        });
     }
 
     /**

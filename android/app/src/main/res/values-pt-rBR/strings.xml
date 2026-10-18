@@ -1,4 +1,29 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="shortcut_capture">Capturar</string>
+    <string name="widget_today">Hoje</string>
+    <string name="widget_today_desc">As tarefas de hoje. Conclua aqui mesmo.</string>
+    <string name="widget_capture">Capturar</string>
+    <string name="widget_capture_desc">Barra de captura, com a Entrada, nova nota e nova ideia.</string>
+    <string name="widget_capture_hint">Capture qualquer coisa…</string>
+    <string name="widget_notes">Notas</string>
+    <string name="widget_notes_desc">Notas fixadas e recentes.</string>
+    <string name="widget_ideas">Ideias</string>
+    <string name="widget_ideas_desc">Ideias em rascunho e amadurecendo.</string>
+    <string name="widget_projects">Projetos</string>
+    <string name="widget_projects_desc">Projetos ativos e a etapa em que estão.</string>
+    <string name="widget_reading">Lendo</string>
+    <string name="widget_reading_desc">Os livros que você está lendo e as citações para revisar.</string>
+    <string name="widget_thought">Pensamento do dia</string>
+    <string name="widget_thought_desc">O pensamento do dia, como em Hoje.</string>
+    <string name="widget_journal">Diário</string>
+    <string name="widget_review">Exame</string>
+    <string name="widget_close_day">Fechar o dia</string>
+    <string name="widget_day">Diário e exame</string>
+    <string name="widget_day_desc">O diário de hoje, o exame da noite e Fechar o dia.</string>
+    <string name="widget_inbox">Entrada</string>
+    <string name="widget_new">Novo</string>
+    <string name="widget_new_note">Nova nota</string>
+    <string name="widget_new_idea">Nova ideia</string>
+    <string name="widget_setup">Abra o Polaris uma vez para preencher este widget.</string>
 </resources>

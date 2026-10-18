@@ -30,6 +30,8 @@ import { useApp } from "./context";
 import { goBack, useBack } from "./useBack";
 import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
+import { useWidgets } from "./useWidgets";
+import { isDay } from "../data/widgets";
 import { t } from "../i18n";
 
 export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
@@ -203,7 +205,16 @@ function DayCard(props: { entry?: Entry; review?: ReviewEntry; onJournal(): void
   );
 }
 
-export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: number; startArea?: Area }) {
+/** A place in the app a home-screen widget asks for (Android, see PolarisWidgets.java). */
+export interface OpenRequest {
+  target: string;
+  key: number;
+}
+
+const OPEN_AREAS: Area[] = ["today", "todo", "inbox", "notes", "ideas", "projects", "books", "journal", "review", "thoughts"];
+
+export function Shell(props: { captureKey?: number; startArea?: Area; openRequest?: OpenRequest }) {
+  const { captureKey = 0, startArea = "today", openRequest } = props;
   const [area, setArea] = useState<Area>(startArea);
   const [view, setView] = useState<View>("today");
   const [homeView, setHomeView] = useState<View>("today");
@@ -290,6 +301,35 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
     if (captureKey) setArea("today");
   }, [captureKey]);
 
+  // Home-screen widgets: their data, and the places they open.
+  useWidgets(
+    { tasks: todo.tasks, inbox, notes: fullNotes, ideas, projects, books, quotes, thoughts, journal, reviews },
+    todo.loaded && thoughts.loaded,
+  );
+  const [newIdeaKey, setNewIdeaKey] = useState(0);
+  useEffect(() => {
+    if (!openRequest) return;
+    const [kind, ...rest] = openRequest.target.split(":");
+    const arg = rest.join(":");
+    if (kind === "area" && OPEN_AREAS.includes(arg as Area)) {
+      go(arg as Area);
+      if (arg === "todo") setView("today");
+    } else if (kind === "open") {
+      const [a, ...p] = arg.split(":");
+      if (OPEN_AREAS.includes(a as Area) && p.length) openIn(a as Area, p.join(":"));
+    } else if (kind === "thought" && arg) openThought({ id: arg });
+    else if (kind === "journal" && isDay(arg)) openJournal(arg);
+    else if (kind === "review" && isDay(arg)) openReview(arg);
+    else if (kind === "close-day") {
+      go("today");
+      setClosing(true);
+    } else if (kind === "new" && arg === "note") void newNote();
+    else if (kind === "new" && arg === "idea") {
+      go("ideas");
+      setNewIdeaKey(Date.now());
+    }
+  }, [openRequest]);
+
   let page: ReactNode;
   switch (area) {
     case "today":
@@ -349,7 +389,7 @@ export function Shell({ captureKey = 0, startArea = "today" }: { captureKey?: nu
       );
       break;
     case "ideas":
-      page = <IdeasView ideas={ideas} openPath={target} onOpenProject={path => openIn("projects", path)} />;
+      page = <IdeasView ideas={ideas} openPath={target} newKey={newIdeaKey} onOpenProject={path => openIn("projects", path)} />;
       break;
     case "notes":
       page = <NotesView list={fullNotes} openPath={target} />;

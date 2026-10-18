@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker preview. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_pill"
+        android:tint="#F5010A29" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp">
+
+        <LinearLayout
+            android:id="@+id/bar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp">
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_w_plus"
+                android:tint="#FFA67CFF" />
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/widget_capture_hint"
+                android:textSize="15sp"
+                android:textColor="#FFD4CCF5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/inbox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/widget_inbox"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <ImageView
+                android:id="@+id/inbox_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_w_inbox"
+                android:tint="#FFA67CFF" />
+
+            <TextView
+                android:id="@+id/inbox_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="13sp"
+                android:textColor="#FF7D76A6"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/new_note"
+            android:layout_width="44dp"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/widget_new_note"
+            android:paddingStart="11dp"
+            android:paddingEnd="11dp"
+            android:src="@drawable/ic_w_file_plus"
+                android:tint="#FFA67CFF" />
+
+        <ImageView
+            android:id="@+id/new_idea"
+            android:layout_width="44dp"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/widget_new_idea"
+            android:paddingStart="11dp"
+            android:paddingEnd="11dp"
+            android:src="@drawable/ic_w_lightbulb"
+                android:tint="#FFA67CFF" />
+    </LinearLayout>
+</FrameLayout>

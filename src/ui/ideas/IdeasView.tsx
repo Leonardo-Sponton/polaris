@@ -61,7 +61,13 @@ function IdeaRow({ idea: i, active, onOpen, onMenu }: { idea: Idea; active: bool
   );
 }
 
-export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key: number }; onOpenProject(path: string): void }) {
+export function IdeasView(props: {
+  ideas: Idea[];
+  openPath?: { path: string; key: number };
+  /** Changes when a home-screen widget asks for a new idea. */
+  newKey?: number;
+  onOpenProject(path: string): void;
+}) {
   const { ideas, openPath } = props;
   const { notes, bump, toast } = useApp();
   const [open, setOpen] = useState<string | null>(null);
@@ -92,6 +98,10 @@ export function IdeasView(props: { ideas: Idea[]; openPath?: { path: string; key
   useEffect(() => {
     if (openPath) openIdea(openPath.path);
   }, [openPath, openIdea]);
+
+  useEffect(() => {
+    if (props.newKey) setAsking(true);
+  }, [props.newKey]);
 
   // Ctrl+N: new idea (SPEC 4.4).
   useEffect(() => {

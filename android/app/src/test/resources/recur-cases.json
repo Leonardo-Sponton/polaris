@@ -1,0 +1,3422 @@
+[
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-06"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-23"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-06"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-30"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-03"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-05"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-06"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-20"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-20"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-20"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-20"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-20"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-23"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-06"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-03"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-02"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-02"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-02"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-02"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-02"
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=3",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-05"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-24"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-07"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-11"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-13"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-09"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-26"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TH",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-05"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-23"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-06"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-30"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-05"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-14"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-04"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-18"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-01-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-01-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-01-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-01-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-01-02"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-03"
+ },
+ {
+  "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA,SU",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-11-17"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-29"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=31",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-28"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-30"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-04-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2027-01-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-05-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-03-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=15",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-06-15"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2027-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2027-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2029-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2028-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2028-01-31"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2028-10-17"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2030-02-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2028-12-28"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "FREQ=YEARLY;INTERVAL=2",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2029-03-30"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": "2026-02-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": "2026-02-02"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": "2026-02-06"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": "2026-10-18"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": "2026-10-19"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": "2026-10-23"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": "2028-03-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": "2028-03-02"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": "2028-03-06"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": "2026-12-29"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": "2026-12-30"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": "2027-01-03"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": "2027-03-31"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": "2027-04-01"
+ },
+ {
+  "rule": "RRULE:FREQ=DAILY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": "2027-04-05"
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=HOURLY",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;BYDAY=MO",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=WEEKLY;BYDAY=XX",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": null
+ },
+ {
+  "rule": "FREQ=DAILY;INTERVAL=0",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2025-12-22",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2026-01-28",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2026-01-30",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2026-01-31",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2026-02-01",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-01-31",
+  "today": "2026-02-05",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-09-07",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-10-14",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-10-16",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-10-17",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-10-18",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-10-17",
+  "today": "2026-10-22",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-01-20",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-02-26",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-02-28",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-02-29",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-03-01",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2028-02-29",
+  "today": "2028-03-05",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2026-11-18",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2026-12-25",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2026-12-27",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2026-12-28",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2026-12-29",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2026-12-28",
+  "today": "2027-01-02",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-02-18",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-03-27",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-03-29",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-03-30",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-03-31",
+  "next": null
+ },
+ {
+  "rule": "",
+  "base": "2027-03-30",
+  "today": "2027-04-04",
+  "next": null
+ }
+]

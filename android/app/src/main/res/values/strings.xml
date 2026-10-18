@@ -5,4 +5,31 @@
     <string name="package_name">io.github.leonardo_sponton.polaris</string>
     <string name="custom_url_scheme">io.github.leonardo_sponton.polaris</string>
     <string name="shortcut_capture">Capture</string>
+    <!-- Home-screen widgets: names and descriptions in the widget picker, and the words shown
+         before the app has sent its own (in the app's language) to the widgets. -->
+    <string name="widget_today">Today</string>
+    <string name="widget_today_desc">Today\'s to-dos. Tick them off right here.</string>
+    <string name="widget_capture">Capture</string>
+    <string name="widget_capture_desc">Capture bar, with the Inbox, a new note and a new idea.</string>
+    <string name="widget_capture_hint">Capture anything…</string>
+    <string name="widget_notes">Notes</string>
+    <string name="widget_notes_desc">Pinned and recent notes.</string>
+    <string name="widget_ideas">Ideas</string>
+    <string name="widget_ideas_desc">Ideas in draft and maturing.</string>
+    <string name="widget_projects">Projects</string>
+    <string name="widget_projects_desc">Active projects and the step they are on.</string>
+    <string name="widget_reading">Reading</string>
+    <string name="widget_reading_desc">Books you are reading and quotes to review.</string>
+    <string name="widget_thought">Thought of the day</string>
+    <string name="widget_thought_desc">The thought of the day, as on Today.</string>
+    <string name="widget_journal">Journal</string>
+    <string name="widget_review">Review</string>
+    <string name="widget_close_day">Close the day</string>
+    <string name="widget_day">Journal and review</string>
+    <string name="widget_day_desc">Today\'s journal, the evening review and Close the day.</string>
+    <string name="widget_inbox">Inbox</string>
+    <string name="widget_new">New</string>
+    <string name="widget_new_note">New note</string>
+    <string name="widget_new_idea">New idea</string>
+    <string name="widget_setup">Open Polaris once to fill this widget.</string>
 </resources>

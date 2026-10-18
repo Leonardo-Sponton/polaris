@@ -5,7 +5,7 @@ import { initDataFolder, loadSettings, saveSettings, type Settings } from "../da
 import { flushAll } from "../data/pending";
 import { Ctx, type AppCtx, type Toast } from "./context";
 import { FileAccess, FirstRun } from "./FirstRun";
-import { Shell } from "./Shell";
+import { Shell, type OpenRequest } from "./Shell";
 import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
 import { SyncLock } from "./SyncView";
 import { lang, setLang, t } from "../i18n";
@@ -39,6 +39,7 @@ export function App({ platform }: { platform: Platform }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [version, setVersion] = useState(0);
   const [captureKey, setCaptureKey] = useState(0);
+  const [openRequest, setOpenRequest] = useState<OpenRequest>();
   // After a language change the screens are drawn anew; this keeps the user in Settings.
   const [startArea, setStartArea] = useState<"settings">();
   const nextId = useRef(1);
@@ -91,6 +92,15 @@ export function App({ platform }: { platform: Platform }) {
   }, [platform]);
 
   useEffect(() => platform.onCaptureRequest?.(() => setCaptureKey(k => k + 1)), [platform]);
+  useEffect(
+    () =>
+      platform.onOpenRequest?.(target =>
+        target === "capture" ? setCaptureKey(k => k + 1) : setOpenRequest({ target, key: Date.now() }),
+      ),
+    [platform],
+  );
+  // A task completed on the home screen: reload.
+  useEffect(() => platform.onWidgetChange?.(() => setVersion(v => v + 1)), [platform]);
 
   // Android: files may have changed while the app was in the background (USB sync, a file
   // manager), and reminders that fired since are no longer upcoming: reload on return.
@@ -135,6 +145,7 @@ export function App({ platform }: { platform: Platform }) {
       if (settings.language !== boot.settings.language) {
         applyLang(settings.language, platform);
         setStartArea("settings");
+        setOpenRequest(undefined); // the new Shell must not open it again
       }
       setBoot({ step: "ready", settings });
     },
@@ -146,7 +157,7 @@ export function App({ platform }: { platform: Platform }) {
   return (
     <Ctx.Provider value={ctx}>
       {/* A new language draws every screen again (they read `t` while rendering). */}
-      {CAPTURE_ONLY ? <CaptureWindow key={lang} /> : <Shell key={lang} captureKey={captureKey} startArea={startArea} />}
+      {CAPTURE_ONLY ? <CaptureWindow key={lang} /> : <Shell key={lang} captureKey={captureKey} startArea={startArea} openRequest={openRequest} />}
       <SyncLock />
       <div className="toasts" aria-live="polite">
         {toasts.map(t => (

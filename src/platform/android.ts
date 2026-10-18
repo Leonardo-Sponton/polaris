@@ -23,7 +23,10 @@ interface PolarisFiles {
   remove(o: { root: string; path: string }): Promise<void>;
   showKeyboard(): Promise<void>;
   openLink(o: { url: string }): Promise<void>;
-  addListener(event: "capture", cb: () => void): Promise<{ remove(): Promise<void> }>;
+  setWidgetData(o: { json: string }): Promise<void>;
+  pinWidget(o: { kind: string }): Promise<{ ok: boolean }>;
+  addListener(event: "capture" | "widgetChange", cb: () => void): Promise<{ remove(): Promise<void> }>;
+  addListener(event: "open", cb: (e: { target: string }) => void): Promise<{ remove(): Promise<void> }>;
 }
 
 const Native = registerPlugin<PolarisFiles>("PolarisFiles");
@@ -133,6 +136,16 @@ export function androidPlatform(): Platform {
     },
     onCaptureRequest: cb => {
       const handle = Native.addListener("capture", cb);
+      return () => void handle.then(h => h.remove());
+    },
+    setWidgetData: json => Native.setWidgetData({ json }),
+    pinWidget: async kind => (await Native.pinWidget({ kind })).ok,
+    onOpenRequest: cb => {
+      const handle = Native.addListener("open", e => cb(e.target));
+      return () => void handle.then(h => h.remove());
+    },
+    onWidgetChange: cb => {
+      const handle = Native.addListener("widgetChange", cb);
       return () => void handle.then(h => h.remove());
     },
     // With a listener, Capacitor no longer closes the app on back; the app decides (ui/useBack).

@@ -125,6 +125,30 @@ export const en = {
     exactOn: "Reminders come on the minute",
     exactOff: "Reminders may come a few minutes late",
     allowExact: "Allow exact time",
+    widgets: "Home-screen widgets",
+    widgetsText: "They show your data on the home screen and open the app in the right place. Today's to-dos can be ticked off right there.",
+    addWidget: "Add",
+    widgetsManual: "This launcher cannot add widgets from an app: hold an empty spot on the home screen, then Widgets → Polaris.",
+    widgetNames: {
+      today: "Today",
+      capture: "Capture",
+      notes: "Notes",
+      ideas: "Ideas",
+      projects: "Projects",
+      reading: "Reading",
+      thought: "Thought of the day",
+      day: "Journal and review",
+    },
+    widgetDescs: {
+      today: "Today's to-dos, late ones first",
+      capture: "Capture bar, Inbox, new note, new idea",
+      notes: "Pinned and recent notes",
+      ideas: "Ideas in draft and maturing",
+      projects: "Active projects and their step",
+      reading: "Books you are reading, quotes to review",
+      thought: "The thought of the day",
+      day: "Today's journal, review, Close the day",
+    },
   },
 
   tray: {
@@ -880,6 +904,25 @@ export const en = {
     decide: "Decide",
     // menu
     putOnHold: "Put on hold…",
+  },
+
+  // Android home-screen widgets: the words are sent to them with the data (data/widgets).
+  widgets: {
+    nothingToday: "Nothing for today",
+    capture: "Capture anything…",
+    noNotes: "No notes yet",
+    noIdeas: "No ideas in draft or maturing",
+    noProjects: "No active projects",
+    noReading: "No book in Reading",
+    quotesToReview: (n: number) => `${n} quote${s(n)} to review`,
+    stepOf: (n: number, total: number, name: string) => `Step ${n}/${total} · ${name}`,
+    todos: (n: number) => `${n} to-do${s(n)}`,
+    journalEmpty: "Nothing written today",
+    noMood: "No mood yet",
+    done: (title: string) => `Done: ${title}`,
+    reopened: (title: string) => `Back to open: ${title}`,
+    syncing: "A USB sync is running. Try again when it ends.",
+    gone: "This task changed or no longer exists. Open Polaris to refresh.",
   },
 
   // @more
