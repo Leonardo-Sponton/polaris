@@ -10,9 +10,14 @@ license=('MIT')
 depends=('gtk3' 'nss' 'alsa-lib' 'libnotify')
 optdepends=('libappindicator-gtk3: tray icon on some desktops')
 options=('!strip' '!debug')
-source=("polaris-${pkgver}-x64.tar.gz::file://${startdir}/../../release/polaris-${pkgver}-x64.tar.gz"
-        "polaris.desktop")
-sha256sums=('SKIP' 'SKIP')
+# The tarball is read straight from release/ (not via source=): makepkg keeps a cached
+# copy of file:// sources and would silently package an old build.
+source=("polaris.desktop")
+sha256sums=('SKIP')
+
+prepare() {
+  tar -xzf "${startdir}/../../release/polaris-${pkgver}-x64.tar.gz" -C "$srcdir"
+}
 
 package() {
   install -d "$pkgdir/opt/polaris"
