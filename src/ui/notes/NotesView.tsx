@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Pin, PinOff, Plus, Search, Trash2 } from "lucide-react";
-import { createFullNote, filterNotes, loadFullNotes, setPinned, type FullNote } from "../../data/fullnotes";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Download, PenTool, Pencil, Pin, PinOff, Plus, Search, Trash2 } from "lucide-react";
+import { createDrawing, importDrawings, listDrawings, type DrawingInfo } from "../../data/drawings";
+import { createFullNote, filterNotes, loadFullNotes, NOTE_SORTS, noteTags, setPinned, sortNotes, type FullNote, type NoteSort } from "../../data/fullnotes";
 import { flushAll } from "../../data/pending";
+import { fold } from "../../data/search";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { Dialog } from "../Dialog";
 import { NoteEditor } from "../NoteEditor";
 import { useApp } from "../context";
 import { useHold } from "../useHold";
+import { usePref } from "../study/prefs";
 import { dateFmt, t } from "../../i18n";
 
-// Notes: longer writing that stays as written (data/fullnotes). Pinned notes first.
+// Notes: longer writing that stays as written (data/fullnotes). Pinned notes first, then in the
+// order chosen above the list; the chips keep only pinned notes or the notes with one #tag.
 
 /** All notes, reloaded whenever data on disk changes. */
 export function useFullNotes(): FullNote[] {
@@ -49,11 +53,113 @@ function NoteRow(props: { note: FullNote; active: boolean; onOpen(): void; onMen
   );
 }
 
+/** Notes that link here with [[this title]] (Obsidian's backlinks). */
+function Backlinks(props: { list: FullNote[]; path: string; onOpen(path: string): void }) {
+  const me = props.list.find(n => n.path === props.path);
+  const key = me?.title ? fold(`[[${me.title}`).folded : "";
+  const back = key ? props.list.filter(n => n.path !== props.path && (n.folded.includes(`${key}]]`) || n.folded.includes(`${key}|`) || n.folded.includes(`${key}#`))) : [];
+  if (!back.length) return null;
+  return (
+    <div className="backlinks">
+      <span className="muted small">{t.study.linkedFrom}</span>
+      {back.map(b => (
+        <button key={b.path} className="chip" onClick={() => props.onOpen(b.path)}>
+          {b.title || t.common.untitled}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** The drawings (drawings/*.excalidraw.md), reloaded whenever data on disk changes. */
+function useDrawings(): DrawingInfo[] {
+  const { notes, version } = useApp();
+  const [list, setList] = useState<DrawingInfo[]>([]);
+  useEffect(() => {
+    let alive = true;
+    listDrawings(notes.storage).then(l => alive && setList(l), () => alive && setList([]));
+    return () => {
+      alive = false;
+    };
+  }, [notes, version]);
+  return list;
+}
+
+/** Drawings: a list under the "Drawings" chip, plus import from an Obsidian vault. */
+function DrawingList({ list }: { list: DrawingInfo[] }) {
+  const { notes, platform, bump, toast, openDrawing } = useApp();
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
+
+  const create = () => createDrawing(notes.storage).then(p => (bump(), openDrawing(p)), fail);
+
+  const picked = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setBusy(true);
+    try {
+      const res = await importDrawings(
+        notes.storage,
+        [...files].map(f => ({ path: f.webkitRelativePath || f.name, read: async () => new Uint8Array(await f.arrayBuffer()) })),
+      );
+      bump();
+      toast({ text: res.added.length || res.skipped.length ? t.drawings.imported(res.added.length, res.skipped.length) : t.drawings.noneFound });
+    } catch (e) {
+      fail(e);
+    } finally {
+      setBusy(false);
+      if (input.current) input.current.value = "";
+    }
+  };
+
+  // The PC picks the whole vault folder; Android picks files (its file chooser has no folders).
+  const folder = platform.name === "electron";
+  return (
+    <>
+      <div className="row drawing-actions" style={{ flexWrap: "wrap" }}>
+        <button className="btn" onClick={create}>
+          <PenTool size={18} /> {t.drawings.newDrawing}
+        </button>
+        <button className="btn" disabled={busy} title={t.drawings.importHint} onClick={() => input.current?.click()}>
+          <Download size={18} /> {t.drawings.importObsidian}
+        </button>
+        <input
+          ref={input}
+          type="file"
+          hidden
+          multiple
+          {...(folder ? { webkitdirectory: "" } : {})}
+          onChange={e => void picked(e.target.files)}
+        />
+      </div>
+      {list.length === 0 ? (
+        <p className="muted empty-note">{t.drawings.empty}</p>
+      ) : (
+        <ul className="list">
+          {list.map(d => (
+            <li key={d.path} className="note-li">
+              <button className="list-item" onClick={() => openDrawing(d.path)}>
+                <span className="list-title">
+                  <PenTool size={14} className="note-pin" /> {d.title}
+                </span>
+                <span className="list-meta mono">{when(new Date(d.modified).toISOString())}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 export function NotesView(props: { list: FullNote[]; openPath?: { path: string; key: number; isNew?: boolean } }) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete, openDrawing } = useApp();
+  const drawings = useDrawings();
   const [open, setOpen] = useState<{ path: string; isNew: boolean } | null>(null);
   const [menu, setMenu] = useState<FullNote | null>(null);
   const [query, setQuery] = useState("");
+  const [sort, setSort] = usePref<NoteSort>("polaris.notes.sort", "modified");
+  const [only, setOnly] = usePref<string>("polaris.notes.only", "");
 
   useEffect(() => {
     if (props.openPath) setOpen({ path: props.openPath.path, isNew: !!props.openPath.isNew });
@@ -75,6 +181,7 @@ export function NotesView(props: { list: FullNote[]; openPath?: { path: string; 
   };
 
   const remove = async (path: string) => {
+    if (!(await confirmDelete(props.list.find(n => n.path === path)?.title))) return;
     try {
       await flushAll(); // the open editor writes its last edits first
       if (open?.path === path) setOpen(null);
@@ -99,7 +206,13 @@ export function NotesView(props: { list: FullNote[]; openPath?: { path: string; 
     }
   };
 
-  const shown = filterNotes(props.list, query);
+  const tags = noteTags(props.list);
+  // A tag that is gone (last note with it changed) stops filtering.
+  const tag = only.startsWith("#") && tags.some(x => x.tag === only.slice(1)) ? only.slice(1) : undefined;
+  const pinnedOnly = only === "pinned";
+  const drawingsOnly = only === "drawings";
+  const shown = sortNotes(filterNotes(props.list, query, { tag, pinned: pinnedOnly }), NOTE_SORTS.includes(sort) ? sort : "modified");
+  const anyPinned = props.list.some(n => n.pinned);
 
   const item = (label: string, icon: React.ReactNode, run: () => void, cls = "") => (
     <button
@@ -119,6 +232,9 @@ export function NotesView(props: { list: FullNote[]; openPath?: { path: string; 
       <div className="list-pane">
         <div className="list-head">
           <h1>{t.notes.title}</h1>
+          <button className="btn icon" style={{ marginLeft: "auto" }} title={t.drawings.newDrawing} aria-label={t.drawings.newDrawing} onClick={() => createDrawing(notes.storage).then(p => (bump(), openDrawing(p)), fail)}>
+            <PenTool size={18} />
+          </button>
           <button className="btn primary" onClick={create}>
             <Plus size={18} /> {t.common.new}
           </button>
@@ -136,7 +252,36 @@ export function NotesView(props: { list: FullNote[]; openPath?: { path: string; 
             />
           </div>
         )}
-        {props.list.length === 0 ? (
+        {(props.list.length > 0 || drawings.length > 0) && (
+          <div className="chips note-chips" role="tablist" aria-label={t.notes.show}>
+            <select className="field note-sort" value={sort} aria-label={t.notes.sortBy} title={t.notes.sortBy} onChange={e => setSort(e.target.value as NoteSort)}>
+              {NOTE_SORTS.map(s => (
+                <option key={s} value={s}>
+                  {t.notes.sorts[s]}
+                </option>
+              ))}
+            </select>
+            <button role="tab" aria-selected={!tag && !pinnedOnly && !drawingsOnly} className={`chip${!tag && !pinnedOnly && !drawingsOnly ? " active" : ""}`} onClick={() => setOnly("")}>
+              {t.common.all}
+            </button>
+            <button role="tab" aria-selected={drawingsOnly} className={`chip${drawingsOnly ? " active" : ""}`} onClick={() => setOnly(drawingsOnly ? "" : "drawings")}>
+              <PenTool size={13} /> {t.drawings.title} {drawings.length > 0 && <span className="muted mono small">{drawings.length}</span>}
+            </button>
+            {anyPinned && (
+              <button role="tab" aria-selected={pinnedOnly} className={`chip${pinnedOnly ? " active" : ""}`} onClick={() => setOnly(pinnedOnly ? "" : "pinned")}>
+                <Pin size={13} /> {t.notes.pinnedChip}
+              </button>
+            )}
+            {tags.map(x => (
+              <button key={x.tag} role="tab" aria-selected={tag === x.tag} className={`chip${tag === x.tag ? " active" : ""}`} onClick={() => setOnly(tag === x.tag ? "" : `#${x.tag}`)}>
+                #{x.tag} <span className="muted mono small">{x.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {drawingsOnly ? (
+          <DrawingList list={drawings} />
+        ) : props.list.length === 0 ? (
           <p className="muted empty-note">{t.notes.empty}</p>
         ) : shown.length === 0 ? (
           <p className="muted empty-note">{t.notes.noMatch}</p>
@@ -163,6 +308,7 @@ export function NotesView(props: { list: FullNote[]; openPath?: { path: string; 
             onBack={() => setOpen(null)}
             removeIfEmpty
             autoFocus={open.isNew}
+            footer={<Backlinks list={props.list} path={open.path} onOpen={path => setOpen({ path, isNew: false })} />}
             actions={f => {
               const pinned = f.data().pinned === true;
               const label = pinned ? t.notes.unpin : t.notes.pin;

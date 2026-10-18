@@ -58,7 +58,7 @@ function ItemRow({
 }
 
 export function InboxView({ items, openPath }: { items: Note[]; openPath?: { path: string; key: number } }) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const [open, setOpen] = useState<{ path: string; isNew: boolean } | null>(null);
   const [menu, setMenu] = useState<Note | null>(null);
 
@@ -82,6 +82,7 @@ export function InboxView({ items, openPath }: { items: Note[]; openPath?: { pat
   };
 
   const act = async (path: string, action: Action) => {
+    if (action === "delete" && !(await confirmDelete())) return;
     try {
       await flushAll(); // the open editor writes its last edits first
       if (open?.path === path) setOpen(null);

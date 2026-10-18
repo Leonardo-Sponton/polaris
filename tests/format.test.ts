@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EditorSelection, EditorState } from "@codemirror/state";
-import { formatSpec, type Format } from "../src/editor/format";
+import { CARET, formatSpec, type Format } from "../src/editor/format";
 
 const TABLE = "| A | B |\n| --- | --- |\n|  |  |";
 
@@ -60,5 +60,9 @@ describe("quick formatting", () => {
     expect(run("Text^", "line")).toBe("Text\n\n---\n^");
     expect(run("Text\n^", "line")).toBe("Text\n\n---\n^");
     expect(run("^", "table")).toBe(TABLE + "\n^");
+    // The table of the app selects its first title, ready to be typed over.
+    const s = EditorState.create({ doc: "" });
+    const next = s.update(formatSpec(s, "table", `| ${CARET}A${CARET} | B |\n| --- | --- |`)).state;
+    expect(next.sliceDoc(next.selection.main.from, next.selection.main.to)).toBe("A");
   });
 });

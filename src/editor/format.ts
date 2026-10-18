@@ -6,6 +6,7 @@ import { EditorSelection, type EditorState, type TransactionSpec } from "@codemi
 export type Format =
   | "h1"
   | "h2"
+  | "h3"
   | "bold"
   | "italic"
   | "strike"
@@ -16,10 +17,31 @@ export type Format =
   | "code"
   | "link"
   | "line"
-  | "table";
+  | "table"
+  | "highlight"
+  | "comment"
+  | "math"
+  | "wiki"
+  | "embed"
+  | "callout"
+  | "codeblock"
+  | "mathblock"
+  | "mermaid"
+  | "footnote";
 
-const WRAP: Partial<Record<Format, string>> = { bold: "**", italic: "*", strike: "~~", code: "`" };
-const PREFIX: Partial<Record<Format, string>> = { h1: "# ", h2: "## ", list: "- ", numbered: "1. ", todo: "- [ ] ", quote: "> " };
+const WRAP: Partial<Record<Format, string>> = { bold: "**", italic: "*", strike: "~~", code: "`", highlight: "==", comment: "%%", math: "$" };
+const PREFIX: Partial<Record<Format, string>> = { h1: "# ", h2: "## ", h3: "### ", list: "- ", numbered: "1. ", todo: "- [ ] ", quote: "> " };
+/** Where the caret goes in a block (a character that is never typed); two of them select the text between. */
+export const CARET = "\u0000";
+
+/** Blocks written after the caret line; CARET is where the caret goes (at the end when none). */
+const BLOCKS: Partial<Record<Format, string>> = {
+  line: "---",
+  callout: `> [!note] ${CARET}\n> `,
+  codeblock: `\`\`\`${CARET}\n\n\`\`\``,
+  mathblock: `$$\n${CARET}\n$$`,
+  mermaid: `\`\`\`mermaid\nflowchart LR\n    A[${CARET}Start] --> B[End]\n\`\`\``,
+};
 /** A block marker a line may already start with: a new one replaces it instead of piling up. */
 const BLOCK = /^(#{1,6} |[-*+] \[[ xX]\] |[-*+] |\d+[.)] |> )/;
 
@@ -30,7 +52,59 @@ export function formatSpec(state: EditorState, f: Format, table: string): Transa
   const prefix = PREFIX[f];
   if (prefix) return prefixSpec(state, f, prefix);
   if (f === "link") return linkSpec(state);
-  return blockSpec(state, f === "line" ? "---" : table);
+  if (f === "wiki" || f === "embed") return insertAround(state, f === "wiki" ? "[[" : "![[", "]]");
+  if (f === "footnote") return footnoteSpec(state);
+  return blockSpec(state, BLOCKS[f] ?? table);
+}
+
+/** "[[" + selection or caret + "]]" (the "[[" list of titles opens after it). */
+function insertAround(state: EditorState, open: string, close: string): TransactionSpec {
+  return state.changeByRange(r => ({
+    changes: [
+      { from: r.from, insert: open },
+      { from: r.to, insert: close },
+    ],
+    range: EditorSelection.range(r.from + open.length, r.to + open.length),
+  }));
+}
+
+/** [^n] at the caret (the next free number) and its "[^n]: " line at the end, caret there. */
+export function footnoteSpec(state: EditorState): TransactionSpec {
+  const text = state.doc.toString();
+  let n = 1;
+  for (const m of text.matchAll(/\[\^(\d+)\]/g)) n = Math.max(n, Number(m[1]) + 1);
+  const at = state.selection.main.head;
+  const ref = `[^${n}]`;
+  const tail = text.endsWith("\n") ? "" : "\n";
+  const sep = /\n\[\^[^\]]+\]:[^\n]*\n?$/.test(text) ? "" : "\n";
+  const def = `${tail}${sep}[^${n}]: `;
+  return {
+    changes: [
+      { from: at, insert: ref },
+      { from: text.length, insert: def },
+    ],
+    selection: EditorSelection.cursor(text.length + ref.length + def.length),
+    scrollIntoView: true,
+  };
+}
+
+/**
+ * Ctrl+L: a line becomes a to-do, a to-do is checked, a checked one is unchecked (like
+ * Obsidian's "Toggle checkbox status").
+ */
+export function checkboxSpec(state: EditorState): TransactionSpec {
+  const lines = new Set<number>();
+  for (const r of state.selection.ranges) for (let n = state.doc.lineAt(r.from).number; n <= state.doc.lineAt(r.to).number; n++) lines.add(n);
+  const changes = [...lines].map(n => {
+    const l = state.doc.line(n);
+    const m = /^(\s*)(?:([-*+]) (\[([ xX])\] )?)?/.exec(l.text)!;
+    const from = l.from + m[1].length;
+    if (m[3]) return { from: from + 3, to: from + 4, insert: m[4] === " " ? "x" : " " };
+    if (m[2]) return { from: from + 2, insert: "[ ] " };
+    return { from, insert: "- [ ] " };
+  });
+  const set = state.changes(changes);
+  return { changes: set, selection: state.selection.map(set, 1) };
 }
 
 /**
@@ -139,9 +213,19 @@ function blockSpec(state: EditorState, block: string): TransactionSpec {
   const line = state.doc.lineAt(state.selection.main.head);
   const prev = line.number > 1 ? state.doc.line(line.number - 1).text : "";
   const before = line.text.trim() ? "\n\n" : prev.trim() ? "\n" : "";
-  const insert = `${before}${block}\n`;
+  const caret = block.includes(CARET) ? block.indexOf(CARET) : block.length;
+  const end = block.indexOf(CARET, caret + 1);
+  const body = block.replaceAll(CARET, "");
+  const insert = `${before}${body}\n`;
+  // A line: the caret goes below it. Others: inside, where CARET was.
+  const at = line.to + before.length;
   return {
     changes: { from: line.to, insert },
-    selection: EditorSelection.cursor(line.to + insert.length),
+    selection:
+      caret === body.length
+        ? EditorSelection.cursor(line.to + insert.length)
+        : end > 0
+          ? EditorSelection.range(at + caret, at + end - 1)
+          : EditorSelection.cursor(at + caret),
   };
 }

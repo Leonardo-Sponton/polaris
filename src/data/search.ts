@@ -32,6 +32,13 @@ export function fold(text: string): { folded: string; map: number[] } {
   let folded = "";
   const map: number[] = [];
   for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    // Plain ASCII (most of any text, and all of code) needs no accent folding.
+    if (c < 128) {
+      folded += c >= 65 && c <= 90 ? String.fromCharCode(c + 32) : text[i];
+      map.push(i);
+      continue;
+    }
     const f = text[i].normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     folded += f;
     for (let k = 0; k < f.length; k++) map.push(i);

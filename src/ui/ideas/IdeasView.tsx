@@ -69,7 +69,7 @@ export function IdeasView(props: {
   onOpenProject(path: string): void;
 }) {
   const { ideas, openPath } = props;
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [filter, setFilter] = useState<Filter>({});
@@ -139,6 +139,7 @@ export function IdeasView(props: {
   };
 
   const remove = async (i: Idea) => {
+    if (!(await confirmDelete(i.title))) return;
     try {
       await flushAll();
       if (open === i.path) setOpen(null);

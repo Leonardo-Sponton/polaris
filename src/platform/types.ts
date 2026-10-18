@@ -22,6 +22,18 @@ export interface SyncBridge {
 }
 
 // What each launcher (Electron, Android) gives the app besides file access.
+/** Local AI on the PC (electron/ai.cjs): drafts flashcards from a study text. */
+export interface AiBridge {
+  /** The chosen GGUF model file, and whether it is still there. */
+  get(): Promise<{ model: string | null; exists: boolean }>;
+  chooseModel(): Promise<string | null>;
+  clearModel(): Promise<void>;
+  /** Rejects with "no-model" when no model is set, "busy" while another run goes on. */
+  cards(o: { text: string; count: number; lang: "en" | "pt" }): Promise<{ front: string; back: string }[]>;
+  cancel(): Promise<void>;
+  onProgress(cb: (p: { done: number; total: number }) => void): () => void;
+}
+
 export interface Platform {
   name: "electron" | "android" | "memory";
   /** Absolute data folder, or null before the first-run choice. */
@@ -34,8 +46,26 @@ export interface Platform {
   hasFileAccess?(): Promise<boolean>;
   openFileAccessSettings?(): Promise<void>;
   openDataFolder?(): Promise<void>;
+  /** PC: opens .polaris/snippets in the file manager (CSS snippets). */
+  openSnippetsFolder?(): Promise<void>;
+  /** PC: font families installed on the system. */
+  listFonts?(): Promise<string[]>;
+  /** PC: zoom of the whole page (1 = 100 %). Without it the page uses CSS zoom. */
+  setZoom?(z: number): Promise<void>;
+  /** PC: Ctrl+= / Ctrl+- / Ctrl+0 pressed (kept from the page by the main process). */
+  onZoomKey?(cb: (key: string) => void): () => void;
   /** Opens a web link in the system browser (http/https only). */
   openLink?(url: string): Promise<void>;
+  /** Opens a file of the data folder in the system's app for its type (assignment files). */
+  openFile?(path: string): Promise<void>;
+  /** PC only. */
+  ai?: AiBridge;
+  /** Prints the page (which then shows only the note, see ui/pdf.ts) to a PDF. PC: asks where
+   *  to save and gives the file's path (null if canceled). Android: opens the system print
+   *  screen ("Save as PDF") and gives null. */
+  printPdf?(o: { name: string; pageSize: string; landscape: boolean }): Promise<string | null>;
+  /** PC: opens the PDF saved last. */
+  openLastPdf?(): Promise<void>;
   /** Saves a backup .zip outside the data folder. Returns where it went, or null if canceled. */
   saveBackup?(name: string, data: Uint8Array): Promise<string | null>;
   storage: Storage;

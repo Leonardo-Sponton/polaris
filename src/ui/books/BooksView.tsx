@@ -94,7 +94,7 @@ interface Props {
 }
 
 export function BooksView({ books, quotes, openPath }: Props) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [quote, setQuote] = useState<string | null>(null);
   const [tab, setTab] = useState<BookStatus>("reading");
@@ -171,6 +171,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
     change(b, statusPatch(b.note.data, s, { reason }), t.books.movedTo(t.books.status[s]));
 
   const remove = async (b: Book) => {
+    if (!(await confirmDelete(b.title))) return;
     try {
       await flushAll();
       if (open === b.path) openBook(null);
@@ -196,6 +197,7 @@ export function BooksView({ books, quotes, openPath }: Props) {
   };
 
   const removeQuote = async (path: string) => {
+    if (!(await confirmDelete())) return;
     try {
       await flushAll();
       setQuote(null);

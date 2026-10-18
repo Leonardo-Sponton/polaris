@@ -258,7 +258,7 @@ function ProjectForm(props: {
           <span className="fl">{t.projects.notes}</span>
         </div>
         <div className="task-notes">
-          <Editor
+          <Editor path={note.path}
             text={split.rest}
             placeholder={t.projects.notesPlaceholder}
             onSaveNow={f.saveNow}

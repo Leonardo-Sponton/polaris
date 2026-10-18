@@ -37,12 +37,13 @@ interface Props {
 }
 
 export function IdeaEditor({ path, onBack, onGone, onOpenProject }: Props) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const f = useNoteFile(path);
   useBack(true, onBack);
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
   const remove = async () => {
+    if (!(await confirmDelete())) return;
     try {
       await f.saveNow();
       const trashed = await moveToTrash(notes.storage, path);
@@ -192,7 +193,7 @@ function IdeaForm({ file: f, note, onOpenProject }: { file: NoteFile; note: Note
           <span className="fl">{t.ideas.draft}</span>
         </div>
         <div className="task-notes">
-          <Editor
+          <Editor path={note.path}
             key={restRev}
             text={rest}
             autoFocus={restRev > 0}

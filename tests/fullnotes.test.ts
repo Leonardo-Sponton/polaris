@@ -62,3 +62,25 @@ describe("notes", () => {
     expect(await loadFullNotes(notes)).toHaveLength(0);
   });
 });
+
+import { noteTags, sortNotes, tagsOf } from "../src/data/fullnotes";
+
+describe("notes filter", () => {
+  it("finds #tags outside code and headings", () => {
+    expect(tagsOf("# Title\nTrip #Travel and #school/ads, not a#b\n`#code`\n```\n#inside\n```\n- #todo")).toEqual(["school/ads", "todo", "travel"]);
+  });
+
+  it("orders, keeps pinned on top and filters by tag or pinned", async () => {
+    const notes = new Notes(new MemoryStorage());
+    const a = toFullNote(await createFullNote(notes, "# Banana\n#food\n", new Date(2026, 9, 1)));
+    const b = toFullNote(await createFullNote(notes, "# apple\n#food #school/ads\n", new Date(2026, 9, 2)));
+    const c = { ...toFullNote(await createFullNote(notes, "# Cherry\n#school\n", new Date(2026, 9, 3))), pinned: true };
+    const list = [a, b, c];
+    expect(sortNotes(list, "oldest").map(n => n.title)).toEqual(["Cherry", "Banana", "apple"]);
+    expect(sortNotes(list, "newest").map(n => n.title)).toEqual(["Cherry", "apple", "Banana"]);
+    expect(sortNotes(list, "title").map(n => n.title)).toEqual(["Cherry", "apple", "Banana"]);
+    expect(filterNotes(list, "", { tag: "school" }).map(n => n.title)).toEqual(["apple", "Cherry"]);
+    expect(filterNotes(list, "", { pinned: true }).map(n => n.title)).toEqual(["Cherry"]);
+    expect(noteTags(list)).toEqual([{ tag: "food", count: 2 }, { tag: "school", count: 1 }, { tag: "school/ads", count: 1 }]);
+  });
+});

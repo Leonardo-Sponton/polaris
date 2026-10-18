@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Dialog } from "./Dialog";
+import { mathHTML } from "../editor/render";
 import { t } from "../i18n";
 
 // A cheat sheet for the Markdown the editor understands: what to type, and how it looks.
@@ -46,11 +47,14 @@ export function MarkdownGuide({ onClose }: { onClose(): void }) {
           <Row src={`~~${g.strike}~~`}>
             <span className="cm-hm-strike">{g.strike}</span>
           </Row>
+          <Row src={`==${g.highlight}==`}>
+            <span className="cm-hm-hl">{g.highlight}</span>
+          </Row>
           <Row src={`- ${g.list}`}>
-            <span className="cm-hm-bullet">-</span> {g.list}
+            <span className="cm-hm-bullet">•</span> {g.list}
           </Row>
           <Row src={`1. ${g.numbered}`}>
-            <span className="cm-hm-bullet">1.</span> {g.numbered}
+            <span className="cm-hm-number">1.</span> {g.numbered}
           </Row>
           <Row src={`- [ ] ${g.todo}`}>
             <span className="cm-hm-check" /> {g.todo}
@@ -61,11 +65,64 @@ export function MarkdownGuide({ onClose }: { onClose(): void }) {
           <Row src={`> ${g.quote}`}>
             <span className="cm-hm-quote md-quote">{g.quote}</span>
           </Row>
+          <Row src={`> [!tip] ${g.calloutTitle}\n> ${g.calloutText}`}>
+            <span className="cm-hm-callout cm-hm-callout-tip md-quote">
+              <span className="cm-hm-callout-title">{g.calloutTitle}</span>
+              <br />
+              {g.calloutText}
+            </span>
+          </Row>
           <Row src={`\`${g.code}\``}>
             <span className="cm-hm-code">{g.code}</span>
           </Row>
+          <Row src={"```java\nint x = 1;\n```"}>
+            <span className="cm-hm-code">
+              <span className="cm-tk-kw">int</span> x = <span className="cm-tk-num">1</span>;
+            </span>
+            <span className="muted small"> {g.codeBlock}</span>
+          </Row>
           <Row src={`[${g.link}](https://…)`}>
             <span className="cm-hm-link">{g.link}</span>
+          </Row>
+          <Row src={`#${g.tag}`}>
+            <span className="cm-hm-tag">#{g.tag}</span>
+          </Row>
+          <Row src={`[[${g.wiki}]]`}>
+            <span className="cm-hm-wiki">{g.wiki}</span>
+            <span className="muted small"> {g.wikiHint}</span>
+          </Row>
+          <Row src={`[[${g.wiki}|${g.wikiAlias}]]`}>
+            <span className="cm-hm-wiki">{g.wikiAlias}</span>
+          </Row>
+          <Row src={`![[${g.wiki}]]`}>
+            <span className="muted small">{g.embedHint}</span>
+          </Row>
+          <Row src="![[foto.png|300]]">
+            <span className="muted small">{g.imageHint}</span>
+          </Row>
+          <Row src="$x^2 + y^2$">
+            <span className="cm-hm-math" dangerouslySetInnerHTML={{ __html: mathHTML("x^2 + y^2", false) }} />
+          </Row>
+          <Row src={"$$\n\\frac{a}{b}\n$$"}>
+            <span className="cm-hm-math" dangerouslySetInnerHTML={{ __html: mathHTML("\\frac{a}{b}", true) }} />
+          </Row>
+          <Row src={"```mermaid\nflowchart LR\n  A --> B\n```"}>
+            <span className="muted small">{g.diagramHint}</span>
+          </Row>
+          <Row src={`${g.footnoteWord}[^1]\n\n[^1]: ${g.footnoteText}`}>
+            {g.footnoteWord}
+            <sup className="cm-hm-fn">1</sup>
+          </Row>
+          <Row src={`%%${g.comment}%%`}>
+            <span className="cm-hm-comment">{g.comment}</span>
+          </Row>
+          <Row src={`<u>${g.underline}</u>`}>
+            <span className="cm-hm-html-u">{g.underline}</span>
+          </Row>
+          <Row src={`> [!faq]- ${g.foldTitle}\n> …`}>
+            <span className="cm-hm-callout cm-hm-callout-warn md-quote">
+              <span className="cm-hm-callout-title">▸ {g.foldTitle}</span>
+            </span>
           </Row>
           <Row src="---">
             <span className="muted">{g.line}</span>

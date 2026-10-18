@@ -254,7 +254,7 @@ function TaskForm({ file: f, note, lists, projects, ensureList, onFinish, onReop
           </div>
         </div>
         <div className="task-notes">
-          <Editor
+          <Editor path={note.path}
             key={notesRev}
             text={rest}
             autoFocus={notesRev > 0}

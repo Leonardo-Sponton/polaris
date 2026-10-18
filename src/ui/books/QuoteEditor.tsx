@@ -166,7 +166,7 @@ function QuoteForm({ file: f, note, book }: { file: NoteFile; note: Note; book: 
           <span className="fl">{t.books.myComment}</span>
         </div>
         <div className="task-notes">
-          <Editor
+          <Editor path={note.path}
             text={split.comment}
             placeholder={t.books.commentPlaceholder}
             onSaveNow={f.saveNow}

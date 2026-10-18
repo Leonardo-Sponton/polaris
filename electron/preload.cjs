@@ -1,5 +1,5 @@
 // Bridge between the page and the main process. Only these functions are visible to the page.
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webFrame } = require("electron");
 
 const call = name => (...args) => ipcRenderer.invoke(name, ...args);
 
@@ -7,7 +7,18 @@ contextBridge.exposeInMainWorld("polaris", {
   config: { get: call("config:get"), setDataDir: call("config:setDataDir") },
   pickFolder: call("dialog:pickFolder"),
   openFolder: call("shell:openFolder"),
+  openSnippets: call("shell:openSnippets"),
+  listFonts: call("fonts:list"),
+  printPdf: call("print:pdf"),
+  openLastPdf: call("print:openLast"),
+  setZoom: z => webFrame.setZoomFactor(Number(z) || 1),
+  onZoomKey: cb => {
+    const listener = (_e, key) => cb(key);
+    ipcRenderer.on("zoom:key", listener);
+    return () => ipcRenderer.removeListener("zoom:key", listener);
+  },
   openLink: call("shell:openLink"),
+  openFile: call("shell:openFile"),
   closeWindow: call("capture:close"),
   saveBackup: call("dialog:saveBackup"),
   setReminders: call("reminders:set"),
@@ -16,6 +27,18 @@ contextBridge.exposeInMainWorld("polaris", {
     const listener = (_e, path) => cb(path);
     ipcRenderer.on("reminder:open", listener);
     return () => ipcRenderer.removeListener("reminder:open", listener);
+  },
+  ai: {
+    get: call("ai:get"),
+    chooseModel: call("ai:chooseModel"),
+    clearModel: call("ai:clearModel"),
+    cards: call("ai:cards"),
+    cancel: call("ai:cancel"),
+    onProgress: cb => {
+      const listener = (_e, p) => cb(p);
+      ipcRenderer.on("ai:progress", listener);
+      return () => ipcRenderer.removeListener("ai:progress", listener);
+    },
   },
   sync: {
     devices: call("sync:devices"),

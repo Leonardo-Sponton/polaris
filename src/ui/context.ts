@@ -16,9 +16,13 @@ export interface AppCtx {
   settings: Settings;
   updateSettings(s: Partial<Settings>): Promise<void>;
   toast(t: Omit<Toast, "id">): void;
+  /** Asks before deleting (a tap by mistake must not delete). `what` = the item's name, if any. */
+  confirmDelete(what?: string, text?: string): Promise<boolean>;
   /** Changes whenever data on disk changes; screens reload when it does. */
   version: number;
   bump(): void;
+  /** Opens a drawing (drawings/x.excalidraw.md) in the drawing editor, over everything. */
+  openDrawing(path: string): void;
 }
 
 export const Ctx = createContext<AppCtx | null>(null);

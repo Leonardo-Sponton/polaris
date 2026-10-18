@@ -369,11 +369,12 @@ interface PageProps extends DayProps {
 
 function ReviewPage(props: PageProps) {
   const { path, bar } = props;
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const f = useNoteFile(path, { removeIfEmpty: isEmptyReview });
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
   const remove = async () => {
+    if (!(await confirmDelete())) return;
     try {
       await f.saveNow();
       const trashed = await moveToTrash(notes.storage, path);

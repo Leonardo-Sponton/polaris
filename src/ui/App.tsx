@@ -8,7 +8,11 @@ import { FileAccess, FirstRun } from "./FirstRun";
 import { Shell, type OpenRequest } from "./Shell";
 import { CaptureNotReady, CaptureWindow } from "./CaptureWindow";
 import { SyncLock } from "./SyncView";
+import { Confirm } from "./Dialog";
+import { DrawingEditor } from "./drawing/DrawingEditor";
 import { lang, setLang, t } from "../i18n";
+import { applyAppearance, applySnippets } from "./appearance";
+import { clamp, DEFAULTS, LIMITS, type Appearance } from "../data/appearance";
 
 // `#capture`: the small quick capture window (Linux, `polaris --capture`).
 const CAPTURE_ONLY = location.hash === "#capture";
@@ -29,19 +33,16 @@ type Boot =
   | { step: "ready"; settings: Settings }
   | { step: "error"; message: string };
 
-function applyTheme(theme: Settings["theme"]) {
-  const dark = theme === "dark" || (theme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.dataset.theme = theme === "minimal" ? "minimal" : dark ? "dark" : "light";
-}
-
 export function App({ platform }: { platform: Platform }) {
   const [boot, setBoot] = useState<Boot>({ step: "loading" });
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [ask, setAsk] = useState<{ text: string; done(ok: boolean): void } | null>(null);
   const [version, setVersion] = useState(0);
   const [captureKey, setCaptureKey] = useState(0);
   const [openRequest, setOpenRequest] = useState<OpenRequest>();
   // After a language change the screens are drawn anew; this keeps the user in Settings.
   const [startArea, setStartArea] = useState<"settings">();
+  const [drawing, setDrawing] = useState<string | null>(null);
   const nextId = useRef(1);
   const notes = useMemo(() => new Notes(platform.storage), [platform]);
 
@@ -51,7 +52,8 @@ export function App({ platform }: { platform: Platform }) {
       if (platform.hasFileAccess && !(await platform.hasFileAccess())) return setBoot({ step: "access" });
       await initDataFolder(platform.storage);
       const settings = await loadSettings(platform.storage);
-      applyTheme(settings.theme);
+      applyAppearance(settings.theme, settings.appearance, platform);
+      void applySnippets(platform, settings.appearance?.snippets);
       applyLang(settings.language, platform);
       setBoot({ step: "ready", settings });
     } catch (e) {
@@ -111,11 +113,69 @@ export function App({ platform }: { platform: Platform }) {
 
   const bump = useCallback(() => setVersion(v => v + 1), []);
 
+  // PC: Ctrl+= / Ctrl+- / Ctrl+0 size the interface; Ctrl+wheel sizes the text of a note (or
+  // the interface elsewhere). Seen at once, saved a moment after the last step.
+  const live = useRef<{ settings: Settings; update: AppCtx["updateSettings"] } | null>(null);
+  useEffect(() => {
+    if (platform.name !== "electron") return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let pending: Appearance | null = null;
+    const step = (patch: (a: Appearance) => Partial<Appearance>) => {
+      const cur = live.current;
+      if (!cur) return;
+      const a = { ...(pending ?? cur.settings.appearance ?? {}) };
+      Object.assign(a, patch(a));
+      for (const k of Object.keys(a) as (keyof Appearance)[]) if (a[k] === undefined) delete a[k];
+      pending = a;
+      applyAppearance(cur.settings.theme, a);
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const next = pending!;
+        pending = null;
+        void live.current?.update({ appearance: next });
+      }, 400);
+    };
+    const zoom = (d: number) => (a: Appearance) => {
+      const z = d === 0 ? 1 : Math.round(clamp((a.zoom ?? 1) + d, LIMITS.zoom) * 100) / 100;
+      return { zoom: z === 1 ? undefined : z };
+    };
+    const onZoomKey = (key: string) => step(zoom(key === "-" ? -0.1 : key === "0" ? 0 : 0.1));
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const up = e.deltaY < 0;
+      const inNote = (e.target as Element | null)?.closest?.(".cm-editor");
+      if (inNote && live.current?.settings.appearance?.ctrlWheel !== false)
+        step(a => {
+          const size = clamp((a.textSize ?? DEFAULTS.textSize) + (up ? 1 : -1), LIMITS.textSize);
+          return { textSize: size === DEFAULTS.textSize ? undefined : size };
+        });
+      else step(zoom(up ? 0.1 : -0.1));
+    };
+    const stopKeys = platform.onZoomKey?.(onZoomKey);
+    addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      clearTimeout(timer);
+      stopKeys?.();
+      removeEventListener("wheel", onWheel);
+    };
+  }, [platform]);
+
   const toast = useCallback((t: Omit<Toast, "id">) => {
     const id = nextId.current++;
     setToasts(list => [...list.slice(-2), { ...t, id }]);
     setTimeout(() => setToasts(list => list.filter(x => x.id !== id)), t.action ? 6000 : 3500);
   }, []);
+
+  const confirmDelete = useCallback(
+    (what = "", text?: string) =>
+      new Promise<boolean>(done => setAsk({ text: text ?? t.common.deleteText(what.trim()), done })),
+    [],
+  );
+  const answer = (ok: boolean) => {
+    ask?.done(ok);
+    setAsk(null);
+  };
 
   if (boot.step === "loading") return null;
   if (boot.step === "error")
@@ -141,7 +201,8 @@ export function App({ platform }: { platform: Platform }) {
     updateSettings: async s => {
       const settings = { ...boot.settings, ...s };
       await saveSettings(platform.storage, settings);
-      applyTheme(settings.theme);
+      applyAppearance(settings.theme, settings.appearance);
+      if (settings.appearance?.snippets !== boot.settings.appearance?.snippets) void applySnippets(platform, settings.appearance?.snippets);
       if (settings.language !== boot.settings.language) {
         applyLang(settings.language, platform);
         setStartArea("settings");
@@ -150,15 +211,20 @@ export function App({ platform }: { platform: Platform }) {
       setBoot({ step: "ready", settings });
     },
     toast,
+    confirmDelete,
     version,
     bump,
+    openDrawing: path => void flushAll().then(() => setDrawing(path)),
   };
+  live.current = { settings: boot.settings, update: ctx.updateSettings };
 
   return (
     <Ctx.Provider value={ctx}>
       {/* A new language draws every screen again (they read `t` while rendering). */}
       {CAPTURE_ONLY ? <CaptureWindow key={lang} /> : <Shell key={lang} captureKey={captureKey} startArea={startArea} openRequest={openRequest} />}
       <SyncLock />
+      {drawing && <DrawingEditor key={drawing} path={drawing} onClose={() => setDrawing(null)} />}
+      {ask && <Confirm title={t.common.deleteTitle} text={ask.text} okLabel={t.common.delete} danger onOk={() => answer(true)} onClose={() => answer(false)} />}
       <div className="toasts" aria-live="polite">
         {toasts.map(t => (
           <div key={t.id} className={`toast${t.error ? " error" : ""}`}>

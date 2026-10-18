@@ -8,7 +8,7 @@ import { useApp } from "../context";
 // first, saves, reloads and offers Undo where it makes sense.
 
 export function useTaskActions(onRemoved?: (path: string) => void) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
   const run = async (job: () => Promise<unknown>) => {
     try {
@@ -32,7 +32,8 @@ export function useTaskActions(onRemoved?: (path: string) => void) {
         });
       }),
     reopen: (path: string) => run(() => reopenTask(notes, path)),
-    remove: (path: string) =>
+    remove: async (path: string) =>
+      (await confirmDelete()) &&
       run(async () => {
         const trashed = await moveToTrash(notes.storage, path);
         onRemoved?.(path);

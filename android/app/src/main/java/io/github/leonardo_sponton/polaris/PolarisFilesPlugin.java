@@ -153,6 +153,71 @@ public class PolarisFilesPlugin extends Plugin {
         call.resolve();
     }
 
+    // ---- PDF export ----
+
+    /**
+     * Opens Android's print screen for the page as it is now; the page shows only the note to
+     * export when printed (its print CSS). "Save as PDF" there writes the file. "printDone" tells
+     * the page when the print screen is closed, so it can take the note away again.
+     */
+    @PluginMethod
+    public void printPage(PluginCall call) {
+        String name = call.getString("name", "Polaris");
+        boolean landscape = Boolean.TRUE.equals(call.getBoolean("landscape", false));
+        String size = call.getString("pageSize", "A4");
+        getActivity().runOnUiThread(() -> {
+            try {
+                android.print.PrintManager pm = (android.print.PrintManager) getActivity().getSystemService(Context.PRINT_SERVICE);
+                android.print.PrintDocumentAdapter inner = getBridge().getWebView().createPrintDocumentAdapter(name);
+                android.print.PrintDocumentAdapter adapter = new android.print.PrintDocumentAdapter() {
+                    @Override
+                    public void onStart() {
+                        inner.onStart();
+                    }
+
+                    @Override
+                    public void onLayout(android.print.PrintAttributes oldAttrs, android.print.PrintAttributes newAttrs,
+                            android.os.CancellationSignal cancel, LayoutResultCallback cb, android.os.Bundle extras) {
+                        inner.onLayout(oldAttrs, newAttrs, cancel, cb, extras);
+                    }
+
+                    @Override
+                    public void onWrite(android.print.PageRange[] pages, android.os.ParcelFileDescriptor dest,
+                            android.os.CancellationSignal cancel, WriteResultCallback cb) {
+                        inner.onWrite(pages, dest, cancel, cb);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        inner.onFinish();
+                        notifyListeners("printDone", new JSObject());
+                    }
+                };
+                android.print.PrintAttributes.MediaSize media = mediaSize(size);
+                if (landscape) media = media.asLandscape();
+                android.print.PrintAttributes attrs = new android.print.PrintAttributes.Builder()
+                        .setMediaSize(media)
+                        .setMinMargins(android.print.PrintAttributes.Margins.NO_MARGINS)
+                        .build();
+                pm.print(name, adapter, attrs);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject(e.getMessage());
+            }
+        });
+    }
+
+    private static android.print.PrintAttributes.MediaSize mediaSize(String name) {
+        switch (name) {
+            case "A3": return android.print.PrintAttributes.MediaSize.ISO_A3;
+            case "A5": return android.print.PrintAttributes.MediaSize.ISO_A5;
+            case "Letter": return android.print.PrintAttributes.MediaSize.NA_LETTER;
+            case "Legal": return android.print.PrintAttributes.MediaSize.NA_LEGAL;
+            case "Tabloid": return android.print.PrintAttributes.MediaSize.NA_TABLOID;
+            default: return android.print.PrintAttributes.MediaSize.ISO_A4;
+        }
+    }
+
     // ---- Web links ----
 
     /**
@@ -175,6 +240,31 @@ public class PolarisFilesPlugin extends Plugin {
             call.resolve();
         } catch (android.content.ActivityNotFoundException e) {
             call.reject("No app can open this link");
+        }
+    }
+
+    /** Opens a data-folder file (an assignment's PDF, a photo…) in the app chosen for its type. */
+    @PluginMethod
+    public void openFile(PluginCall call) {
+        try {
+            Path p = resolve(call, "path");
+            if (!Files.isRegularFile(p)) {
+                call.reject("Not a file");
+                return;
+            }
+            String name = p.getFileName().toString();
+            String ext = name.contains(".") ? name.substring(name.lastIndexOf('.') + 1).toLowerCase(java.util.Locale.ROOT) : "";
+            String mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+            Uri uri = androidx.core.content.FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", p.toFile());
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, mime != null ? mime : "*/*");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getActivity().startActivity(Intent.createChooser(i, name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            call.resolve();
+        } catch (IOException | IllegalArgumentException e) {
+            call.reject(e.getMessage());
+        } catch (android.content.ActivityNotFoundException e) {
+            call.reject("No app can open this file");
         }
     }
 

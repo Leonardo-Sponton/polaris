@@ -39,7 +39,10 @@ Um só app para <b>Linux</b> e <b>Android</b>, 100% offline, com os dados guarda
 | **Hoje** | Campo de captura rápida, tarefas de hoje e atrasadas, "Esta noite", pensamento do dia, citações para revisar, uma ideia antiga que volta à tona e o cartão do diário. Segure o botão Hoje para uma nova nota. |
 | **Tarefas** | Listas no estilo Things (Hoje, Próximas, A qualquer hora, Algum dia, Concluídas) e listas próprias; adição em uma linha (`pagar aluguel todo dia 5 #casa !1`), repetição, subtarefas, prioridade e lembretes (notificações no Android, bandeja no Linux). |
 | **Ideias** | Rascunhos com modelos e seções opcionais, tags, bloco 5W2H, checklist de viabilidade com nota, suposições mais arriscadas com como testar, e arquivo que guarda o motivo. |
-| **Notas** | Textos mais longos, do jeito que você escreveu: fixe no topo, filtre por palavras ou transforme um item da Entrada em nota. |
+| **Notas** | Textos mais longos, do jeito que você escreveu: fixe no topo, filtre por palavras ou #tags, ou transforme um item da Entrada em nota. Notas se ligam com `[[Título]]` e mostram quem aponta para elas. |
+| **Editor** | Markdown no estilo do Obsidian com prévia ao vivo em todo lugar: `[[links]]` e `![[incorporações]]` entre todas as áreas, imagens coladas ou arrastadas, callouts (recolhíveis), `$fórmulas$` (KaTeX), diagramas ```` ```mermaid ````, notas de rodapé, `%%comentários%%`, tabelas que se alinham sozinhas (Tab, Enter, linhas/colunas, ordenar, fórmulas), menu "/", localizar e substituir, sumário, modelos, propriedades, modo leitura, Ctrl+O para abrir qualquer nota e Ctrl+P para comandos. Exporte qualquer nota para PDF (tamanho da página, margens, orientação). |
+| **Desenhos** | Desenhos do [Excalidraw](https://excalidraw.com) mostrados dentro das notas com `![[nome.excalidraw]]` (ou `/desenho`), salvos no formato do plugin Excalidraw do Obsidian; importe os desenhos de um cofre do Obsidian. |
+| **Aparência** | Claro/escuro, esquemas de cores (Polaris, Minimal, Catppuccin, Nord, Gruvbox, Atom One), cor de destaque, fontes, tamanho do texto e da interface, largura da linha, estilo dos títulos, cores uma a uma por modo e seus próprios snippets CSS. |
 | **Projetos** | Transforme uma ideia num projeto que segue um fluxo: **Negócio** (guia de plano de negócio do Sebrae), **Startup de tecnologia** ou **Software**. Cada etapa tem orientação, notas, tarefas e uma decisão: seguir, pausar, encerrar ou refazer. |
 | **Livros** | Estante com capas, abas por situação de leitura, citações por página com seus comentários, revisão diária de citações e estatísticas de leitura. |
 | **Diário** | Uma entrada por dia com calendário, palavras de humor e seções opcionais; "Fechar o dia" em três perguntas. |
@@ -146,6 +149,20 @@ o app em si nunca acessa a internet.
 
 TypeScript, React e Vite · editor CodeMirror 6 com prévia do Markdown ao vivo · Electron (Linux) ·
 Capacitor com um pequeno plugin Java para acesso aos arquivos (Android) · Vitest.
+
+## Créditos
+
+O editor segue o Markdown do [Obsidian](https://obsidian.md) e se inspira, sem copiar código,
+nestes plugins do Obsidian: Advanced Tables e Recent Files (Tony Grosinger) e Remember cursor
+position (Dmitry Savosh). A edição de tabelas é feita pela
+[md-advanced-tables](https://github.com/tgrosinger/md-advanced-tables) (MIT), a biblioteca em que
+o Advanced Tables se baseia; as fórmulas pelo [KaTeX](https://katex.org) e os diagramas pelo
+[Mermaid](https://mermaid.js.org). Os desenhos usam o editor [Excalidraw](https://github.com/excalidraw/excalidraw)
+(MIT) e o formato de arquivo do plugin Excalidraw do Obsidian (Zsolt Viczián); a Aparência segue
+as configurações do Obsidian e o plugin Style Settings (mgmeyers), também só como ideia. Os
+esquemas de cores seguem [Catppuccin](https://catppuccin.com), [Nord](https://www.nordtheme.com),
+[Gruvbox](https://github.com/morhetz/gruvbox) e Atom One (todos MIT). Todas as bibliotecas incluídas e suas licenças estão em
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) e no app (Configurações → Licenças de código aberto).
 
 ## Licença
 

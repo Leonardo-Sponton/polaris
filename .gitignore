@@ -34,3 +34,6 @@ android/capacitor-cordova-android-plugins/
 # Data folders and backups
 Polaris/
 polaris-backup-*.zip
+public/excalidraw/
+docs/OBSIDIAN.md
+docs/STUDY.md

@@ -96,7 +96,8 @@ export function canKeepBoth(path: string): boolean {
   return (
     /^(inbox|todo|ideas|notes|thoughts)\/[^/]+\.md$/.test(path) ||
     /^books\/[^/]+\/quotes\/[^/]+\.md$/.test(path) ||
-    /^projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(path)
+    /^projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(path) ||
+    /^study\/[^/]+\/(materials|notes|exams)\/[^/]+\.md$/.test(path)
   );
 }
 

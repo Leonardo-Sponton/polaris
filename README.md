@@ -39,7 +39,10 @@ One app for <b>Linux</b> and <b>Android</b>, 100% offline, with your data kept a
 | **Today** | Quick capture field, today's and overdue tasks, "This Evening", thought of the day, quotes to review, an old idea resurfacing, the day's journal card. Hold the Today button for a new note. |
 | **To-do** | Things-style lists (Today, Upcoming, Anytime, Someday, Logbook) and your own lists; one-line quick add (`pay rent every month on the 5th #home !1`), recurrence, subtasks, priorities and reminders (Android notifications, Linux tray). |
 | **Ideas** | Drafts with templates and optional sections, tags, a 5W2H block, a viability checklist with a score, the riskiest assumptions with how to test them, and an archive that keeps the reason. |
-| **Notes** | Longer writing kept as you wrote it: pin to the top, filter by words, or turn an inbox item into a note. |
+| **Notes** | Longer writing kept as you wrote it: pin to the top, filter by words or #tags, or turn an inbox item into a note. Notes link to each other with `[[Title]]` and show what links back. |
+| **Editor** | Obsidian-flavored Markdown with live preview everywhere: `[[links]]` and `![[embeds]]` across all areas, pasted or dropped pictures, callouts (foldable), `$math$` (KaTeX), ```` ```mermaid ```` diagrams, footnotes, `%%comments%%`, tables that line themselves up (Tab, Enter, rows/columns, sort, formulas), a "/" menu, find & replace, outline, templates, properties, reading view, Ctrl+O to open any note and Ctrl+P for commands. Export any note to PDF (page size, margins, orientation). |
+| **Drawings** | [Excalidraw](https://excalidraw.com) drawings shown inside notes with `![[name.excalidraw]]` (or `/drawing`), saved in the Obsidian Excalidraw plugin's format; import the drawings of an Obsidian vault. |
+| **Appearance** | Light/dark, color schemes (Polaris, Minimal, Catppuccin, Nord, Gruvbox, Atom One), accent color, fonts, text and interface size, line width, heading style, single colors per mode and your own CSS snippets. |
 | **Projects** | Turn an idea into a project that follows a flow: **Business** (Sebrae's business plan guide), **Tech startup** or **Software**. Each step has guidance, notes, to-dos and a gate: go, hold, kill or recycle. |
 | **Books** | A shelf with covers, reading status tabs, quotes by page with your comments, a daily quote review and reading stats. |
 | **Journal** | One entry per day with a calendar, mood words and optional sections; "Close the day" in three questions. |
@@ -146,6 +149,20 @@ connection; the app itself never goes online.
 
 TypeScript, React and Vite · CodeMirror 6 editor with live Markdown preview · Electron (Linux) ·
 Capacitor with a small Java plugin for file access (Android) · Vitest.
+
+## Credits
+
+The editor follows [Obsidian](https://obsidian.md)'s Markdown and borrows ideas, not code, from
+these Obsidian plugins: Advanced Tables and Recent Files (Tony Grosinger) and Remember cursor
+position (Dmitry Savosh). Table editing is done by
+[md-advanced-tables](https://github.com/tgrosinger/md-advanced-tables) (MIT), the library
+Advanced Tables is built on; math by [KaTeX](https://katex.org) and diagrams by
+[Mermaid](https://mermaid.js.org). Drawings use the [Excalidraw](https://github.com/excalidraw/excalidraw)
+editor (MIT) and the file format of the Obsidian Excalidraw plugin (Zsolt Viczián); Appearance
+follows Obsidian's settings and the Style Settings plugin (mgmeyers), again ideas only. Color
+schemes follow [Catppuccin](https://catppuccin.com), [Nord](https://www.nordtheme.com),
+[Gruvbox](https://github.com/morhetz/gruvbox) and Atom One (all MIT). Every bundled library and its license is listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and in the app (Settings → Open-source licenses).
 
 ## License
 

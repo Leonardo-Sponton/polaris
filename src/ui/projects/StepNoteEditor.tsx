@@ -90,7 +90,7 @@ function StepNoteForm({ file: f, note, sections }: { file: NoteFile; note: Note;
           onKeyDown={e => e.key === "Enter" && (e.preventDefault(), (e.target as HTMLElement).blur())}
         />
         <div className="task-notes">
-          <Editor
+          <Editor path={note.path}
             key={restRev}
             text={rest}
             autoFocus={restRev > 0}

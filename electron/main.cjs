@@ -6,8 +6,13 @@ const fsp = require("fs/promises");
 const path = require("path");
 const os = require("os");
 const adb = require("./adb.cjs");
+const ai = require("./ai.cjs");
 
 const configFile = () => path.join(app.getPath("userData"), "config.json");
+
+// The PDF saved last (opened by the toast's "Open") and its folder (offered next time).
+let lastPdf = null;
+let lastPdfDir = null;
 
 function readConfig() {
   try {
@@ -76,6 +81,36 @@ const handlers = {
     await fsp.writeFile(r.filePath, Buffer.from(data));
     return r.filePath;
   },
+  // Local AI (electron/ai.cjs). The model file lives outside the data folder (it is big and
+  // not synced); its path is kept in config.json.
+  "ai:get": () => {
+    const model = readConfig().aiModel || null;
+    return { model, exists: !!model && fs.existsSync(model) };
+  },
+  "ai:chooseModel": async e => {
+    const r = await dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender), {
+      properties: ["openFile"],
+      filters: [{ name: "GGUF", extensions: ["gguf"] }],
+    });
+    if (r.canceled || !r.filePaths[0]) return null;
+    await ai.unload();
+    writeConfig({ ...readConfig(), aiModel: r.filePaths[0] });
+    return r.filePaths[0];
+  },
+  "ai:clearModel": async () => {
+    await ai.unload();
+    const { aiModel, ...rest } = readConfig();
+    writeConfig(rest);
+  },
+  "ai:cards": async (e, opts) => {
+    const modelPath = readConfig().aiModel;
+    if (!modelPath || !fs.existsSync(modelPath)) throw new Error("no-model");
+    const count = Math.max(1, Math.min(40, Number(opts?.count) || 10));
+    return ai.makeCards({ modelPath, text: String(opts?.text ?? ""), count, lang: opts?.lang }, (done, total) => {
+      if (!e.sender.isDestroyed()) e.sender.send("ai:progress", { done, total });
+    });
+  },
+  "ai:cancel": () => ai.cancel(),
   "fs:list": async (_e, dir) => {
     const abs = dir ? resolve(dir) : resolve("");
     let names;
@@ -116,10 +151,66 @@ const handlers = {
   },
   "fs:remove": (_e, rel) => fsp.rm(resolve(rel), { recursive: true, force: true }),
   "shell:openFolder": () => dataDir && shell.openPath(dataDir),
+  // PDF export (ui/pdf.ts): the page shows only the note when printed; its CSS sets the page
+  // size and margins.
+  "print:pdf": async (e, { name, landscape, pageSize }) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    // The page margins show the window's own background: white for paper while printing.
+    const bg = win.getBackgroundColor();
+    win.setBackgroundColor("#ffffff");
+    let data;
+    try {
+      data = await e.sender.printToPDF({ printBackground: true, preferCSSPageSize: true, landscape: !!landscape, pageSize: pageSize || "A4" });
+    } finally {
+      win.setBackgroundColor(bg);
+    }
+    const safe = String(name || "Polaris").replace(/[\\/:*?"<>|\n\r\t]/g, "-").trim().slice(0, 120) || "Polaris";
+    // Test helper: POLARIS_PDF_OUT saves there without asking.
+    const { canceled, filePath } = process.env.POLARIS_PDF_OUT ? { canceled: false, filePath: process.env.POLARIS_PDF_OUT } : await dialog.showSaveDialog(win, {
+      defaultPath: path.join(lastPdfDir || app.getPath("documents"), `${safe}.pdf`),
+      filters: [{ name: "PDF", extensions: ["pdf"] }],
+    });
+    if (canceled || !filePath) return null;
+    await fsp.writeFile(filePath, data);
+    lastPdf = filePath;
+    lastPdfDir = path.dirname(filePath);
+    return filePath;
+  },
+  "print:openLast": () => lastPdf && shell.openPath(lastPdf),
+  "shell:openSnippets": async () => {
+    if (!dataDir) return;
+    const dir = path.join(dataDir, ".polaris", "snippets");
+    await fsp.mkdir(dir, { recursive: true });
+    return shell.openPath(dir);
+  },
+  // Font families installed on the PC (Settings → Appearance), from fontconfig.
+  "fonts:list": () =>
+    new Promise(done =>
+      require("child_process").execFile("fc-list", [":", "family"], { maxBuffer: 4 << 20 }, (err, out) => {
+        if (err) return done([]);
+        const names = new Set();
+        for (const line of out.split("\n")) {
+          const name = line.split(",")[0].trim();
+          if (name && !/emoji|fangsong|awesome|symbol|dingbat|cursor/i.test(name)) names.add(name);
+        }
+        done([...names].sort((a, b) => a.localeCompare(b)));
+      }),
+    ),
   // Only web links: the page never gets to open files or other programs this way.
   "shell:openLink": (_e, url) => {
     if (!/^https?:\/\//i.test(String(url))) throw new Error("Not a web link");
     return shell.openExternal(String(url));
+  },
+  // Attachments (school assignments) open in the system's app for their type; anything that
+  // could run as a program is refused.
+  "shell:openFile": async (_e, rel) => {
+    const abs = resolve(rel);
+    const st = await fsp.stat(abs);
+    if (!st.isFile()) throw new Error("Not a file");
+    if (/\.(desktop|sh|bash|zsh|run|bin|appimage|exe|bat|cmd|com|msi|jar|py|pl|rb)$/i.test(abs) || st.mode & 0o111)
+      throw new Error("This file could run as a program; open it from the folder instead");
+    const err = await shell.openPath(abs);
+    if (err) throw new Error(err);
   },
   "capture:close": e => BrowserWindow.fromWebContents(e.sender)?.close(),
   "reminders:set": (_e, list) => setReminders(list),
@@ -258,8 +349,13 @@ function attachShot(win) {
         await new Promise(r => setTimeout(r, Number(process.env.POLARIS_SHOT_WAIT || 800)));
       }
       // POLARIS_SHOT=close: close the window the way the window manager does (tests saving on close).
-      if (process.env.POLARIS_SHOT === "close") return win.isDestroyed() || win.close();
+      if (process.env.POLARIS_SHOT === "close") {
+        if (process.env.POLARIS_SHOT_ZOOM && !win.isDestroyed()) win.webContents.setZoomFactor(1);
+        return win.isDestroyed() || win.close();
+      }
       if (!win.isDestroyed()) fs.writeFileSync(process.env.POLARIS_SHOT, (await win.webContents.capturePage()).toPNG());
+      // Chromium keeps a page's zoom for the next runs: put it back so the app opens at 100%.
+      if (process.env.POLARIS_SHOT_ZOOM && !win.isDestroyed()) win.webContents.setZoomFactor(1);
       app.quit();
     }, Number(process.env.POLARIS_SHOT_DELAY || 1500)),
   );
@@ -319,6 +415,14 @@ function createWindow({ hidden = false } = {}) {
     webPreferences: webPreferences(),
   });
   lockDown(mainWindow);
+  // Ctrl+= / Ctrl+- / Ctrl+0 size the interface through the app's setting (Settings →
+  // Appearance), not through the built-in zoom of the default menu.
+  mainWindow.webContents.on("before-input-event", (e, input) => {
+    if (input.type !== "keyDown" || !input.control || input.alt || input.meta) return;
+    if (!["=", "+", "-", "0"].includes(input.key)) return;
+    e.preventDefault();
+    mainWindow.webContents.send("zoom:key", input.key);
+  });
   load(mainWindow);
   attachShot(mainWindow);
   // Closing: give the page up to 3 s to write unsaved edits (SPEC 2.4), then close, or only

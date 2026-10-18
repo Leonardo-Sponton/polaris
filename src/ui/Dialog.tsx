@@ -65,7 +65,7 @@ export function AskText(props: {
   );
 }
 
-export function Confirm(props: { title: string; text: string; okLabel: string; onOk(): void; onClose(): void }) {
+export function Confirm(props: { title: string; text: string; okLabel: string; danger?: boolean; onOk(): void; onClose(): void }) {
   return (
     <Dialog title={props.title} onClose={props.onClose}>
       <p className="muted" style={{ margin: 0 }}>
@@ -75,7 +75,7 @@ export function Confirm(props: { title: string; text: string; okLabel: string; o
         <button className="btn" onClick={props.onClose}>
           {t.common.cancel}
         </button>
-        <button className="btn primary" onClick={props.onOk}>
+        <button className={`btn primary${props.danger ? " danger" : ""}`} onClick={props.onOk}>
           {props.okLabel}
         </button>
       </div>

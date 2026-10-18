@@ -55,7 +55,7 @@ export function kindLabel(th: Thought): string | null {
 type Open = { id: string; edit?: boolean } | { new: true } | null;
 
 export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { id: string; key: number } }) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const [filter, setFilter] = useState<Filter>({});
   const [open, setOpen] = useState<Open>(null);
   const [showMenus, setShowMenus] = useState(false);
@@ -108,7 +108,7 @@ export function ThoughtsView({ data, openId }: { data: ThoughtsData; openId?: { 
   };
 
   const remove = async (th: Thought) => {
-    if (!th.path) return;
+    if (!th.path || !(await confirmDelete())) return;
     try {
       setOpen(null);
       const trashed = await moveToTrash(notes.storage, th.path);

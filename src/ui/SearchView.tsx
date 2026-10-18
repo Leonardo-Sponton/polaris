@@ -14,7 +14,7 @@ export interface SearchState {
   since: Since;
 }
 
-const AREAS = ["todo", "inbox", "ideas", "notes", "projects", "books", "journal", "review", "thoughts"];
+const AREAS = ["todo", "inbox", "ideas", "notes", "projects", "books", "study", "journal", "review", "thoughts"];
 
 export const areaLabel = (a: string) => (AREAS.includes(a) ? t.area[a as keyof typeof t.area] : a);
 

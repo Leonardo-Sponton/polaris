@@ -57,7 +57,7 @@ interface Props {
 }
 
 export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [step, setStep] = useState<string | null>(null);
   const [notePath, setNotePath] = useState<string | null>(null);
@@ -151,6 +151,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
   };
 
   const remove = async (p: Project) => {
+    if (!(await confirmDelete(p.title))) return;
     try {
       await flushAll();
       if (open === p.path) show(null);
@@ -166,6 +167,7 @@ export function ProjectsView({ projects, todo, openPath, onOpenIdea }: Props) {
   };
 
   const removeNote = async (path: string) => {
+    if (!(await confirmDelete())) return;
     try {
       await flushAll();
       setNotePath(null);

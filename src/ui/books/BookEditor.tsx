@@ -273,7 +273,7 @@ function BookForm({ file: f, note, quotes, onAddQuote, onOpenQuote }: FormProps)
           <span className="fl">{t.books.notes}</span>
         </div>
         <div className="task-notes">
-          <Editor text={note.body} placeholder={t.books.notesPlaceholder} onSaveNow={f.saveNow} onChange={f.setBody} />
+          <Editor path={note.path} text={note.body} placeholder={t.books.notesPlaceholder} onSaveNow={f.saveNow} onChange={f.setBody} />
         </div>
         <div className="row task-actions">
           <span className="muted small mono">{t.books.added(String(d.created ?? "").replace("T", " "))}</span>

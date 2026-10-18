@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Download, Feather, FileText, FolderKanban, FolderOpen, Lightbulb, NotebookPen, Plus, Sun, Upload } from "lucide-react";
 import { useApp } from "./context";
-import type { Theme } from "../data/settings";
 import { BEFORE_RESTORE, backupName, exportBackup, readBackup, restoreBackup, type Backup } from "../data/backup";
 import { flushAll } from "../data/pending";
-import { Confirm } from "./Dialog";
+import { Confirm, Dialog } from "./Dialog";
 import { deviceLang, LANGS, t } from "../i18n";
+import { AppearanceCard } from "./AppearanceSettings";
 
 export function SettingsView() {
   const { platform, settings, updateSettings, bump, toast } = useApp();
@@ -61,23 +61,11 @@ export function SettingsView() {
     platform.getDataDir().then(setDir);
   }, [platform]);
 
-  const themes: Theme[] = ["dark", "minimal", "light", "system"];
-
   return (
     <div className="page">
       <div className="page-inner">
         <h1>{t.settings.title}</h1>
-
-        <section className="card stack">
-          <h2>{t.settings.theme}</h2>
-          <div className="segmented" role="group" aria-label={t.settings.theme}>
-            {themes.map(th => (
-              <button key={th} aria-pressed={settings.theme === th} onClick={() => updateSettings({ theme: th })}>
-                {t.settings.themes[th]}
-              </button>
-            ))}
-          </div>
-        </section>
+        <AppearanceCard />
 
         <section className="card stack">
           <h2>{t.settings.language}</h2>
@@ -98,6 +86,7 @@ export function SettingsView() {
 
         <RemindersCard />
         <WidgetsCard />
+        <AiCard />
 
         <section className="card stack">
           <h2>{t.settings.dataFolder}</h2>
@@ -137,6 +126,7 @@ export function SettingsView() {
             />
           </div>
         </section>
+        <Licenses />
       </div>
       {pending && (
         <Confirm
@@ -243,6 +233,69 @@ function WidgetsCard() {
           </button>
         </div>
       ))}
+    </section>
+  );
+}
+
+/** PC: the GGUF model file used to make flashcards (electron/ai.cjs). */
+function AiCard() {
+  const { platform, toast } = useApp();
+  const ai = platform.ai;
+  const [model, setModel] = useState<{ model: string | null; exists: boolean } | null>(null);
+  useEffect(() => {
+    void ai?.get().then(setModel);
+  }, [ai]);
+  if (!ai) return null;
+  const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
+  const choose = () => ai.chooseModel().then(() => ai.get().then(setModel), fail);
+  const remove = () => ai.clearModel().then(() => ai.get().then(setModel), fail);
+  return (
+    <section className="card stack">
+      <h2>{t.ai.settings}</h2>
+      <p className="muted" style={{ margin: 0 }}>
+        {t.ai.settingsHint}
+      </p>
+      <p className={`mono${model?.model && !model.exists ? " err" : ""}`} style={{ wordBreak: "break-all", margin: 0 }}>
+        {model?.model ?? t.ai.noModelSet}
+      </p>
+      {!model?.model && <p className="muted small" style={{ margin: 0 }}>{t.ai.modelHint}</p>}
+      <div className="row">
+        <button className="btn" onClick={choose}>
+          <FolderOpen size={18} /> {model?.model ? t.ai.change : t.ai.chooseModel}
+        </button>
+        {model?.model && (
+          <button className="btn ghost" onClick={remove}>
+            {t.ai.remove}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** The open-source libraries inside the app and their licenses (public/licenses.txt, tools/licenses.mjs). */
+function Licenses() {
+  const [text, setText] = useState<string | null>(null);
+  const open = () =>
+    fetch("licenses.txt")
+      .then(r => r.text())
+      .then(setText, () => setText("—"));
+  return (
+    <section className="card stack">
+      <h2>{t.settings.licenses}</h2>
+      <p className="muted" style={{ margin: 0 }}>
+        {t.settings.licensesHint}
+      </p>
+      <div className="row">
+        <button className="btn" onClick={open}>
+          <FileText size={18} /> {t.settings.showLicenses}
+        </button>
+      </div>
+      {text !== null && (
+        <Dialog title={t.settings.licenses} onClose={() => setText(null)}>
+          <pre className="mono licenses-text">{text}</pre>
+        </Dialog>
+      )}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import type { Reminder } from "../data/reminders";
 import type { FileInfo, Storage } from "../storage/types";
-import type { Device, Platform, SyncBridge } from "./types";
+import type { AiBridge, Device, Platform, SyncBridge } from "./types";
 
 // Functions exposed by electron/preload.cjs.
 interface PolarisBridge {
@@ -10,12 +10,20 @@ interface PolarisBridge {
   };
   pickFolder(): Promise<string | null>;
   openFolder(): Promise<void>;
+  openSnippets(): Promise<void>;
+  listFonts(): Promise<string[]>;
+  printPdf(o: { name: string; pageSize: string; landscape: boolean }): Promise<string | null>;
+  openLastPdf(): Promise<void>;
+  setZoom(z: number): void;
+  onZoomKey(cb: (key: string) => void): () => void;
   openLink(url: string): Promise<void>;
+  openFile(path: string): Promise<void>;
   closeWindow(): Promise<void>;
   saveBackup(name: string, data: Uint8Array): Promise<string | null>;
   setReminders(list: Reminder[]): Promise<void>;
   setLabels(labels: Record<string, string>): Promise<void>;
   onReminderOpen(cb: (path: string) => void): () => void;
+  ai: AiBridge;
   sync: {
     devices(): Promise<{ adb: boolean; list: Device[] }>;
     pcName(): Promise<string>;
@@ -83,6 +91,14 @@ export function electronPlatform(): Platform {
     pickFolder: () => b.pickFolder(),
     openDataFolder: () => b.openFolder(),
     openLink: url => b.openLink(url),
+    openSnippetsFolder: () => b.openSnippets(),
+    listFonts: () => b.listFonts(),
+    printPdf: o => b.printPdf(o),
+    openLastPdf: () => b.openLastPdf(),
+    setZoom: async z => b.setZoom(z),
+    onZoomKey: cb => b.onZoomKey(cb),
+    openFile: path => b.openFile(path),
+    ai: b.ai,
     onFileChanged: cb => b.onFileChanged(cb),
     onClosing: flush => b.onClosing(flush),
     closeWindow: () => b.closeWindow(),

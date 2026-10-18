@@ -23,9 +23,11 @@ interface PolarisFiles {
   remove(o: { root: string; path: string }): Promise<void>;
   showKeyboard(): Promise<void>;
   openLink(o: { url: string }): Promise<void>;
+  printPage(o: { name: string; pageSize: string; landscape: boolean }): Promise<void>;
+  openFile(o: { root: string; path: string }): Promise<void>;
   setWidgetData(o: { json: string }): Promise<void>;
   pinWidget(o: { kind: string }): Promise<{ ok: boolean }>;
-  addListener(event: "capture" | "widgetChange", cb: () => void): Promise<{ remove(): Promise<void> }>;
+  addListener(event: "capture" | "widgetChange" | "printDone", cb: () => void): Promise<{ remove(): Promise<void> }>;
   addListener(event: "open", cb: (e: { target: string }) => void): Promise<{ remove(): Promise<void> }>;
 }
 
@@ -110,6 +112,22 @@ export function androidPlatform(): Platform {
     },
     showKeyboard: () => Native.showKeyboard(),
     openLink: url => Native.openLink({ url }),
+    // Resolves when the print screen closes (the page keeps the note until then).
+    printPdf: async o => {
+      let stop: (() => void) | undefined;
+      const done = new Promise<void>(r => {
+        const handle = Native.addListener("printDone", () => r());
+        stop = () => void handle.then(h => h.remove());
+      });
+      try {
+        await Native.printPage({ name: o.name, pageSize: o.pageSize, landscape: o.landscape });
+        await done;
+      } finally {
+        stop?.();
+      }
+      return null;
+    },
+    openFile: path => Native.openFile({ root: root(), path }),
     setReminders,
     onReminderOpen: cb => {
       const handle = LocalNotifications.addListener("localNotificationActionPerformed", a => {

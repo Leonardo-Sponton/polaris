@@ -19,6 +19,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import LZString from "lz-string";
 
 const ADB = process.env.ADB || path.join(os.homedir(), "Android/Sdk/platform-tools/adb");
 // POLARIS_PHONE_DIR: another folder on the phone (the screenshot demo uses its own).
@@ -62,8 +63,40 @@ const yamlValue = v =>
     ? JSON.stringify(v)
     : String(v);
 
+/** A value written as is (a YAML flow list of quoted strings, for example). */
+class Raw {
+  constructor(text) {
+    this.text = text;
+  }
+}
+const flowList = items => new Raw(`[${items.map(x => JSON.stringify(x)).join(", ")}]`);
+
+/** A one-page PDF with a title and lines of text (Helvetica, no images): a sample attachment. */
+function tinyPdf(title, lines) {
+  const esc = t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\\()]/g, m => `\\${m}`);
+  const text = [`BT /F1 18 Tf 60 770 Td (${esc(title)}) Tj ET`, ...lines.map((l, i) => `BT /F1 11 Tf 60 ${735 - i * 18} Td (${esc(l)}) Tj ET`)].join("\n");
+  const objs = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${text.length} >>\nstream\n${text}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  let out = "%PDF-1.4\n";
+  const at = [];
+  objs.forEach((o, i) => {
+    at.push(out.length);
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${at.map(n => `${String(n).padStart(10, "0")} 00000 n \n`).join("")}`;
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(out, "latin1");
+}
+
 /** Objects and lists of objects (checklist, assumptions) as indented YAML blocks. */
 const yamlEntry = (k, v, ind = "") => {
+  if (v instanceof Raw) return `${ind}${k}: ${v.text}`;
   if (Array.isArray(v)) {
     const items = v.map(o =>
       Object.entries(o)
@@ -77,6 +110,45 @@ const yamlEntry = (k, v, ind = "") => {
   }
   return `${ind}${k}: ${yamlValue(v)}`;
 };
+
+/** A small drawing for the Markdown tour (a picture in attachments/). */
+/** A small Excalidraw drawing in the Obsidian plugin's file format (data/drawings.ts). */
+function sampleDrawing(labels) {
+  let seed = 7;
+  const base = (id, type, x, y, w, h, extra = {}) => ({
+    id, type, x, y, width: w, height: h, angle: 0, strokeColor: "#1e1e1e", backgroundColor: "transparent",
+    fillStyle: "solid", strokeWidth: 2, strokeStyle: "solid", roughness: 1, opacity: 100, groupIds: [],
+    frameId: null, roundness: type === "rectangle" ? { type: 3 } : null, seed: seed++, version: 1, versionNonce: seed++,
+    isDeleted: false, boundElements: [], updated: 1, link: null, locked: false, ...extra,
+  });
+  const colors = ["#a5d8ff", "#ffec99", "#b2f2bb"];
+  const els = [];
+  labels.forEach((label, i) => {
+    const x = 20 + i * 220;
+    els.push(base(`box${i}0000000`, "rectangle", x, 40, 160, 80, { backgroundColor: colors[i] }));
+    els.push(base(`txt${i}0000`, "text", x + 20, 66, 120, 25, {
+      text: label, originalText: label, fontSize: 20, fontFamily: 5, textAlign: "center", verticalAlign: "middle",
+      containerId: null, autoResize: true, lineHeight: 1.25,
+    }));
+    if (i < labels.length - 1)
+      els.push(base(`arr${i}000000`, "arrow", x + 165, 80, 50, 0, {
+        points: [[0, 0], [50, 0]], startBinding: null, endBinding: null, startArrowhead: null, endArrowhead: "arrow",
+        lastCommittedPoint: null, elbowed: false,
+      }));
+  });
+  const json = JSON.stringify({ type: "excalidraw", version: 2, source: "polaris", elements: els, appState: { viewBackgroundColor: "#ffffff", gridSize: null }, files: {} }, null, "\t");
+  const z = LZString.compressToBase64(json).replace(/(.{256})/g, "$1\n\n").replace(/\n+$/, "");
+  const texts = labels.map((l, i) => `${l} ^txt${i}0000\n`).join("\n");
+  return `---\n\nexcalidraw-plugin: parsed\ntags: [excalidraw]\n\n---\n==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'\n\n\n# Excalidraw Data\n\n## Text Elements\n${texts}\n%%\n## Drawing\n\`\`\`compressed-json\n${z}\n\`\`\`\n%%\n`;
+}
+
+const SKETCH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">
+  <rect width="400" height="240" rx="16" fill="#1a1650"/>
+  <circle cx="310" cy="70" r="34" fill="#e0c07a"/>
+  <path d="M0 200 L90 110 L150 160 L230 80 L330 190 L400 150 L400 240 L0 240 Z" fill="#a67cff"/>
+  <path d="M0 220 L120 170 L210 210 L300 175 L400 205 L400 240 L0 240 Z" fill="#7fd1d8" opacity="0.8"/>
+</svg>
+`;
 
 function file(data, body) {
   const head = Object.entries(data)
@@ -95,6 +167,8 @@ function samples(lang = "en", demo = false) {
   const T = (en, pt) => (lang === "pt" ? pt : en);
   const out = []; // [relative path, text]
   const covers = []; // [book folder, cover source]
+  const binaries = []; // [relative path, Buffer]: files that cannot carry `sample: true`
+  const fixed = new Set(); // files with a fixed name, added when missing even if their area has samples
   let sec = 0;
   const task = (created, title, data, notes = "") => {
     const c = new Date(created.getTime() + sec++ * 1000);
@@ -175,18 +249,49 @@ function samples(lang = "en", demo = false) {
     out.push([`notes/${stamp(c)}.md`, file({ type: "note", created: isoMinute(c), modified: isoMinute(modified), ...extra }, body)]);
   };
   note(at(-20, 19, 5), at(-1, 22, 10), T(
-    "# Trip to the coast\n\n## Before going\n- [x] Book the bus tickets\n- [ ] Ask about the hostel breakfast\n- [ ] Sun cream and a hat\n\n## Days\n**Day 1.** Arrive at noon, walk on the beach, dinner at the fish market.\n\n**Day 2.** Boat trip to the island (leaves at 9). Take cash: card is not accepted on the boat.\n\n**Day 3.** Free morning, bus back at 16:00.\n\n## Budget\n| Item              | Cost |\n| ----------------- | ---- |\n| Bus               | 180  |\n| Hostel, 2 nights  | 240  |\n| Food              | 200  |\n",
-    "# Viagem para o litoral\n\n## Antes de ir\n- [x] Comprar as passagens de ônibus\n- [ ] Perguntar sobre o café da manhã do hostel\n- [ ] Protetor solar e boné\n\n## Dias\n**Dia 1.** Chegar ao meio-dia, caminhar na praia, jantar no mercado de peixe.\n\n**Dia 2.** Passeio de barco até a ilha (sai às 9). Levar dinheiro: o barco não aceita cartão.\n\n**Dia 3.** Manhã livre, ônibus de volta às 16h.\n\n## Orçamento\n| Item              | Custo |\n| ----------------- | ----- |\n| Ônibus            | 180   |\n| Hostel, 2 noites  | 240   |\n| Comida            | 200   |\n"),
+    "# Trip to the coast\n\n## Before going\n- [x] Book the bus tickets\n- [ ] Ask about the hostel breakfast\n- [ ] Sun cream and a hat\n\n## Days\n**Day 1.** Arrive at noon, walk on the beach, dinner at the fish market.\n\n**Day 2.** Boat trip to the island (leaves at 9). Take cash: card is not accepted on the boat.\n\n**Day 3.** Free morning, bus back at 16:00.\n\n## Budget\n| Item              | Cost |\n| ----------------- | ---- |\n| Bus               | 180  |\n| Hostel, 2 nights  | 240  |\n| Food              | 200  |\n\n#travel #family\n",
+    "# Viagem para o litoral\n\n## Antes de ir\n- [x] Comprar as passagens de ônibus\n- [ ] Perguntar sobre o café da manhã do hostel\n- [ ] Protetor solar e boné\n\n## Dias\n**Dia 1.** Chegar ao meio-dia, caminhar na praia, jantar no mercado de peixe.\n\n**Dia 2.** Passeio de barco até a ilha (sai às 9). Levar dinheiro: o barco não aceita cartão.\n\n**Dia 3.** Manhã livre, ônibus de volta às 16h.\n\n## Orçamento\n| Item              | Custo |\n| ----------------- | ----- |\n| Ônibus            | 180   |\n| Hostel, 2 noites  | 240   |\n| Comida            | 200   |\n\n#viagem #familia\n"),
     { pinned: true });
   note(at(-8, 21, 30), at(-2, 20, 45), T(
-    "# How Git branches work\n\nA branch is only a name that points to a commit. Making a new commit moves the name forward.\n\n- `git switch -c topic` makes a branch and moves to it.\n- `git merge topic` brings its commits into the current branch.\n- `git rebase main` replays my commits on top of main: cleaner history, but never on commits others already have.\n\n> Commit early, push when it works.\n",
-    "# Como funcionam os branches do Git\n\nUm branch é só um nome que aponta para um commit. Fazer um novo commit move o nome para frente.\n\n- `git switch -c topico` cria um branch e muda para ele.\n- `git merge topico` traz os commits dele para o branch atual.\n- `git rebase main` refaz meus commits por cima da main: histórico mais limpo, mas nunca em commits que outros já têm.\n\n> Faça commit cedo, dê push quando funcionar.\n"));
+    "# How Git branches work\n\nA branch is only a name that points to a commit. Making a new commit moves the name forward.\n\n- `git switch -c topic` makes a branch and moves to it.\n- `git merge topic` brings its commits into the current branch.\n- `git rebase main` replays my commits on top of main: cleaner history, but never on commits others already have.\n\n> Commit early, push when it works.\n\n#study #git\n",
+    "# Como funcionam os branches do Git\n\nUm branch é só um nome que aponta para um commit. Fazer um novo commit move o nome para frente.\n\n- `git switch -c topico` cria um branch e muda para ele.\n- `git merge topico` traz os commits dele para o branch atual.\n- `git rebase main` refaz meus commits por cima da main: histórico mais limpo, mas nunca em commits que outros já têm.\n\n> Faça commit cedo, dê push quando funcionar.\n\n#estudo #git\n"));
+  note(at(-3, 20, 10), at(0, 9, 40), T(
+    "# Java snippets I keep forgetting\n\n> [!tip] Read this first\n> Run the code in your head before running it on the PC.\n\nReading a file line by line, with ==try-with-resources== closing it for me:\n\n```java\nimport java.nio.file.*;\nimport java.util.List;\n\npublic class Lines {\n    // Prints every line that has the word\n    public static void main(String[] args) throws Exception {\n        List<String> lines = Files.readAllLines(Path.of(\"notes.txt\"));\n        for (String line : lines) {\n            if (line.contains(\"java\")) System.out.println(line);\n        }\n    }\n}\n```\n\nThe same in the shell:\n\n```bash\ngrep -i java notes.txt | wc -l\n```\n\n> [!warning] Careful\n> `==` compares references; use `.equals()` for strings.\n\nMore in the [Java tutorials](https://dev.java/learn/).\n\n#study #java\n",
+    "# Trechos de Java que eu sempre esqueço\n\n> [!tip] Leia antes\n> Rode o código na cabeça antes de rodar no PC.\n\nLer um arquivo linha por linha, com o ==try-with-resources== fechando para mim:\n\n```java\nimport java.nio.file.*;\nimport java.util.List;\n\npublic class Linhas {\n    // Mostra toda linha que tem a palavra\n    public static void main(String[] args) throws Exception {\n        List<String> linhas = Files.readAllLines(Path.of(\"notas.txt\"));\n        for (String linha : linhas) {\n            if (linha.contains(\"java\")) System.out.println(linha);\n        }\n    }\n}\n```\n\nO mesmo no terminal:\n\n```bash\ngrep -i java notas.txt | wc -l\n```\n\n> [!warning] Cuidado\n> `==` compara referências; para strings use `.equals()`.\n\nMais nos [tutoriais de Java](https://dev.java/learn/).\n\n#estudo #java\n"));
   note(at(-4, 7, 50), at(-4, 8, 20), T(
-    "# Letter to myself in five years\n\nI hope you still write things down. This year I started studying software at night after work, and some days it felt like too much.\n\nIf you are reading this, check: did you keep going? Whatever the answer, be kind to the person who wrote this.\n",
-    "# Carta para mim daqui a cinco anos\n\nEspero que você ainda escreva as coisas. Este ano comecei a estudar software à noite depois do trabalho, e tem dias que parece demais.\n\nSe você está lendo isto, confira: você continuou? Seja qual for a resposta, seja gentil com quem escreveu isto.\n"));
+    "# Letter to myself in five years\n\nI hope you still write things down. This year I started studying software at night after work, and some days it felt like too much.\n\nIf you are reading this, check: did you keep going? Whatever the answer, be kind to the person who wrote this.\n\n#personal\n",
+    "# Carta para mim daqui a cinco anos\n\nEspero que você ainda escreva as coisas. Este ano comecei a estudar software à noite depois do trabalho, e tem dias que parece demais.\n\nSe você está lendo isto, confira: você continuou? Seja qual for a resposta, seja gentil com quem escreveu isto.\n\n#pessoal\n"));
   note(at(-1, 12, 15), at(0, 8, 5), T(
-    "# Meeting notes: neighbourhood association\n\n- Street lights: the city answered, work starts next month.\n- Saturday market: needs two more volunteers.\n- Next meeting on the first Tuesday, 19:00.\n",
-    "# Ata: associação de moradores\n\n- Iluminação da rua: a prefeitura respondeu, a obra começa no mês que vem.\n- Feira de sábado: faltam dois voluntários.\n- Próxima reunião na primeira terça, às 19h.\n"));
+    "# Meeting notes: neighbourhood association\n\n- Street lights: the city answered, work starts next month.\n- Saturday market: needs two more volunteers.\n- Next meeting on the first Tuesday, 19:00.\n\n#community\n",
+    "# Ata: associação de moradores\n\n- Iluminação da rua: a prefeitura respondeu, a obra começa no mês que vem.\n- Feira de sábado: faltam dois voluntários.\n- Próxima reunião na primeira terça, às 19h.\n\n#comunidade\n"));
+
+  // A tour of the Obsidian-like Markdown (fixed names: added even when the area has samples).
+  const tourName = T("notes/sample-markdown-tour.md", "notes/exemplo-tour-do-markdown.md");
+  fixed.add(tourName);
+  out.push([tourName, file({ type: "note", created: isoMinute(at(0, 7, 30)), modified: isoMinute(at(0, 7, 30)), pinned: true }, T(
+    "# Markdown like Obsidian\n\nEverything here is plain text in the file. Tap a line to see its symbols; type / for a menu of everything you can insert.\n\n## Links and embeds\n\nLink to another note: [[Trip to the coast]] · with other words: [[Trip to the coast|our trip]] · to a heading: [[Trip to the coast#Budget]].\n\nThe budget, shown here from the other note:\n\n![[Trip to the coast#Budget]]\n\nA picture from the attachments folder, 240 px wide (paste or drop your own):\n\n![[sample-sketch.svg|240]]\n\n## Callouts\n\n> [!tip] Tip\n> Ctrl+O opens any note by its title; Ctrl+P lists commands.\n\n> [!faq]- Can callouts fold?\n> Yes: [!faq]- starts closed, [!faq]+ starts open. Tap the arrow.\n\n## Math\n\nInline: $a^2 + b^2 = c^2$. A block:\n\n$$\n\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}\n$$\n\n## Diagram\n\n```mermaid\nflowchart LR\n    Idea --> Draft --> Review\n    Review -->|ok| Done\n    Review -->|change| Draft\n```\n\n## Table with a formula\n\nPut the caret in the table: Tab moves between cells and lines the columns up; the bar has \"Calculate formulas\".\n\n| Item   | Cost |\n| ------ | ---- |\n| Bus    | 180  |\n| Hostel | 240  |\n| Food   | 200  |\n| Total  | 620  |\n<!-- TBLFM: @>$2=sum(@I..@-1) -->\n\n## Small things\n\n==Highlight==, <u>underline</u>, H<sub>2</sub>O, x<sup>2</sup>, <kbd>Ctrl</kbd>+<kbd>L</kbd>, a footnote[^1] and one written in place^[like this]. %%A comment: faded, only for you.%%\n\n- [ ] A task (Ctrl+L makes one)\n- Lists indent with Tab\n\t- like this\n\n[^1]: Footnotes gather at the end of the note.\n\n#markdown\n",
+    "# Markdown como no Obsidian\n\nTudo aqui é texto simples no arquivo. Toque numa linha para ver os símbolos; digite / para um menu com tudo o que dá para inserir.\n\n## Links e incorporações\n\nLink para outra nota: [[Viagem para o litoral]] · com outras palavras: [[Viagem para o litoral|nossa viagem]] · para um título: [[Viagem para o litoral#Orçamento]].\n\nO orçamento, mostrado aqui a partir da outra nota:\n\n![[Viagem para o litoral#Orçamento]]\n\nUma imagem da pasta attachments, com 240 px de largura (cole ou arraste as suas):\n\n![[exemplo-desenho.svg|240]]\n\n## Destaques (callouts)\n\n> [!tip] Dica\n> Ctrl+O abre qualquer nota pelo título; Ctrl+P lista os comandos.\n\n> [!faq]- Dá para recolher?\n> Dá: [!faq]- começa fechado, [!faq]+ começa aberto. Toque na setinha.\n\n## Fórmulas\n\nNa linha: $a^2 + b^2 = c^2$. Em bloco:\n\n$$\n\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}\n$$\n\n## Diagrama\n\n```mermaid\nflowchart LR\n    Ideia --> Rascunho --> Revisão\n    Revisão -->|ok| Pronto\n    Revisão -->|mudar| Rascunho\n```\n\n## Tabela com fórmula\n\nPonha o cursor na tabela: Tab passa de célula e alinha as colunas; a barra tem \"Calcular fórmulas\".\n\n| Item   | Custo |\n| ------ | ----- |\n| Ônibus | 180   |\n| Hostel | 240   |\n| Comida | 200   |\n| Total  | 620   |\n<!-- TBLFM: @>$2=sum(@I..@-1) -->\n\n## Detalhes\n\n==Destaque==, <u>sublinhado</u>, H<sub>2</sub>O, x<sup>2</sup>, <kbd>Ctrl</kbd>+<kbd>L</kbd>, uma nota de rodapé[^1] e uma escrita no lugar^[assim]. %%Um comentário: apagadinho, só para você.%%\n\n- [ ] Uma tarefa (Ctrl+L cria uma)\n- Listas recuam com Tab\n\t- assim\n\n[^1]: As notas de rodapé ficam no fim da nota.\n\n#markdown\n"))]);
+  binaries.push([T("attachments/sample-sketch.svg", "attachments/exemplo-desenho.svg"), Buffer.from(SKETCH_SVG)]);
+  binaries.push([T("templates/Meeting.md", "templates/Reunião.md"), Buffer.from(T(
+    "---\ntags: [meeting]\n---\n# {{title}}\n\n**When:** {{date:DD/MM/YYYY}} {{time}}\n\n## People\n\n- \n\n## Notes\n\n## Decisions\n\n- [ ] \n",
+    "---\ntags: [reunião]\n---\n# {{title}}\n\n**Quando:** {{date:DD/MM/YYYY}} {{time}}\n\n## Pessoas\n\n- \n\n## Anotações\n\n## Decisões\n\n- [ ] \n"))]);
+  binaries.push([T("templates/Study note.md", "templates/Nota de estudo.md"), Buffer.from(T(
+    "---\nsubject:\nsource:\nreview_date:\n---\n## {{title}}\n\n> [!summary] In my own words\n> \n\n## Questions\n\n- What::\n",
+    "---\nmateria:\nfonte:\nrevisar_em:\n---\n## {{title}}\n\n> [!summary] Com as minhas palavras\n> \n\n## Perguntas\n\n- O quê::\n"))]);
+  for (const [rel] of binaries.slice(-3)) fixed.add(rel);
+
+  // Drawings, PDF export and appearance (Obsidian rounds 2 and 3; fixed names too).
+  const drawName = T("Sample drawing", "Exemplo de desenho");
+  binaries.push([`drawings/${drawName}.excalidraw.md`, Buffer.from(sampleDrawing(T(["Idea", "Draft", "Done"], ["Ideia", "Rascunho", "Pronto"])))]);
+  binaries.push([T(".polaris/snippets/sample-wide-headings.css", ".polaris/snippets/exemplo-titulos-espacados.css"), Buffer.from(T(
+    "/* Sample CSS snippet: turn it on in Settings → Appearance → CSS snippets. */\n.cm-hm-h1,\n.cm-hm-h2 {\n  letter-spacing: 0.06em;\n}\n",
+    "/* Snippet CSS de exemplo: ligue em Configurações → Aparência → Snippets CSS. */\n.cm-hm-h1,\n.cm-hm-h2 {\n  letter-spacing: 0.06em;\n}\n"))]);
+  for (const [rel] of binaries.slice(-2)) fixed.add(rel);
+  const drawNote = T("notes/sample-drawings-and-pdf.md", "notes/exemplo-desenhos-e-pdf.md");
+  fixed.add(drawNote);
+  out.push([drawNote, file({ type: "note", created: isoMinute(at(0, 7, 35)), modified: isoMinute(at(0, 7, 35)), pinned: true }, T(
+    `# Drawings, PDF and appearance\n\n## Drawings (Excalidraw)\n\nA drawing shown in a note; tap it to draw. New ones: type /drawing in a note, or the pen button in Notes. They are the same files as Obsidian's Excalidraw plugin (drawings/*.excalidraw.md); Notes → Drawings → "Import from Obsidian…" copies a vault's drawings.\n\n![[${drawName}.excalidraw]]\n\n## PDF\n\nThe ⋯ menu of a note → Export to PDF: page size, margins, orientation, size, justified text. Pictures, drawings, formulas and diagrams go too.\n\n## Appearance\n\nSettings → Appearance: light/dark, color schemes (Catppuccin, Nord, Gruvbox, Atom One…), accent color, fonts, text size, interface size (Ctrl + = / Ctrl + −), line width. "Customize" changes single colors and headings; CSS snippets add your own rules.\n`,
+    `# Desenhos, PDF e aparência\n\n## Desenhos (Excalidraw)\n\nUm desenho mostrado numa nota; toque nele para desenhar. Novos: digite /desenho numa nota, ou o botão da caneta em Notas. São os mesmos arquivos do plugin Excalidraw do Obsidian (drawings/*.excalidraw.md); Notas → Desenhos → "Importar do Obsidian…" copia os desenhos de um cofre.\n\n![[${drawName}.excalidraw]]\n\n## PDF\n\nMenu ⋯ de uma nota → Exportar para PDF: tamanho da página, margens, orientação, tamanho, texto justificado. Imagens, desenhos, fórmulas e diagramas vão junto.\n\n## Aparência\n\nConfigurações → Aparência: claro/escuro, esquemas de cores (Catppuccin, Nord, Gruvbox, Atom One…), cor de destaque, fontes, tamanho do texto, tamanho da interface (Ctrl + = / Ctrl + −), largura da linha. "Personalizar" muda cores uma a uma e os títulos; snippets CSS acrescentam suas próprias regras.\n`))]);
 
   // ---- Ideas ----
   const idea = (created, title, data, rest = "", seen = 0) => {
@@ -412,13 +517,144 @@ function samples(lang = "en", demo = false) {
     T("## Gratitude\n\nOld friends who still call.\n\n## Done well\n\nAsked for help instead of guessing for another week.\n",
       "## Gratidão\n\nAmigos antigos que ainda ligam.\n\n## O que fiz bem\n\nPedi ajuda em vez de ficar mais uma semana tentando sozinho.\n"));
 
+  // ---- Study ----
+  // Personal: a tree (Programming → Java → JDBC, Databases → SQL basics, Tools → Git) with
+  // [[links]] between notes. School: a simulated ADS course, 5 semesters, the 3rd being taken.
+  const studyFile = (rel, created, modified, data, body) =>
+    out.push([`study/${rel}`, file({ ...data, created: isoMinute(created), modified: isoMinute(modified) }, body)]);
+  studyFile("sql-basics/subject.md", at(-21, 20, 0), at(-1, 21, 0),
+    { type: "subject", title: T("SQL basics", "Fundamentos de SQL"), group: T("Databases", "Banco de dados") },
+    T("A database keeps data in tables: rows are records, columns are fields. SELECT reads, WHERE filters the rows, JOIN puts two tables side by side using a column they share. I still mix up LEFT JOIN and INNER JOIN: study that again.\n",
+      "Um banco guarda dados em tabelas: linhas são registros, colunas são campos. SELECT lê, WHERE filtra as linhas, JOIN coloca duas tabelas lado a lado usando uma coluna em comum. Ainda confundo LEFT JOIN com INNER JOIN: estudar de novo.\n"));
+  studyFile("sql-basics/materials/sql-handout.md", at(-21, 20, 5), at(-1, 21, 0),
+    { type: "material", title: T("SQL handout", "Apostila de SQL"), kind: "handout", source: T("Written with an AI assistant", "Escrita com um assistente de IA"), done: "[1, 2]", at: 3 },
+    T("# SQL handout\n\nHow to use it: read one chapter a day and try every query.\n\n## 1. Tables, rows and columns\n\nA **table** holds one kind of thing: `customers`, `orders`. Each **row** is one record; each **column** is one field with a type.\n\n```sql\nCREATE TABLE customers (\n  id   INTEGER PRIMARY KEY,\n  name TEXT NOT NULL,\n  city TEXT\n);\n```\n\n## 2. SELECT and WHERE\n\n```sql\nSELECT name, city FROM customers WHERE city = 'Recife';\n```\n\n> **Watch out:** text values go in single quotes.\n\n## 3. JOIN\n\nA JOIN matches rows of two tables by a shared column.\n\n```sql\nSELECT c.name, o.total\nFROM customers c\nJOIN orders o ON o.customer_id = c.id;\n```\n\n- **INNER JOIN** keeps only rows with a match on both sides.\n- **LEFT JOIN** keeps every row of the left table; missing matches come as NULL.\n\n## 4. GROUP BY\n\n```sql\nSELECT city, COUNT(*) FROM customers GROUP BY city;\n```\n\nEvery column in SELECT must be in GROUP BY or inside a function like COUNT or SUM.\n\n## Exercises\n\n1. List the customers with no orders (hint: LEFT JOIN and IS NULL).\n2. Count the orders per city.\n",
+      "# Apostila de SQL\n\nComo usar: leia um capítulo por dia e teste cada consulta.\n\n## 1. Tabelas, linhas e colunas\n\nUma **tabela** guarda um tipo de coisa: `clientes`, `pedidos`. Cada **linha** é um registro; cada **coluna** é um campo com um tipo.\n\n```sql\nCREATE TABLE clientes (\n  id     INTEGER PRIMARY KEY,\n  nome   TEXT NOT NULL,\n  cidade TEXT\n);\n```\n\n## 2. SELECT e WHERE\n\n```sql\nSELECT nome, cidade FROM clientes WHERE cidade = 'Recife';\n```\n\n> **Atenção:** texto vai entre aspas simples.\n\n## 3. JOIN\n\nUm JOIN junta linhas de duas tabelas por uma coluna em comum.\n\n```sql\nSELECT c.nome, p.total\nFROM clientes c\nJOIN pedidos p ON p.cliente_id = c.id;\n```\n\n- **INNER JOIN** fica só com as linhas que têm par dos dois lados.\n- **LEFT JOIN** mantém todas as linhas da tabela da esquerda; o que não tem par vem como NULL.\n\n## 4. GROUP BY\n\n```sql\nSELECT cidade, COUNT(*) FROM clientes GROUP BY cidade;\n```\n\nToda coluna do SELECT precisa estar no GROUP BY ou dentro de uma função como COUNT ou SUM.\n\n## Exercícios\n\n1. Liste os clientes sem pedidos (dica: LEFT JOIN e IS NULL).\n2. Conte os pedidos por cidade.\n"));
+  studyFile(`sql-basics/notes/${stamp(at(-6, 21, 10))}.md`, at(-6, 21, 10), at(-6, 21, 40),
+    { type: "study-note", material: "sql-handout", chapter: 2 },
+    T("# SELECT and WHERE\n\nWHERE runs before the columns are picked, so it cannot use a name given with AS.\n\nWhich clause filters rows? :: WHERE\nHow are text values written in SQL? :: Between single quotes: 'Recife'\n",
+      "# SELECT e WHERE\n\nO WHERE roda antes de as colunas serem escolhidas, por isso não enxerga um nome dado com AS.\n\nQual cláusula filtra as linhas? :: WHERE\nComo se escreve um texto em SQL? :: Entre aspas simples: 'Recife'\n"));
+  studyFile(`sql-basics/notes/${stamp(at(-1, 21, 5))}.md`, at(-1, 21, 5), at(-1, 21, 30),
+    { type: "study-note", material: "sql-handout", chapter: 3 },
+    T("# JOIN\n\nSee also [[SELECT and WHERE]]. In Java the same query runs through [[JDBC queries]].\n\nINNER JOIN ::: only rows with a match on both sides\n\nWhat does a LEFT JOIN return for a customer with no orders?\n?\nThe customer's row, with NULL in the order columns\n",
+      "# JOIN\n\nVeja também [[SELECT e WHERE]]. Em Java a mesma consulta roda pelo [[Consultas com JDBC]].\n\nINNER JOIN ::: só as linhas com par dos dois lados\n\nO que um LEFT JOIN devolve para um cliente sem pedidos?\n?\nA linha do cliente, com NULL nas colunas do pedido\n"));
+  const links = (dir, created, list) =>
+    studyFile(`${dir}/links.md`, created, created, { type: "links" }, list.map(([title, url, note]) => `- [${title}](${url})${note ? ` — ${note}` : ""}`).join("\n") + "\n");
+  links("sql-basics", at(-20, 20, 0), [
+    [T("SQLite tutorial", "Tutorial de SQLite"), "https://www.sqlitetutorial.net/", T("short pages, one topic each", "páginas curtas, um assunto cada")],
+    ["SQL Fiddle", "https://sqlfiddle.com/", T("try queries in the browser", "testar consultas no navegador")],
+    [T("PostgreSQL docs: SELECT", "Documentação do PostgreSQL: SELECT"), "https://www.postgresql.org/docs/current/sql-select.html", ""],
+  ]);
+  studyFile("sample-git/subject.md", at(-30, 19, 0), at(-30, 19, 0),
+    { type: "subject", title: "Git", group: T("Tools", "Ferramentas") }, "");
+  studyFile("sample-java/subject.md", at(-40, 20, 0), at(-3, 21, 0),
+    { type: "subject", title: "Java", group: T("Programming", "Programação") },
+    T("Java compiles to bytecode that runs on the JVM. Classes describe objects; interfaces describe what an object can do.\n",
+      "Java compila para bytecode, que roda na JVM. Classes descrevem objetos; interfaces descrevem o que um objeto sabe fazer.\n"));
+  studyFile("sample-jdbc/subject.md", at(-10, 20, 0), at(-3, 21, 20),
+    { type: "subject", title: "JDBC", parent: "sample-java" }, "");
+  studyFile(`sample-jdbc/notes/${stamp(at(-3, 21, 0))}.md`, at(-3, 21, 0), at(-3, 21, 20),
+    { type: "study-note" },
+    T("# JDBC queries\n\nOpen a `Connection`, prepare the SQL, run it, read the `ResultSet`. The SQL itself is in [[JOIN]] and [[SELECT and WHERE]].\n\n```java\ntry (var ps = conn.prepareStatement(\"SELECT name FROM customers WHERE city = ?\")) {\n  ps.setString(1, \"Recife\");\n  var rs = ps.executeQuery();\n}\n```\n\nWhy use PreparedStatement instead of joining strings? :: It stops SQL injection and lets the database reuse the plan\nWhat does try-with-resources do with the statement? :: Closes it at the end, even after an error\n",
+      "# Consultas com JDBC\n\nAbra uma `Connection`, prepare o SQL, execute, leia o `ResultSet`. O SQL em si está em [[JOIN]] e [[SELECT e WHERE]].\n\n```java\ntry (var ps = conn.prepareStatement(\"SELECT nome FROM clientes WHERE cidade = ?\")) {\n  ps.setString(1, \"Recife\");\n  var rs = ps.executeQuery();\n}\n```\n\nPor que usar PreparedStatement em vez de juntar strings? :: Evita SQL injection e deixa o banco reaproveitar o plano\nO que o try-with-resources faz com o statement? :: Fecha no final, mesmo depois de um erro\n"));
+  links("sample-jdbc", at(-9, 20, 0), [
+    [T("JDBC basics (Oracle)", "JDBC básico (Oracle)"), "https://docs.oracle.com/javase/tutorial/jdbc/basics/", T("the official tutorial", "o tutorial oficial")],
+    [T("PreparedStatement API", "API do PreparedStatement"), "https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/PreparedStatement.html", ""],
+  ]);
+  studyFile("sample-jdbc/notes/flashcards.md", at(-3, 21, 25), at(-3, 21, 25),
+    { type: "study-note", kind: "cards" },
+    T("# Flashcards\n\nWhich interface runs SQL with parameters? :: PreparedStatement\n\nDriverManager ::: gives a Connection from a JDBC URL\n",
+      "# Flashcards\n\nQual interface executa SQL com parâmetros? :: PreparedStatement\n\nDriverManager ::: entrega uma Connection a partir de uma URL JDBC\n"));
+
+  // School: a course, 5 semesters, the 3rd now. One retake class falls on today's weekday, so
+  // "Classes today" shows something whatever day the samples are added.
+  const WD = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const todayWd = WD[TODAY.getDay()];
+  studyFile("_courses/ads.md", at(-400, 10, 0), at(-60, 10, 0),
+    { type: "course", title: T("Systems Analysis and Development", "Análise e Desenvolvimento de Sistemas"), institution: T("Sample College", "Faculdade Exemplo"), semesters: 5, current: 3, pass: 6, attendance: 75 }, "");
+  const subject = (slugName, data, body = "") =>
+    studyFile(`${slugName}/subject.md`, at(-60, 10, 0), at(-2, 21, 0), { type: "subject", course: "ads", ...data }, body);
+  const exam = (dir, n, title, date, extra, body = "") =>
+    studyFile(`${dir}/exams/${stamp(at(-50, 10, n))}.md`, at(-50, 10, n), at(-2, 10, n), { type: "exam", title, date, ...extra }, body);
+  const assignment = (dir, name, data, body = "") =>
+    studyFile(`${dir}/assignments/${name}/assignment.md`, at(-30, 10, 0), at(-2, 10, 0), { type: "assignment", ...data }, body);
+
+  // Semester 1 and 2: finished.
+  subject("algoritmos", { title: T("Algorithms and Logic", "Algoritmos e Lógica de Programação"), semester: 1, result: "passed", teacher: "Prof. Helena Costa", hours_week: 4, absences: 2 });
+  exam("algoritmos", 1, "P1", day(-330), { grade: 8.5 });
+  exam("algoritmos", 2, "P2", day(-290), { grade: 9 });
+  subject("matematica-discreta", { title: T("Discrete Mathematics", "Matemática Discreta"), semester: 1, result: "failed", teacher: "Prof. Paulo Nunes", hours_week: 4, absences: 6 });
+  exam("matematica-discreta", 1, "P1", day(-330), { grade: 4 });
+  exam("matematica-discreta", 2, "P2", day(-290), { grade: 5 });
+  subject("estrutura-de-dados-ads", { title: T("Data Structures", "Estrutura de Dados"), semester: 2, result: "passed", teacher: "Prof. Marina Alves", hours_week: 4 });
+  exam("estrutura-de-dados-ads", 1, "P1", day(-150), { grade: 7 });
+  exam("estrutura-de-dados-ads", 2, "P2", day(-110), { grade: 8 });
+
+  // Semester 3: being taken.
+  const poo = "programacao-orientada-a-objetos";
+  subject(poo, {
+    title: T("Object-Oriented Programming", "Programação Orientada a Objetos"), semester: 3, result: "taking",
+    teacher: "Prof. Marina Alves", room: T("Lab 3", "Lab 3"), hours_week: 4, hours_total: 80, absences: 4,
+    schedule: flowList(["mon 19:00-20:40", "wed 19:00-20:40"]),
+  }, T("## Syllabus\n\nClasses and objects, encapsulation, inheritance, polymorphism, interfaces, exceptions, collections.\n\n## Grades\n\nP1 and P2 (weight 2 each) + the group project (weight 1).\n",
+    "## Ementa\n\nClasses e objetos, encapsulamento, herança, polimorfismo, interfaces, exceções, coleções.\n\n## Avaliação\n\nP1 e P2 (peso 2 cada) + projeto em grupo (peso 1).\n"));
+  studyFile(`${poo}/notes/${stamp(at(-12, 20, 40))}.md`, at(-12, 20, 40), at(-12, 20, 55),
+    { type: "study-note", kind: "class", date: day(-12) },
+    T("# Encapsulation\n\nFields private, access through methods. The class decides what is valid.\n\nWhy make fields private? :: So only the class can change them and keep them valid\n",
+      "# Encapsulamento\n\nAtributos privados, acesso por métodos. A classe decide o que é válido.\n\nPor que deixar os atributos privados? :: Para só a própria classe mudá-los e mantê-los válidos\n"));
+  studyFile(`${poo}/notes/${stamp(at(-5, 20, 40))}.md`, at(-5, 20, 40), at(-5, 20, 58),
+    { type: "study-note", kind: "class", date: day(-5) },
+    T("# Polymorphism\n\nThe same call, different behaviour: `animal.sound()` runs the method of the real class.\n\nWhat decides which overridden method runs? :: The real class of the object, at run time\nOverloading ::: same name, different parameters (chosen when compiling)\n",
+      "# Polimorfismo\n\nA mesma chamada, comportamentos diferentes: `animal.som()` roda o método da classe real.\n\nO que decide qual método sobrescrito roda? :: A classe real do objeto, em tempo de execução\nSobrecarga ::: mesmo nome, parâmetros diferentes (escolhida na compilação)\n"));
+  studyFile(`${poo}/materials/apostila-poo.md`, at(-40, 20, 0), at(-5, 21, 0),
+    { type: "material", title: T("OOP handout", "Apostila de POO"), kind: "handout", source: T("The teacher", "A professora"), done: "[1]", at: 2 },
+    T("# OOP handout\n\n## 1. Classes and objects\n\nA class is a model; an object is one thing made from it with `new`.\n\n## 2. Encapsulation\n\nKeep fields `private` and expose methods that keep the object valid.\n\n## 3. Inheritance and polymorphism\n\n`extends` reuses a class; an overridden method runs according to the real object.\n",
+      "# Apostila de POO\n\n## 1. Classes e objetos\n\nUma classe é um modelo; um objeto é uma coisa feita a partir dele com `new`.\n\n## 2. Encapsulamento\n\nMantenha os atributos `private` e exponha métodos que mantêm o objeto válido.\n\n## 3. Herança e polimorfismo\n\n`extends` reaproveita uma classe; um método sobrescrito roda de acordo com o objeto real.\n"));
+  links(poo, at(-40, 20, 5), [
+    [T("Dev.java: learn Java", "Dev.java: aprenda Java"), "https://dev.java/learn/", T("the teacher's suggestion", "sugestão da professora")],
+    [T("Class video: inheritance", "Vídeo da aula: herança"), "https://www.youtube.com/results?search_query=heran%C3%A7a+java", ""],
+  ]);
+  exam(poo, 3, "P1", day(-14), { time: "19:00", room: "Lab 3", grade: 7.5, weight: 2 });
+  exam(poo, 4, "P2", day(20), { time: "19:00", room: "Lab 3", weight: 2 },
+    T("- Inheritance and polymorphism\n- Interfaces vs abstract classes\n- Exceptions (checked x unchecked)\n", "- Herança e polimorfismo\n- Interfaces x classes abstratas\n- Exceções (checked x unchecked)\n"));
+  const lib = T("library-system", "sistema-de-biblioteca");
+  assignment(poo, lib, { title: T("Library system in Java", "Sistema de biblioteca em Java"), due: day(9), status: "doing", group: true, members: "Ana, Bruno, Carla" },
+    T("Classes Book, Member and Loan; a loan lasts 14 days. Delivery: the code on GitHub + a short report.\n\n- [x] Class diagram\n- [ ] Loan rules\n- [ ] Report\n",
+      "Classes Livro, Membro e Emprestimo; um empréstimo dura 14 dias. Entrega: o código no GitHub + um relatório curto.\n\n- [x] Diagrama de classes\n- [ ] Regras de empréstimo\n- [ ] Relatório\n"));
+  binaries.push([`study/${poo}/assignments/${lib}/${T("brief.pdf", "enunciado.pdf")}`,
+    tinyPdf(T("Assignment: library system", "Trabalho: sistema de biblioteca"), T(
+      ["Groups of up to 3.", "Classes: Book, Member, Loan.", "A loan lasts 14 days; a late return blocks new loans.", `Due: ${day(9)}`],
+      ["Grupos de ate 3 pessoas.", "Classes: Livro, Membro, Emprestimo.", "Um emprestimo dura 14 dias; atraso bloqueia novos emprestimos.", `Entrega: ${day(9)}`]))]);
+  binaries.push([`study/${poo}/assignments/${lib}/${T("meeting-notes.txt", "reuniao-do-grupo.txt")}`,
+    Buffer.from(T("Ana: Book and Member classes\nBruno: Loan rules\nCarla: report\n", "Ana: classes Livro e Membro\nBruno: regras de empréstimo\nCarla: relatório\n"))]);
+
+  const bd = "banco-de-dados-ads";
+  subject(bd, {
+    title: T("Databases", "Banco de Dados"), semester: 3, result: "taking",
+    teacher: "Prof. Ricardo Lima", room: T("Room 12", "Sala 12"), hours_week: 4, absences: 0,
+    schedule: flowList(["tue 19:00-22:30"]),
+  });
+  assignment(bd, T("clinic-er-model", "modelo-er-da-clinica"), { title: T("ER model of a clinic", "Modelo ER de uma clínica"), due: day(-8), status: "graded", grade: 9 }, "");
+  exam(bd, 5, "P1", day(6), { time: "19:00", room: T("Room 12", "Sala 12"), weight: 2 },
+    T("Normal forms (1NF to 3NF), JOINs, GROUP BY. Study from [[JOIN]].\n", "Formas normais (1FN a 3FN), JOINs, GROUP BY. Estudar por [[JOIN]].\n"));
+  subject("engenharia-de-software-ii", {
+    title: T("Software Engineering II", "Engenharia de Software II"), semester: 3, result: "taking",
+    teacher: "Prof. Sofia Rocha", room: T("Room 7", "Sala 7"), hours_week: 2, absences: 1,
+    schedule: flowList(["thu 21:00-22:40"]),
+  });
+  subject("matematica-discreta-dp", {
+    title: T("Discrete Mathematics (retake)", "Matemática Discreta (DP)"), semester: 3, result: "taking",
+    teacher: "Prof. Paulo Nunes", room: T("Room 4", "Sala 4"), hours_week: 2, absences: 0,
+    schedule: flowList([`${todayWd} 19:00-20:40`]),
+  });
+
   // ---- Trash ----
   const old = at(-12, 9, 0);
   const oldTitle = T("Print the boarding pass", "Imprimir o cartão de embarque");
   const trashed = `.trash/todo/${stamp(old)}-${slug(oldTitle)}.md`;
   out.push([trashed, file({ type: "todo", created: isoMinute(old), modified: isoMinute(old), status: "open", when: day(-11) },
     `# ${oldTitle}\n`)]);
-  return { files: out, covers, trashIndex: { [trashed]: { from: trashed.slice(7), at: isoMinute(at(-1, 19, 0)) } } };
+  return { files: out, covers, binaries, fixed, trashIndex: { [trashed]: { from: trashed.slice(7), at: isoMinute(at(-1, 19, 0)) } } };
 }
 
 const sampleLists = lang => [
@@ -510,13 +746,20 @@ const areaOf = rel => rel.split("/")[0];
 async function add(io, { lang, demo }) {
   const m = readJson(io, MANIFEST, null);
   const had = new Set(m ? (m.areas ?? m.files.map(areaOf)) : []);
-  const { files: all, covers, trashIndex } = samples(lang, demo);
-  const files = all.filter(([rel]) => !had.has(areaOf(rel)));
-  if (!files.length) {
+  const { files: all, covers, binaries, fixed, trashIndex } = samples(lang, demo);
+  const known = new Set([...(m?.files ?? []), ...(m?.binaries ?? [])]);
+  const isNew = rel => !had.has(areaOf(rel)) || (fixed.has(rel) && !known.has(rel) && io.read(rel) === null);
+  const files = all.filter(([rel]) => isNew(rel));
+  if (!files.length && !binaries.some(([rel]) => isNew(rel) && io.read(rel) === null)) {
     console.log("Sample data is already there. Run `remove` first to make it again with today's dates.");
     return;
   }
-  for (const [rel, text] of files) io.write(rel, text);
+  // Never over a file of the user's (a subject folder with the same name, say).
+  const taken = files.filter(([rel]) => io.read(rel) !== null).map(([rel]) => rel);
+  for (const rel of taken) console.log(`Kept the existing ${rel} (no sample written there).`);
+  for (const [rel, text] of files) if (!taken.includes(rel)) io.write(rel, text);
+  const bins = binaries.filter(([rel]) => isNew(rel) && io.read(rel) === null);
+  for (const [rel, data] of bins) io.write(rel, data);
   let addedLists = [];
   if (files.some(([rel]) => areaOf(rel) === "todo")) {
     const lists = readJson(io, LISTS, { lists: [] });
@@ -543,7 +786,8 @@ async function add(io, { lang, demo }) {
     io.write(".polaris/settings.json", JSON.stringify({ ...settings, language: lang === "pt" ? "pt-BR" : "en" }, null, 2) + "\n");
   }
   const manifest = {
-    files: [...(m?.files ?? []), ...files.map(f => f[0])],
+    files: [...(m?.files ?? []), ...files.map(f => f[0]).filter(rel => !taken.includes(rel))],
+    binaries: [...(m?.binaries ?? []), ...bins.map(f => f[0])],
     lists: [...(m?.lists ?? []), ...addedLists.map(l => l.id)],
     areas: [...new Set([...had, ...files.map(([rel]) => areaOf(rel))])],
   };
@@ -566,6 +810,13 @@ function remove(io) {
   // Sample projects too: the step folders, then the project folder.
   for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/[^/]+\/[^/]+\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
   for (const rel of files) if (/^(\.trash\/)?projects\/[^/]+\/project\.md$/.test(rel)) io.removeDirIfEmpty(path.posix.dirname(rel));
+  // Sample attachments (no header to mark them), then the study folders left empty.
+  for (const rel of m?.binaries ?? []) io.remove(rel);
+  const studyDirs = new Set();
+  for (const rel of [...files, ...(m?.binaries ?? [])])
+    if (rel.startsWith("study/"))
+      for (let d = path.posix.dirname(rel); d.split("/").length > 1; d = path.posix.dirname(d)) studyDirs.add(d);
+  for (const d of [...studyDirs].sort((a, b) => b.split("/").length - a.split("/").length)) io.removeDirIfEmpty(d);
   const index = readJson(io, ".trash/.deleted.json", {});
   for (const k of files) delete index[k];
   if (Object.keys(index).length) io.write(".trash/.deleted.json", JSON.stringify(index, null, 2) + "\n");

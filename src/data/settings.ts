@@ -1,9 +1,11 @@
 import type { Storage } from "../storage/types";
 import type { LangSetting } from "../i18n";
+import { migrateTheme, type Appearance } from "./appearance";
 
 // Per-device settings in .polaris/settings.json (not synced, SPEC 6.2).
 
-export type Theme = "dark" | "minimal" | "light" | "system";
+/** Light or dark mode ("minimal" was a theme before palettes; loadSettings turns it into one). */
+export type Theme = "dark" | "light" | "system";
 
 export interface Settings {
   theme: Theme;
@@ -11,6 +13,10 @@ export interface Settings {
   language?: LangSetting;
   /** PC: the data folder on the Android devices it syncs with (SPEC 6.1). */
   syncDeviceDir?: string;
+  /** Palette, fonts, sizes… (data/appearance). */
+  appearance?: Appearance;
+  /** The PDF export options used last (ui/pdf). */
+  pdf?: Partial<import("../ui/pdf").PdfOptions>;
 }
 
 export const SETTINGS_PATH = ".polaris/settings.json";
@@ -20,7 +26,7 @@ const defaults: Settings = { theme: "dark" };
 export async function loadSettings(s: Storage): Promise<Settings> {
   if (!(await s.stat(SETTINGS_PATH))) return { ...defaults };
   try {
-    return { ...defaults, ...JSON.parse(await s.read(SETTINGS_PATH)) };
+    return migrateTheme({ ...defaults, ...JSON.parse(await s.read(SETTINGS_PATH)) });
   } catch {
     return { ...defaults };
   }

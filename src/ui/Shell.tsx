@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, FilePlus, FileText, FolderKanban, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, FilePlus, FileText, FolderKanban, GraduationCap, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { createFullNote } from "../data/fullnotes";
 import { dayOfPath, MOODS, type Entry } from "../data/journal";
@@ -12,6 +12,9 @@ import { BooksView, useBooks } from "./books/BooksView";
 import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
+import { StudyCard } from "./study/CardReview";
+import { StudyView, useCourses, useStudy, type StudyRequest } from "./study/StudyView";
+import { ClassesToday } from "./study/School";
 import { NotesView, useFullNotes } from "./notes/NotesView";
 import { ProjectsView, useProjects } from "./projects/ProjectsView";
 import { CloseDay } from "./journal/CloseDay";
@@ -31,10 +34,14 @@ import { goBack, useBack } from "./useBack";
 import { useHold } from "./useHold";
 import { useReminders } from "./useReminders";
 import { useWidgets } from "./useWidgets";
+import { useAppLinks, linkPlaces, type LinkPlace } from "./appLinks";
+import { LinksCtx } from "./links";
+import { QuickSwitcher, type Command } from "./QuickSwitcher";
+import { flushAll } from "../data/pending";
 import { isDay } from "../data/widgets";
 import { t } from "../i18n";
 
-export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
+export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "study" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
 const AREAS: { id: Area; icon: ReactNode }[] = [
   { id: "today", icon: <Sun size={20} /> },
@@ -42,6 +49,7 @@ const AREAS: { id: Area; icon: ReactNode }[] = [
   { id: "notes", icon: <FileText size={20} /> },
   { id: "projects", icon: <FolderKanban size={20} /> },
   { id: "books", icon: <BookOpen size={20} /> },
+  { id: "study", icon: <GraduationCap size={20} /> },
   { id: "todo", icon: <CheckSquare size={20} /> },
   { id: "journal", icon: <NotebookPen size={20} /> },
   { id: "review", icon: <Scale size={20} /> },
@@ -75,7 +83,7 @@ function More({ go }: { go: (a: Area) => void }) {
 }
 
 // Hold More (right-click on PC) for these without leaving the current page.
-const QUICK: Area[] = ["notes", "projects", "journal", "review", "thoughts", "inbox"];
+const QUICK: Area[] = ["notes", "study", "projects", "journal", "review", "thoughts", "inbox"];
 
 interface PopItem {
   id: string;
@@ -211,7 +219,7 @@ export interface OpenRequest {
   key: number;
 }
 
-const OPEN_AREAS: Area[] = ["today", "todo", "inbox", "notes", "ideas", "projects", "books", "journal", "review", "thoughts"];
+const OPEN_AREAS: Area[] = ["today", "todo", "inbox", "notes", "ideas", "projects", "books", "study", "journal", "review", "thoughts"];
 
 export function Shell(props: { captureKey?: number; startArea?: Area; openRequest?: OpenRequest }) {
   const { captureKey = 0, startArea = "today", openRequest } = props;
@@ -225,6 +233,13 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
   const projects = useProjects();
   const books = useBooks();
   const quotes = useQuotes(books);
+  const study = useStudy();
+  const courses = useCourses();
+  const [studyRequest, setStudyRequest] = useState<StudyRequest | undefined>();
+  const openStudy = (r: Omit<StudyRequest, "key">) => {
+    setStudyRequest({ ...r, key: Date.now() });
+    setArea("study");
+  };
   const thoughts = useThoughts();
   const journal = useJournal();
   const [journalTarget, setJournalTarget] = useState<{ day: string; key: number } | undefined>();
@@ -264,6 +279,7 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
     setThoughtTarget(undefined);
     setJournalTarget(undefined);
     setReviewTarget(undefined);
+    setStudyRequest(a === "study" ? { key: Date.now() } : undefined);
     setArea(a);
   };
 
@@ -271,11 +287,20 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
   const { platform, notes, bump, toast } = useApp();
   const areaRef = useRef(area);
   areaRef.current = area;
+  // The area last opened from More (page or hold popup): back goes to More, not Today.
+  const fromMore = useRef<Area | null>(null);
+  const goFromMore = (a: Area) => {
+    go(a);
+    fromMore.current = a;
+  };
   useEffect(
     () =>
       platform.onBackButton?.(() => {
         if (goBack()) return;
-        if (areaRef.current !== "today") go("today");
+        if (fromMore.current && fromMore.current === areaRef.current) {
+          fromMore.current = null;
+          go("more");
+        } else if (areaRef.current !== "today") go("today");
         else void platform.leaveApp?.();
       }),
     [platform],
@@ -284,10 +309,16 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
   // Ctrl+F: search (SPEC 4.4).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      // Ctrl+F in a note finds in that note (the editor takes it first); Ctrl+Shift+F always searches everything.
+      if (k === "f" && (e.shiftKey || !e.defaultPrevented)) {
         e.preventDefault();
         setArea("search");
         setSearchKey(k => k + 1);
+      } else if ((k === "o" || k === "p") && !e.shiftKey) {
+        e.preventDefault();
+        setSwitcher(k === "o" ? "open" : "commands");
       }
     };
     addEventListener("keydown", onKey);
@@ -316,7 +347,8 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
       if (arg === "todo") setView("today");
     } else if (kind === "open") {
       const [a, ...p] = arg.split(":");
-      if (OPEN_AREAS.includes(a as Area) && p.length) openIn(a as Area, p.join(":"));
+      if (a === "study" && p.length) openStudy({ path: p.join(":") });
+      else if (OPEN_AREAS.includes(a as Area) && p.length) openIn(a as Area, p.join(":"));
     } else if (kind === "thought" && arg) openThought({ id: arg });
     else if (kind === "journal" && isDay(arg)) openJournal(arg);
     else if (kind === "review" && isDay(arg)) openReview(arg);
@@ -360,6 +392,12 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
                     }
                   />
                 )}
+                <ClassesToday subjects={study} courses={courses} onOpen={s => openStudy({ path: s.path })} />
+                <StudyCard
+                  subjects={study}
+                  onReview={() => openStudy({ review: true })}
+                  onContinue={(path, chapter) => openStudy({ path, chapter })}
+                />
                 <QuoteReview
                   quotes={quotes}
                   onOpen={q => {
@@ -400,6 +438,9 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
       break;
+    case "study":
+      page = <StudyView subjects={study} request={studyRequest} />;
+      break;
     case "journal":
       page = <JournalView entries={journal} openDay={journalTarget} onReview={openReview} />;
       break;
@@ -437,6 +478,10 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
               (d.area === "journal" ? openJournal : openReview)(day);
               return true;
             }
+            if (d.area === "study") {
+              openStudy({ path: d.path });
+              return true;
+            }
             if (!["todo", "inbox", "ideas", "notes", "books", "projects"].includes(d.area)) return false;
             if (d.area === "books" && !d.path.endsWith("/book.md") && !isQuotePath(d.path)) return false;
             if (d.area === "projects" && !isProjectPath(d.path) && !isStepNotePath(d.path)) return false;
@@ -454,7 +499,7 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
       page = <SyncView />;
       break;
     case "more":
-      page = <More go={go} />;
+      page = <More go={goFromMore} />;
       break;
   }
 
@@ -475,6 +520,33 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
     }
   };
   const held = (id: Area) => (id === "more" ? moreHold : id === "today" ? todayHold : undefined);
+
+  // [[Links]] in every editor, Ctrl+O to open a note by title, Ctrl+P for commands (Obsidian-like).
+  const [switcher, setSwitcher] = useState<"open" | "commands" | null>(null);
+  const linkLists = { notes: fullNotes, ideas, projects, books, study };
+  const openPlace = (p: LinkPlace) =>
+    void flushAll().then(() => {
+      if (p.area === "study") openStudy({ path: p.path });
+      else openIn(p.area as Area, p.path);
+    });
+  const newTitled = async (title: string) => {
+    try {
+      await flushAll();
+      const n = await createFullNote(notes, `# ${title}\n\n`);
+      bump();
+      setTarget({ path: n.path, key: Date.now(), isNew: true });
+      setArea("notes");
+    } catch (e) {
+      toast({ text: e instanceof Error ? e.message : String(e), error: true });
+    }
+  };
+  const links = useAppLinks(linkLists, notes, { open: openPlace, day: d => void flushAll().then(() => openJournal(d)), create: title => void newTitled(title) });
+  const commands: Command[] = [
+    { id: "new-note", label: t.shell.newNote, icon: <FilePlus size={16} />, run: () => void newNote() },
+    { id: "open", label: t.switcher.title, icon: <Search size={16} />, run: () => setSwitcher("open") },
+    { id: "search", label: t.search.title, icon: <Search size={16} />, run: () => (setArea("search"), setSearchKey(k => k + 1)) },
+    ...AREAS.map(a => ({ id: `go-${a.id}`, label: t.area[a.id], icon: a.icon, run: () => go(a.id) })),
+  ];
 
   // To-do lists right under "To-do" in the sidebar (wide screens; narrow ones use chips).
   const todoNav = (
@@ -525,7 +597,19 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
           </Fragment>
         ))}
       </nav>
-      <main className="main">{page}</main>
+      <main className="main">
+        <LinksCtx.Provider value={links}>{page}</LinksCtx.Provider>
+      </main>
+      {switcher && (
+        <QuickSwitcher
+          mode={switcher}
+          places={linkPlaces(linkLists)}
+          commands={commands}
+          onOpen={openPlace}
+          onCreate={title => void newTitled(title)}
+          onClose={() => setSwitcher(null)}
+        />
+      )}
       {closing && <CloseDay day={today} onClose={() => setClosing(false)} />}
       <nav className="bottombar" aria-label={t.shell.areas}>
         {BOTTOM.map(id => {
@@ -556,7 +640,7 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
           }))}
           pick={a => {
             setMorePop(false);
-            go(a as Area);
+            goFromMore(a as Area);
           }}
           onClose={() => setMorePop(false)}
         />

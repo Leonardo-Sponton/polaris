@@ -287,11 +287,12 @@ interface PageProps {
 }
 
 function DayPage({ path, head, bar, start, onClose, onGone }: PageProps) {
-  const { notes, bump, toast } = useApp();
+  const { notes, bump, toast, confirmDelete } = useApp();
   const f = useNoteFile(path, { removeIfEmpty: isEmptyDay });
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
   const remove = async () => {
+    if (!(await confirmDelete())) return;
     try {
       await f.saveNow();
       const trashed = await moveToTrash(notes.storage, path);
