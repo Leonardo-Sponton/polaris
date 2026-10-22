@@ -91,7 +91,7 @@ export function SchoolSubject(props: Props) {
           {props.tab === "overview" && f.note && <Overview {...props} f={f} />}
           {props.tab === "classes" && <Classes {...props} />}
           {props.tab === "handouts" && <Handouts {...props} />}
-          {props.tab === "links" && <LinksBox subject={s} />}
+          {props.tab === "links" && <LinksBox dir={s.dir} links={s.links} />}
           {props.tab === "work" && <Work {...props} />}
           {props.tab === "exams" && <Exams {...props} />}
           {props.tab === "cards" && <Cards {...props} />}

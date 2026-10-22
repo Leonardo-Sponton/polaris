@@ -4,7 +4,7 @@ import { isoDate, slugify, stamp } from "./dates";
 import { parse, titleOf, type Data } from "./frontmatter";
 import { itemParts } from "./inbox";
 import type { Note, Notes } from "./notes";
-import { CLASS_RESULTS, loadAssignments, num, slotsOf, toExam, type Assignment, type ClassResult, type Exam, type Slot } from "./school";
+import { addFile, CLASS_RESULTS, loadAssignments, num, slotsOf, toExam, type Assignment, type ClassResult, type Exam, type Slot } from "./school";
 
 // Study: one folder per subject (JDBC, Docker, a school course…), study/<slug>/:
 //   subject.md            the subject: title, group, parent subject (the tree), exam date in the
@@ -19,7 +19,14 @@ import { CLASS_RESULTS, loadAssignments, num, slotsOf, toExam, type Assignment, 
 //                         `kind: class` (with `date`) = notes of one class; `kind: cards` = a note
 //                         holding only flashcards (added by hand or made by the AI from a material)
 //   links.md              links to read or watch (videos, docs, articles): one Markdown list item
-//                         per link, "- [Title](https://…) — note"
+//                         per link, "- [Title](https://…) #video — note" (the #kind is optional)
+//   pdfs/<name>.pdf       PDFs studied from (opened in the device's PDF app); a study note about
+//                         one keeps its file name in `pdf:`
+//   workbench/<slug>/     a project for studying the subject in depth: project.md (title, short
+//                         description, status, draw.io and GitHub links in the header; the body is
+//                         the project notes), links.md like the subject's, files/ (anything added)
+//   exercises/            exercises to practise with: lists written or imported as .md ("# Title"),
+//                         PDFs (opened in the device's PDF app) and a links.md like the subject's
 //   assignments/, exams/  school subjects only (data/school)
 // study/_groups.md keeps the personal groups (their order, and groups with no subject yet).
 // Notes link to each other with [[Title]] (a note, a material or a subject, by title).
@@ -28,13 +35,48 @@ export type MaterialKind = "handout" | "book" | "course" | "video" | "article" |
 export const MATERIAL_KINDS: MaterialKind[] = ["handout", "book", "course", "video", "article", "other"];
 
 export const SUBJECT_FILE = "subject.md";
+export const PROJECT_FILE = "project.md";
 export const LINKS_FILE = "links.md";
 export const GROUPS_PATH = "study/_groups.md";
+
+export const EXERCISES_DIR = "exercises";
+
+/** What a link leads to; each kind has its own color (LINK_KIND_COLORS). */
+export const LINK_KINDS = ["article", "blog", "video", "lecture", "tutorial", "course", "docs", "podcast", "other"] as const;
+export type LinkKind = (typeof LINK_KINDS)[number];
+/** Tag colors of the link kinds: fixed hues, mid tones, so they read the same on every theme. */
+export const LINK_KIND_COLORS: Record<LinkKind, string> = {
+  article: "#4c9be8",
+  blog: "#a371f7",
+  video: "#e5534b",
+  lecture: "#f0883e",
+  tutorial: "#3fb68b",
+  course: "#d4a72c",
+  docs: "#2fb5c4",
+  podcast: "#db61a2",
+  other: "#8b949e",
+};
 
 export interface StudyLink {
   title: string;
   url: string;
   note: string;
+  /** "" = not said. */
+  kind: LinkKind | "";
+}
+
+/** An exercise list kept as Markdown in exercises/. */
+export interface ExerciseDoc {
+  path: string;
+  title: string;
+  preview: string;
+  modified: string;
+}
+
+export interface Exercises {
+  docs: ExerciseDoc[];
+  pdfs: StudyPdf[];
+  links: StudyLink[];
 }
 
 export interface Chapter {
@@ -63,6 +105,41 @@ export interface Material {
 
 export type StudyNoteKind = "note" | "class" | "cards";
 
+export interface StudyPdf {
+  path: string;
+  /** File name, with .pdf: what a study note points to in `pdf:`. */
+  name: string;
+  title: string;
+  size: number;
+  modified: number;
+}
+
+export const WORKBENCH_STATUSES = ["planning", "active", "paused", "done"] as const;
+export type WorkbenchStatus = (typeof WORKBENCH_STATUSES)[number];
+/** Longest project description, in characters. */
+export const DESCRIPTION_MAX = 350;
+
+export interface WorkbenchProject {
+  path: string;
+  dir: string;
+  title: string;
+  description: string;
+  status: WorkbenchStatus;
+  /** Link to the model on draw.io (diagrams.net). */
+  drawio: string;
+  github: string;
+  /** Where it runs (a deploy, a demo video…). */
+  demo: string;
+  started: string;
+  finished: string;
+  links: StudyLink[];
+  /** Names of the files in files/. */
+  files: string[];
+  /** The project notes are not empty. */
+  hasNotes: boolean;
+  modified: string;
+}
+
 export interface StudyNote {
   path: string;
   kind: StudyNoteKind;
@@ -72,6 +149,8 @@ export interface StudyNote {
   preview: string;
   material: string;
   chapter: number | null;
+  /** File name of the PDF this note is about (pdfs/<name>). */
+  pdf: string;
   cards: Card[];
   states: Map<string, CardState>;
   /** Names this note links to with [[…]]. */
@@ -110,6 +189,9 @@ export interface Subject {
   materials: Material[];
   notes: StudyNote[];
   links: StudyLink[];
+  pdfs: StudyPdf[];
+  exercises: Exercises;
+  workbench: WorkbenchProject[];
   modified: string;
 }
 
@@ -127,23 +209,49 @@ export const isSubjectPath = (p: string) => /^study\/[^/]+\/subject\.md$/.test(p
 export const isMaterialPath = (p: string) => /^study\/[^/]+\/materials\/[^/]+\.md$/.test(p);
 export const isStudyNotePath = (p: string) => /^study\/[^/]+\/notes\/[^/]+\.md$/.test(p);
 export const isLinksPath = (p: string) => /^study\/[^/]+\/links\.md$/.test(p);
+export const isPdfPath = (p: string) => /^study\/[^/]+\/pdfs\/[^/]+\.pdf$/i.test(p);
+export const isExercisePath = (p: string) => /^study\/[^/]+\/exercises\//.test(p);
+export const isWorkbenchPath = (p: string) => /^study\/[^/]+\/workbench\/[^/]+\//.test(p);
+/** project.md of the workbench project a path is in. */
+export const workbenchProjectOf = (p: string) => `${p.split("/").slice(0, 4).join("/")}/${PROJECT_FILE}`;
 
 // ---- Links ----
 
-const LINK_ITEM = /^\s*[-*+]\s+(?:\[((?:\\.|[^\]\\])*)\]\(<?([^)\s>]+)>?\)|<?(https?:\/\/[^\s>]+)>?)\s*(?:[—–-]\s*(.*))?$/;
+const LINK_ITEM = /^\s*[-*+]\s+(?:\[((?:\\.|[^\]\\])*)\]\(<?([^)\s>]+)>?\)|<?(https?:\/\/[^\s>]+)>?)(?:\s+#([a-z]+))?\s*(?:[—–-]\s*(.*))?$/;
 
-/** The links of a links.md body: list items "- [Title](url) — note" or "- https://…"; anything else is ignored. */
+const linkKind = (v: string | undefined): LinkKind | "" => ((LINK_KINDS as readonly string[]).includes(v ?? "") ? (v as LinkKind) : "");
+
+/** The links of a links.md body: list items "- [Title](url) #kind — note" or "- https://…"; anything else is ignored. */
 export function parseLinks(body: string): StudyLink[] {
   const out: StudyLink[] = [];
   for (const l of body.split("\n")) {
     const m = LINK_ITEM.exec(l);
-    if (m) out.push({ title: (m[1] ?? "").replace(/\\([[\]])/g, "$1").trim(), url: m[2] ?? m[3], note: (m[4] ?? "").trim() });
+    if (m)
+      out.push({ title: (m[1] ?? "").replace(/\\([[\]])/g, "$1").trim(), url: m[2] ?? m[3], kind: linkKind(m[4]), note: (m[5] ?? "").trim() });
   }
   return out;
 }
 
+/** A first guess of a link's kind from its address (the user can change it). */
+export function guessLinkKind(url: string): LinkKind | "" {
+  let host = "";
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+  const on = (...names: string[]) => names.some(x => host === x || host.endsWith(`.${x}`));
+  if (on("youtube.com", "youtu.be", "vimeo.com", "twitch.tv")) return "video";
+  if (on("udemy.com", "coursera.org", "alura.com.br", "edx.org", "khanacademy.org", "dio.me", "rocketseat.com.br", "freecodecamp.org")) return "course";
+  if (on("medium.com", "dev.to", "substack.com", "hashnode.dev", "blogspot.com", "wordpress.com")) return "blog";
+  if (on("spotify.com", "podcasts.apple.com", "anchor.fm")) return "podcast";
+  if (/^(docs|developer|devdocs|learn)\./.test(host) || on("developer.mozilla.org", "readthedocs.io", "docs.oracle.com")) return "docs";
+  return "";
+}
+
 export function linksBody(list: StudyLink[]): string {
-  const item = (l: StudyLink) => `- [${(l.title || l.url).replace(/([[\]])/g, "\\$1")}](${l.url})${l.note ? ` — ${l.note.replace(/\n/g, " ")}` : ""}`;
+  const item = (l: StudyLink) =>
+    `- [${(l.title || l.url).replace(/([[\]])/g, "\\$1")}](${l.url})${l.kind ? ` #${l.kind}` : ""}${l.note ? ` — ${l.note.replace(/\n/g, " ")}` : ""}`;
   return list.length ? `${list.map(item).join("\n")}\n` : "";
 }
 
@@ -155,6 +263,128 @@ export async function saveLinks(notes: Notes, subjectDir: string, list: StudyLin
     await notes.save(n, n.data, linksBody(list));
   } else await notes.create(path, { type: "links" }, linksBody(list));
 }
+
+// ---- PDFs ----
+
+export async function loadPdfs(notes: Notes, subjectDir: string, folder = "pdfs"): Promise<StudyPdf[]> {
+  const dir = `${subjectDir}/${folder}`;
+  return (await notes.storage.list(dir))
+    .filter(f => !f.isDir && /\.pdf$/i.test(f.name) && !f.name.includes(".tmp-"))
+    .map(f => ({ path: `${dir}/${f.name}`, name: f.name, title: f.name.replace(/\.pdf$/i, ""), size: f.size, modified: f.mtime }))
+    .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+}
+
+/** Copies a picked PDF into the subject (renamed when the name is taken). Returns its file name. */
+export const addPdf = (notes: Notes, subjectDir: string, name: string, data: Uint8Array) =>
+  addFile(notes.storage, `${subjectDir}/pdfs`, /\.pdf$/i.test(name) ? name : `${name}.pdf`, data);
+
+// ---- Exercises ----
+
+const toExerciseDoc = (n: Note): ExerciseDoc => {
+  const { title, rest } = itemParts(n.body);
+  const preview = rest
+    .split("\n")
+    .map(l => l.replace(/^\s*(#+|>|[-*+]( \[[ xX]\])?|\d+\.)\s*/, "").replace(/[*_~`]/g, "").trim())
+    .filter(Boolean)
+    .join(" · ")
+    .slice(0, 140);
+  return { path: n.path, title: title || n.path.slice(n.path.lastIndexOf("/") + 1, -3), preview, modified: str(n.data.modified ?? n.data.created) };
+};
+
+export async function loadExercises(notes: Notes, subjectDir: string, onError?: (p: string) => void): Promise<Exercises> {
+  const dir = `${subjectDir}/${EXERCISES_DIR}`;
+  const docs = (await loadAll(notes, dir, toExerciseDoc, onError, LINKS_FILE)).sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  const linksInfo = await notes.storage.stat(`${dir}/${LINKS_FILE}`);
+  const links = linksInfo ? await loadCached(notes, `${dir}/${LINKS_FILE}`, linksInfo, x => parseLinks(x.body)).catch(() => []) : [];
+  return { docs, pdfs: await loadPdfs(notes, subjectDir, EXERCISES_DIR), links };
+}
+
+/** A new exercise list ("# Title"), in exercises/. */
+export async function createExercise(notes: Notes, subjectDir: string, title: string, at = new Date()): Promise<Note> {
+  const dir = `${subjectDir}/${EXERCISES_DIR}`;
+  return notes.create(await notes.freePath(dir, slugify(title) || stamp(at)), { type: "exercise" }, `# ${title.trim()}\n\n`);
+}
+
+/** Copies a picked .md or .pdf into exercises/ (renamed when the name is taken). Returns its file name. */
+export const addExerciseFile = (notes: Notes, subjectDir: string, name: string, data: Uint8Array) =>
+  addFile(notes.storage, `${subjectDir}/${EXERCISES_DIR}`, name, data);
+
+// ---- Workbench ----
+
+const toProject = (n: Note, dir: string, links: StudyLink[], files: string[]): WorkbenchProject => {
+  const d = n.data;
+  return {
+    path: n.path,
+    dir,
+    title: str(d.title) || dir.slice(dir.lastIndexOf("/") + 1),
+    description: str(d.description),
+    status: pick(d.status, [...WORKBENCH_STATUSES], "planning"),
+    drawio: str(d.drawio),
+    github: str(d.github),
+    demo: str(d.demo),
+    started: str(d.started).slice(0, 10),
+    finished: str(d.finished).slice(0, 10),
+    links,
+    files,
+    hasNotes: n.body.trim() !== "",
+    modified: str(d.modified ?? d.created),
+  };
+};
+
+/** The workbench projects of a subject: active first, then planning, paused and done; last changed first. */
+export async function loadWorkbench(notes: Notes, subjectDir: string, onError?: (p: string) => void): Promise<WorkbenchProject[]> {
+  const out: WorkbenchProject[] = [];
+  const base = `${subjectDir}/workbench`;
+  for (const f of await notes.storage.list(base)) {
+    if (!f.isDir) continue;
+    const dir = `${base}/${f.name}`;
+    const path = `${dir}/${PROJECT_FILE}`;
+    try {
+      const info = await notes.storage.stat(path);
+      if (!info) continue;
+      const linksInfo = await notes.storage.stat(`${dir}/${LINKS_FILE}`);
+      const links = linksInfo ? await loadCached(notes, `${dir}/${LINKS_FILE}`, linksInfo, x => parseLinks(x.body)).catch(() => []) : [];
+      const files = (await notes.storage.list(`${dir}/files`))
+        .filter(e => !e.isDir && !e.name.includes(".tmp-"))
+        .map(e => e.name)
+        .sort((a, b) => a.localeCompare(b));
+      const n = await notes.load(path);
+      out.push(toProject(n, dir, links, files));
+    } catch {
+      onError?.(path);
+    }
+  }
+  const rank: Record<WorkbenchStatus, number> = { active: 0, planning: 1, paused: 2, done: 3 };
+  return out.sort((a, b) => rank[a.status] - rank[b.status] || b.modified.localeCompare(a.modified));
+}
+
+/** A new workbench project; the notes start with a few headings to fill in (in the app language). */
+export async function createProject(
+  notes: Notes,
+  subjectDir: string,
+  fields: { title: string; description?: string },
+  body = "",
+  today = isoDate(),
+): Promise<Note> {
+  const dir = await notes.freePath(`${subjectDir}/workbench`, slugify(fields.title), "");
+  const data: Data = {
+    type: "workbench",
+    title: fields.title.trim(),
+    description: fields.description?.trim().slice(0, DESCRIPTION_MAX) || undefined,
+    status: "planning",
+    started: today,
+  };
+  return notes.create(`${dir}/${PROJECT_FILE}`, data, body);
+}
+
+/** Header change for a new status: `finished` is set when done and cleared when reopened. */
+export function statusPatch(status: WorkbenchStatus, today = isoDate()): Data {
+  return { status, finished: status === "done" ? today : undefined };
+}
+
+/** Copies a picked file into a project's files/ folder. Returns its file name. */
+export const addProjectFile = (notes: Notes, projectDir: string, name: string, data: Uint8Array) =>
+  addFile(notes.storage, `${projectDir}/files`, name, data);
 
 // ---- Groups (personal) ----
 
@@ -258,6 +488,7 @@ export function toStudyNote(n: Note): StudyNote {
     preview,
     material: str(n.data.material),
     chapter: int(n.data.chapter),
+    pdf: str(n.data.pdf),
     cards: parseCards(n.body),
     states: statesOf(n.data),
     links: linksIn(n.body),
@@ -270,22 +501,34 @@ export function toStudyNote(n: Note): StudyNote {
 export const STUDY_NOTE_SORTS = ["chapter", "modified", "newest", "oldest", "title"] as const;
 export type StudyNoteSort = (typeof STUDY_NOTE_SORTS)[number];
 
-/** What the notes list of a subject keeps: all, the notes on one material, the free ones, or those with cards. */
-export type StudyNoteOnly = "" | "free" | "cards" | `m:${string}`;
+/** What the notes list of a subject keeps: all, the notes on one material or PDF, the free ones, or those with cards. */
+export type StudyNoteOnly = "" | "free" | "cards" | `m:${string}` | `p:${string}`;
+
+/** A note made from a material or a PDF; the others are free ("standalone"). */
+export const isFreeNote = (n: StudyNote) => !n.material && !n.pdf;
 
 /** The notes of a subject that have every word of `query`, kept by `only`, in the chosen order.
- *  "chapter" follows the materials (as listed) and their chapters, free notes last, each by creation. */
+ *  "chapter" follows the materials (as listed) and their chapters, then the PDFs, free notes last, each by creation. */
 export function filterStudyNotes(s: Subject, query: string, only: StudyNoteOnly, sort: StudyNoteSort): StudyNote[] {
   const words = fold(query).split(/\s+/).filter(Boolean);
   const list = s.notes.filter(
     n =>
       (!words.length || words.every(w => n.folded.includes(w))) &&
       (only === "" ||
-        (only === "free" ? !n.material : only === "cards" ? n.cards.length > 0 : n.material === only.slice(2))),
+        (only === "free"
+          ? isFreeNote(n)
+          : only === "cards"
+            ? n.cards.length > 0
+            : only.startsWith("p:")
+              ? n.pdf === only.slice(2)
+              : n.material === only.slice(2))),
   );
   const byCreated = (a: StudyNote, b: StudyNote) => a.created.localeCompare(b.created) || a.path.localeCompare(b.path);
   const at = new Map(s.materials.map((m, i) => [m.name, i]));
-  const place = (n: StudyNote) => (n.material ? (at.get(n.material) ?? s.materials.length) : s.materials.length + 1);
+  const pdfAt = new Map(s.pdfs.map((p, i) => [p.name, s.materials.length + 1 + i]));
+  const free = s.materials.length + s.pdfs.length + 2;
+  const place = (n: StudyNote) =>
+    n.material ? (at.get(n.material) ?? s.materials.length) : n.pdf ? (pdfAt.get(n.pdf) ?? free - 1) : free;
   const cmp: Record<StudyNoteSort, (a: StudyNote, b: StudyNote) => number> = {
     chapter: (a, b) => place(a) - place(b) || (a.chapter ?? 1e9) - (b.chapter ?? 1e9) || byCreated(a, b),
     modified: (a, b) => b.modified.localeCompare(a.modified) || byCreated(a, b),
@@ -361,10 +604,10 @@ async function loadCached<T>(notes: Notes, path: string, info: FileInfo, make: (
   return value;
 }
 
-async function loadAll<T>(notes: Notes, dir: string, make: (n: Note) => T, onError?: (p: string) => void): Promise<T[]> {
+async function loadAll<T>(notes: Notes, dir: string, make: (n: Note) => T, onError?: (p: string) => void, skip?: string): Promise<T[]> {
   const out: T[] = [];
   for (const f of await notes.storage.list(dir)) {
-    if (f.isDir || !f.name.endsWith(".md")) continue;
+    if (f.isDir || !f.name.endsWith(".md") || f.name === skip) continue;
     try {
       out.push(await loadCached(notes, `${dir}/${f.name}`, f, make));
     } catch {
@@ -397,13 +640,24 @@ export async function loadSubjects(notes: Notes, onError?: (path: string) => voi
     );
     const linksInfo = await notes.storage.stat(`${dir}/${LINKS_FILE}`);
     const links = linksInfo ? await loadCached(notes, `${dir}/${LINKS_FILE}`, linksInfo, x => parseLinks(x.body)).catch(() => []) : [];
+    const pdfs = await loadPdfs(notes, dir);
+    const exercises = await loadExercises(notes, dir, onError);
+    const workbench = await loadWorkbench(notes, dir, onError);
     const d = n.data;
     const course = str(d.course);
     const assignments = course ? await loadAssignments(notes.storage, notes, dir, onError) : [];
     const exams = course
       ? (await loadAll(notes, `${dir}/exams`, toExam, onError)).sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"))
       : [];
-    const modified = [str(d.modified ?? d.created), ...materials.map(m => m.modified), ...studyNotes.map(x => x.modified)].sort().at(-1)!;
+    const modified = [
+      str(d.modified ?? d.created),
+      ...materials.map(m => m.modified),
+      ...studyNotes.map(x => x.modified),
+      ...workbench.map(x => x.modified),
+      ...exercises.docs.map(x => x.modified),
+    ]
+      .sort()
+      .at(-1)!;
     out.push({
       path,
       dir,
@@ -427,6 +681,9 @@ export async function loadSubjects(notes: Notes, onError?: (path: string) => voi
       materials,
       notes: studyNotes,
       links,
+      pdfs,
+      exercises,
+      workbench,
       modified,
     });
   }
@@ -524,7 +781,7 @@ export function donePatch(done: number[], n: number, on: boolean): Data {
 export async function createStudyNote(
   notes: Notes,
   subjectDir: string,
-  about?: { material?: string; chapter?: number; title?: string; kind?: StudyNoteKind; date?: string },
+  about?: { material?: string; chapter?: number; pdf?: string; title?: string; kind?: StudyNoteKind; date?: string },
   at = new Date(),
 ): Promise<Note> {
   const data: Data = {
@@ -532,6 +789,7 @@ export async function createStudyNote(
     kind: about?.kind && about.kind !== "note" ? about.kind : undefined,
     date: about?.date,
     material: about?.material || undefined,
+    pdf: about?.pdf || undefined,
     chapter: about?.chapter,
   };
   const body = about?.title ? `# ${about.title}\n\n` : "";

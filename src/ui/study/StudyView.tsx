@@ -8,22 +8,30 @@ import {
   appendCards,
   backlinks,
   createMaterial,
+  createProject,
   createStudyNote,
+  createExercise,
+  LINKS_FILE,
+  isExercisePath,
   createSubject,
   allGroups,
   dueCards,
   isLinksPath,
   isMaterialPath,
+  isPdfPath,
   isSchool,
   isStudyNotePath,
   isSubjectPath,
+  isWorkbenchPath,
   linkTargets,
   loadSubjects,
   resolveLink,
   subjectDirOf,
+  workbenchProjectOf,
   type NewCard,
   type Subject,
 } from "../../data/study";
+import { guideBody, guideOf, type GuideId } from "../../data/guides";
 import { moveToTrash, restoreFromTrash } from "../../data/trash";
 import { Dialog } from "../Dialog";
 import { NoteEditor } from "../NoteEditor";
@@ -40,11 +48,12 @@ import { CoursePage, NewCourse, NewDated, Timetable } from "./School";
 import { SubjectPage } from "./SubjectPage";
 import { SubjectTree } from "./SubjectTree";
 import { AssignmentPage, ExamPage } from "./WorkPages";
+import { NewProject, WorkbenchPage } from "./Workbench";
 import { AiCards } from "./AiCards";
 import { GroupsDialog, MoveToGroup, useSavedGroups } from "./Groups";
 import { usePref } from "./prefs";
 import { dateLabel, gradeText } from "./school-ui";
-import { t } from "../../i18n";
+import { t, word } from "../../i18n";
 
 // Study (data/study, data/school), in two sections:
 //   Personal  subjects as a tree (groups, sub-subjects, their materials and notes), Obsidian-like
@@ -81,12 +90,14 @@ export function useCourses(): Course[] {
 
 /** What the detail pane shows. */
 type Pane =
-  | { kind: "subject"; path: string; tab?: SchoolTab }
+  | { kind: "subject"; path: string; tab?: SchoolTab | "pdf" | "exercises" }
   | { kind: "summary"; path: string }
   | { kind: "material"; path: string; chapter?: number | null }
   | { kind: "note"; path: string; isNew?: boolean }
   | { kind: "assignment"; path: string }
   | { kind: "exam"; path: string }
+  | { kind: "project"; path: string }
+  | { kind: "exercise"; path: string; isNew?: boolean }
   | { kind: "review"; only?: string; section?: Section }
   | { kind: "course"; path: string }
   | { kind: "timetable" };
@@ -253,6 +264,7 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
   const [adding, setAdding] = useState<"subject" | "course" | null>(null);
   const [addingMaterial, setAddingMaterial] = useState<string | null>(null);
   const [addingCard, setAddingCard] = useState<string | null>(null);
+  const [addingProject, setAddingProject] = useState<string | null>(null);
   const [aiFor, setAiFor] = useState<Subject | null>(null);
   const [dated, setDated] = useState<{ kind: "assignment" | "exam"; dir: string } | null>(null);
   const [menu, setMenu] = useState<Subject | null>(null);
@@ -294,7 +306,11 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
       }
     }
     if (isSubjectPath(path)) setPane({ kind: "subject", path });
+    else if (isExercisePath(path))
+      setPane(path.endsWith(".md") && !path.endsWith(`/${LINKS_FILE}`) ? { kind: "exercise", path } : { kind: "subject", path: subjectPathOf(path), tab: "exercises" });
     else if (isLinksPath(path)) setPane({ kind: "subject", path: subjectPathOf(path), tab: "links" });
+    else if (isPdfPath(path)) setPane({ kind: "subject", path: subjectPathOf(path), tab: "pdf" });
+    else if (isWorkbenchPath(path)) setPane({ kind: "project", path: workbenchProjectOf(path) });
     else if (isMaterialPath(path)) setPane({ kind: "material", path, chapter: chapter ?? null });
     else if (isStudyNotePath(path)) setPane({ kind: "note", path });
     else if (isExamPath(path)) setPane({ kind: "exam", path });
@@ -302,13 +318,14 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
   }
 
   /** The school tab an item lives in, to come back to it. */
-  const tabOf = (p: Pane): SchoolTab | undefined => {
+  const tabOf = (p: Pane): SchoolTab | "pdf" | "exercises" | undefined => {
+    if (p.kind === "exercise") return "exercises";
     if (p.kind === "material") return "handouts";
     if (p.kind === "assignment") return "work";
     if (p.kind === "exam") return "exams";
     if (p.kind === "note") {
       const n = subjectOf(p.path)?.notes.find(x => x.path === p.path);
-      return n?.kind === "class" ? "classes" : n?.kind === "cards" ? "cards" : n?.material ? "handouts" : "classes";
+      return n?.kind === "class" ? "classes" : n?.kind === "cards" ? "cards" : n?.material ? "handouts" : n?.pdf ? "pdf" : "classes";
     }
     return undefined;
   };
@@ -371,6 +388,13 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
       setPane({ kind: "note", path: n.path, isNew: true });
     });
 
+  const newExercise = (dir: string, title: string) =>
+    run(async () => {
+      const n = await createExercise(notes, dir, title);
+      bump();
+      setPane({ kind: "exercise", path: n.path, isNew: true });
+    });
+
   const newClass = (dir: string) => {
     const today = isoDate();
     return newNote(dir, { kind: "class", date: today, title: t.school.classOf(dateLabel(today)) });
@@ -383,6 +407,21 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
       bump();
       setPane({ kind: "material", path: n.path, chapter: null });
     });
+
+  const addProject = (dir: string, title: string, description: string, guide: GuideId | "") =>
+    run(async () => {
+      setAddingProject(null);
+      const n = await createProject(notes, dir, { title, description }, guide ? guideBody(guideOf(guide), word) : "");
+      bump();
+      setPane({ kind: "project", path: n.path });
+    });
+
+  /** A PDF keeps one note, like a chapter: open the one already written instead of starting another. */
+  const pdfNote = (s: Subject, pdf: string) => {
+    const had = s.notes.find(x => x.kind !== "cards" && x.pdf === pdf);
+    if (had) setPane({ kind: "note", path: had.path });
+    else void newNote(s.dir, { pdf, title: pdf.replace(/\.pdf$/i, "") });
+  };
 
   const addCards = (dir: string, cards: NewCard[], from?: { material: string; title: string }) =>
     run(async () => {
@@ -446,7 +485,7 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
         <SchoolSubject
           {...common}
           course={courses.find(c => c.id === s.course)}
-          tab={pane.tab ?? "overview"}
+          tab={!pane.tab || pane.tab === "pdf" || pane.tab === "exercises" ? "overview" : pane.tab}
           onTab={tab => setPane({ ...pane, tab })}
           onSyllabus={() => setPane({ kind: "summary", path: s.path })}
           onNewClass={() => newClass(s.dir)}
@@ -462,9 +501,14 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
           {...common}
           all={subjects}
           groups={groups}
-          tab={pane.tab === "links" ? "links" : "md"}
+          tab={pane.tab === "links" || pane.tab === "pdf" || pane.tab === "exercises" ? pane.tab : "md"}
           onSummary={() => setPane({ kind: "summary", path: s.path })}
           onNewNote={() => newNote(s.dir)}
+          onPdfNote={pdf => pdfNote(s, pdf)}
+          onProject={path => setPane({ kind: "project", path })}
+          onNewProject={() => setAddingProject(s.dir)}
+          onExercise={path => setPane({ kind: "exercise", path })}
+          onNewExercise={title => newExercise(s.dir, title)}
         />
       );
   } else if (pane?.kind === "summary") {
@@ -553,6 +597,29 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
         )}
       />
     );
+  } else if (pane?.kind === "exercise") {
+    const p = pane.path;
+    detail = (
+      <NoteEditor
+        key={p}
+        path={p}
+        placeholder={t.study.exercisePlaceholder}
+        onBack={up}
+        backOnWide
+        autoFocus={pane.isNew}
+        links={links(subjectDirOf(p))}
+        actions={() => (
+          <button
+            className="btn ghost icon"
+            title={t.study.deleteExercise}
+            aria-label={t.study.deleteExercise}
+            onClick={() => trash(p, t.study.exerciseDeleted, { kind: "subject", path: subjectPathOf(p), tab: "exercises" })}
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      />
+    );
   } else if (pane?.kind === "assignment") {
     const s = subjectOf(pane.path);
     const a = s?.assignments.find(x => x.path === pane.path);
@@ -563,6 +630,18 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
           assignment={a}
           onBack={up}
           onDelete={() => trash(a.dir, t.school.assignmentDeleted, { kind: "subject", path: s!.path, tab: "work" })}
+        />
+      );
+  } else if (pane?.kind === "project") {
+    const s = subjectOf(pane.path);
+    const p = s?.workbench.find(x => x.path === pane.path);
+    if (p)
+      detail = (
+        <WorkbenchPage
+          key={p.path}
+          project={p}
+          onBack={up}
+          onDelete={() => trash(p.dir, t.study.projectDeleted, { kind: "subject", path: s!.path }, p.title)}
         />
       );
   } else if (pane?.kind === "exam") {
@@ -712,6 +791,7 @@ export function StudyView(props: { subjects: Subject[]; request?: StudyRequest }
       {adding === "subject" && <NewSubject personal={personal} groups={groups} school={section === "school"} onOk={createSub} onClose={() => setAdding(null)} />}
       {adding === "course" && <NewCourse onOk={addCourse} onClose={() => setAdding(null)} />}
       {addingMaterial && <NewMaterial onOk={f => addMaterial(addingMaterial, f)} onClose={() => setAddingMaterial(null)} />}
+      {addingProject && <NewProject onOk={(title, desc, guide) => addProject(addingProject, title, desc, guide)} onClose={() => setAddingProject(null)} />}
       {addingCard && <AddCard onOk={cards => addCards(addingCard, cards)} onClose={() => setAddingCard(null)} />}
       {aiFor && <AiCards subject={aiFor} onSave={(cards, from) => (setAiFor(null), addCards(aiFor.dir, cards, from))} onClose={() => setAiFor(null)} />}
       {dated && (

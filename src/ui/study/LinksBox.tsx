@@ -2,13 +2,23 @@ import { useState } from "react";
 import { ExternalLink, Link2, Pencil, Plus, Trash2 } from "lucide-react";
 import { webLink } from "../../data/books";
 import { flushAll } from "../../data/pending";
-import { saveLinks, type StudyLink, type Subject } from "../../data/study";
+import { guessLinkKind, LINK_KIND_COLORS, LINK_KINDS, saveLinks, type LinkKind, type StudyLink } from "../../data/study";
 import { Dialog } from "../Dialog";
 import { useApp } from "../context";
 import { t } from "../../i18n";
 
-// A subject's links (data/study links.md): videos, docs, articles to come back to. A tap opens
-// the link in the browser; each one can be edited or removed.
+// The links of a subject or a workbench project (data/study links.md in `dir`): videos, docs,
+// articles to come back to. Each link says what it leads to (a video, a blog post…) with a colored
+// tag. A tap opens the link in the browser; each one can be edited or removed.
+
+/** The colored tag of a link kind. */
+export function LinkKindTag(props: { kind: LinkKind }) {
+  return (
+    <span className="note-tag link-kind" style={{ "--tag": LINK_KIND_COLORS[props.kind] } as React.CSSProperties}>
+      {t.study.linkKinds[props.kind]}
+    </span>
+  );
+}
 
 const hostOf = (url: string) => {
   try {
@@ -18,9 +28,9 @@ const hostOf = (url: string) => {
   }
 };
 
-export function LinksBox(props: { subject: Subject; heading?: boolean }) {
+export function LinksBox(props: { dir: string; links: StudyLink[]; heading?: boolean | string; empty?: string }) {
   const { notes, platform, bump, toast, confirmDelete } = useApp();
-  const s = props.subject;
+  const s = props;
   const [edit, setEdit] = useState<{ i: number | null } | null>(null);
   const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
 
@@ -49,20 +59,20 @@ export function LinksBox(props: { subject: Subject; heading?: boolean }) {
   return (
     <>
       <div className="task-notes-head row" style={{ justifyContent: "space-between" }}>
-        {props.heading !== false ? <h2>{t.study.links}</h2> : <span />}
+        {props.heading === false ? <span /> : typeof props.heading === "string" ? <h3>{props.heading}</h3> : <h2>{t.study.links}</h2>}
         <button className="btn ghost" onClick={() => setEdit({ i: null })}>
           <Plus size={16} /> {t.study.addLink}
         </button>
       </div>
       {s.links.length === 0 ? (
-        <p className="muted small">{t.study.noLinks}</p>
+        <p className="muted small">{props.empty ?? t.study.noLinks}</p>
       ) : (
         <ul className="list">
           {s.links.map((l, i) => (
             <li key={`${i}:${l.url}`} className="link-row">
               <button className="list-item" onClick={() => platform.openLink?.(l.url).catch(fail)} title={l.url}>
                 <span className="list-title">
-                  <Link2 size={14} className="muted" /> {l.title || hostOf(l.url)}
+                  {l.kind ? <LinkKindTag kind={l.kind} /> : <Link2 size={14} className="muted" />} {l.title || hostOf(l.url)}
                 </span>
                 {l.note && <span className="note-preview">{l.note}</span>}
                 <span className="list-meta mono">
@@ -88,14 +98,32 @@ function LinkDialog(props: { link?: StudyLink; onOk(l: StudyLink): void; onClose
   const [url, setUrl] = useState(props.link?.url ?? "");
   const [title, setTitle] = useState(props.link?.title ?? "");
   const [note, setNote] = useState(props.link?.note ?? "");
+  // Until a kind is picked, it follows the address (youtube → video…).
+  const [kind, setKind] = useState<LinkKind | "" | null>(props.link ? props.link.kind : null);
   const href = webLink(url);
-  const ok = () => href && props.onOk({ url: href, title: title.trim(), note: note.trim() });
+  const shown = kind ?? (href ? guessLinkKind(href) : "");
+  const ok = () => href && props.onOk({ url: href, title: title.trim(), note: note.trim(), kind: shown });
   const enter = (e: React.KeyboardEvent) => e.key === "Enter" && ok();
   return (
     <Dialog title={props.link ? t.study.editLink : t.study.addLink} onClose={props.onClose}>
       <input className="field" autoFocus inputMode="url" value={url} placeholder="https://…" aria-label={t.study.linkUrl} onChange={e => setUrl(e.target.value)} onKeyDown={enter} />
       {url.trim() && !href && <span className="err small">{t.study.linkBad}</span>}
       <input className="field" value={title} placeholder={t.study.linkTitle} aria-label={t.study.linkTitle} onChange={e => setTitle(e.target.value)} onKeyDown={enter} />
+      <span className="fl">{t.study.linkKind}</span>
+      <div className="chips link-kinds" role="radiogroup" aria-label={t.study.linkKind}>
+        {LINK_KINDS.map(k => (
+          <button
+            key={k}
+            role="radio"
+            aria-checked={shown === k}
+            className={`chip link-kind-chip${shown === k ? " active" : ""}`}
+            style={{ "--tag": LINK_KIND_COLORS[k] } as React.CSSProperties}
+            onClick={() => setKind(shown === k ? "" : k)}
+          >
+            {t.study.linkKinds[k]}
+          </button>
+        ))}
+      </div>
       <input className="field" value={note} placeholder={t.study.linkNote} aria-label={t.study.linkNote} onChange={e => setNote(e.target.value)} onKeyDown={enter} />
       <div className="row" style={{ justifyContent: "flex-end" }}>
         <button className="btn" onClick={props.onClose}>

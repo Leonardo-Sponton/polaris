@@ -5,8 +5,18 @@ import { parseCards, readState, schedule, statesOf } from "../src/data/cards";
 import {
   chaptersOf,
   continueAt,
+  addPdf,
+  addExerciseFile,
+  createExercise,
+  guessLinkKind,
+  isExercisePath,
+  addProjectFile,
   createMaterial,
+  createProject,
   createStudyNote,
+  DESCRIPTION_MAX,
+  isFreeNote,
+  statusPatch,
   createSubject,
   donePatch,
   dueCards,
@@ -173,9 +183,9 @@ describe("study links", () => {
     const body = "Intro text\n- [JDBC guide](https://docs.oracle.com/jdbc) — chapter 3\n- https://youtu.be/x\n* [a \\[b\\]](http://x.org)\n";
     const list = parseLinks(body);
     expect(list).toEqual([
-      { title: "JDBC guide", url: "https://docs.oracle.com/jdbc", note: "chapter 3" },
-      { title: "", url: "https://youtu.be/x", note: "" },
-      { title: "a [b]", url: "http://x.org", note: "" },
+      { title: "JDBC guide", url: "https://docs.oracle.com/jdbc", note: "chapter 3", kind: "" },
+      { title: "", url: "https://youtu.be/x", note: "", kind: "" },
+      { title: "a [b]", url: "http://x.org", note: "", kind: "" },
     ]);
     expect(parseLinks(linksBody(list))).toEqual([list[0], { ...list[1], title: "https://youtu.be/x" }, list[2]]);
   });
@@ -184,10 +194,48 @@ describe("study links", () => {
     const notes = new Notes(new MemoryStorage());
     const s = await createSubject(notes, { title: "JDBC" });
     const dir = s.path.replace("/subject.md", "");
-    await saveLinks(notes, dir, [{ title: "Docs", url: "https://x.org", note: "" }]);
-    expect((await loadSubjects(notes))[0].links).toEqual([{ title: "Docs", url: "https://x.org", note: "" }]);
+    await saveLinks(notes, dir, [{ title: "Docs", url: "https://x.org", note: "", kind: "video" as const }]);
+    expect((await loadSubjects(notes))[0].links).toEqual([{ title: "Docs", url: "https://x.org", note: "", kind: "video" as const }]);
     await saveLinks(notes, dir, []);
     expect((await loadSubjects(notes))[0].links).toEqual([]);
+  });
+});
+
+describe("link kinds", () => {
+  it("are read and written as a #tag after the link", () => {
+    const list = parseLinks("- [Intro](https://youtu.be/a) #video — part 1\n- [Old](https://x.org) #nope\n- https://dev.to/a #blog");
+    expect(list.map(l => [l.title, l.kind, l.note])).toEqual([
+      ["Intro", "video", "part 1"],
+      ["Old", "", ""],
+      ["", "blog", ""],
+    ]);
+    expect(linksBody([list[0]])).toBe("- [Intro](https://youtu.be/a) #video — part 1\n");
+  });
+
+  it("are guessed from the address", () => {
+    expect(guessLinkKind("https://www.youtube.com/watch?v=1")).toBe("video");
+    expect(guessLinkKind("https://medium.com/@a/b")).toBe("blog");
+    expect(guessLinkKind("https://docs.spring.io/x")).toBe("docs");
+    expect(guessLinkKind("https://www.udemy.com/course/x")).toBe("course");
+    expect(guessLinkKind("https://example.com")).toBe("");
+  });
+});
+
+describe("study exercises", () => {
+  it("keep .md lists, PDFs and links in exercises/", async () => {
+    const notes = new Notes(new MemoryStorage());
+    await createSubject(notes, { title: "SQL" });
+    const e = await createExercise(notes, "study/sql", "Lista 1 — SELECT");
+    expect(e.path).toBe("study/sql/exercises/lista-1-select.md");
+    await addExerciseFile(notes, "study/sql", "prova antiga.pdf", new Uint8Array([37]));
+    await saveLinks(notes, "study/sql/exercises", [{ title: "SQLZoo", url: "https://sqlzoo.net", note: "", kind: "tutorial" }]);
+    const [s] = await loadSubjects(notes);
+    expect(s.exercises.docs.map(d => [d.title, d.path])).toEqual([["Lista 1 — SELECT", e.path]]);
+    expect(s.exercises.pdfs.map(p => p.name)).toEqual(["prova antiga.pdf"]);
+    expect(s.exercises.links.map(l => [l.title, l.kind])).toEqual([["SQLZoo", "tutorial"]]);
+    expect(s.pdfs).toEqual([]);
+    expect(s.links).toEqual([]);
+    expect(isExercisePath(e.path)).toBe(true);
   });
 });
 
@@ -211,5 +259,71 @@ describe("study groups", () => {
     subjects = await loadSubjects(notes);
     expect(subjects.find(s => s.title === "SQL")!.group).toBe("");
     expect(allGroups(await loadGroups(notes), subjects)).toEqual(["Languages", "Java SE"]);
+  });
+});
+
+describe("study PDFs and workbench", () => {
+  it("keeps PDFs, notes about them and filters them apart from free notes", async () => {
+    const notes = new Notes(new MemoryStorage());
+    await createSubject(notes, { title: "Redes" });
+    expect(await addPdf(notes, "study/redes", "Modelo OSI.pdf", new Uint8Array([37, 80, 68, 70]))).toBe("Modelo OSI.pdf");
+    expect(await addPdf(notes, "study/redes", "Modelo OSI.pdf", new Uint8Array([1]))).toBe("Modelo OSI (2).pdf");
+    expect(await addPdf(notes, "study/redes", "tcp", new Uint8Array([1]))).toBe("tcp.pdf");
+    await createStudyNote(notes, "study/redes", { pdf: "Modelo OSI.pdf", title: "Camadas" }, new Date(2026, 9, 1));
+    await createStudyNote(notes, "study/redes", { title: "Solta" }, new Date(2026, 9, 2));
+
+    const [s] = await loadSubjects(notes);
+    expect(s.pdfs.map(p => p.title)).toEqual(["Modelo OSI", "Modelo OSI (2)", "tcp"]);
+    expect(s.pdfs[0].path).toBe("study/redes/pdfs/Modelo OSI.pdf");
+    expect(s.notes.map(n => [n.title, n.pdf, isFreeNote(n)])).toEqual([
+      ["Camadas", "Modelo OSI.pdf", false],
+      ["Solta", "", true],
+    ]);
+    expect(filterStudyNotes(s, "", "free", "chapter").map(n => n.title)).toEqual(["Solta"]);
+    expect(filterStudyNotes(s, "", "p:Modelo OSI.pdf", "chapter").map(n => n.title)).toEqual(["Camadas"]);
+  });
+
+  it("creates, loads and orders workbench projects", async () => {
+    const notes = new Notes(new MemoryStorage());
+    await createSubject(notes, { title: "Spring" });
+    const a = await createProject(notes, "study/spring", { title: "API de tarefas", description: "x".repeat(400) }, "## Goal\n", "2026-10-01");
+    expect(a.path).toBe("study/spring/workbench/api-de-tarefas/project.md");
+    expect(String(a.data.description).length).toBe(DESCRIPTION_MAX);
+    const b = await createProject(notes, "study/spring", { title: "Blog" }, "", "2026-10-02");
+    await notes.patchHeader(b.path, { ...statusPatch("active"), github: "https://github.com/x/blog", drawio: "https://app.diagrams.net/#Gx" });
+    await saveLinks(notes, "study/spring/workbench/blog", [{ title: "Docs", url: "https://spring.io", note: "", kind: "" as const }]);
+    await addProjectFile(notes, "study/spring/workbench/blog", "modelo.drawio", new Uint8Array([60]));
+
+    const [s] = await loadSubjects(notes);
+    expect(s.workbench.map(p => [p.title, p.status])).toEqual([
+      ["Blog", "active"],
+      ["API de tarefas", "planning"],
+    ]);
+    const blog = s.workbench[0];
+    expect(blog.github).toBe("https://github.com/x/blog");
+    expect(blog.drawio).toBe("https://app.diagrams.net/#Gx");
+    expect(blog.links.map(l => l.url)).toEqual(["https://spring.io"]);
+    expect(blog.files).toEqual(["modelo.drawio"]);
+    expect(blog.started).toBe("2026-10-02");
+    expect(s.workbench[1].hasNotes).toBe(true);
+    expect(statusPatch("done", "2026-10-20")).toEqual({ status: "done", finished: "2026-10-20" });
+    expect(statusPatch("active")).toEqual({ status: "active", finished: undefined });
+  });
+});
+
+describe("project guides", () => {
+  it("write each heading with its hint, and the hints come out in one go", async () => {
+    const { GUIDES, guideBody, guideOf, stripComments } = await import("../src/data/guides");
+    const pick = (w: { en: string }) => w.en;
+    const body = guideBody(guideOf("small"), pick);
+    expect(body.startsWith("## Goal\n\n%% ")).toBe(true);
+    expect(body).toContain("## Steps\n\n%% ");
+    expect(body).toContain("- [ ] ");
+    const clean = stripComments(body);
+    expect(clean).not.toContain("%%");
+    expect(clean).toBe("## Goal\n\n## Input and output\n\n## Steps\n\n- [ ] \n\n## What I learned\n\n");
+    expect(stripComments("text %%inline%% more\n")).toBe("text more\n");
+    expect(new Set(GUIDES.map(g => g.id)).size).toBe(GUIDES.length);
+    expect(guideOf("nope").id).toBe("standard");
   });
 });

@@ -539,11 +539,13 @@ function samples(lang = "en", demo = false) {
     T("# JOIN\n\nSee also [[SELECT and WHERE]]. In Java the same query runs through [[JDBC queries]].\n\nINNER JOIN ::: only rows with a match on both sides\n\nWhat does a LEFT JOIN return for a customer with no orders?\n?\nThe customer's row, with NULL in the order columns\n",
       "# JOIN\n\nVeja também [[SELECT e WHERE]]. Em Java a mesma consulta roda pelo [[Consultas com JDBC]].\n\nINNER JOIN ::: só as linhas com par dos dois lados\n\nO que um LEFT JOIN devolve para um cliente sem pedidos?\n?\nA linha do cliente, com NULL nas colunas do pedido\n"));
   const links = (dir, created, list) =>
-    studyFile(`${dir}/links.md`, created, created, { type: "links" }, list.map(([title, url, note]) => `- [${title}](${url})${note ? ` — ${note}` : ""}`).join("\n") + "\n");
+    studyFile(`${dir}/links.md`, created, created, { type: "links" }, list.map(([title, url, note, kind]) => `- [${title}](${url})${kind ? ` #${kind}` : ""}${note ? ` — ${note}` : ""}`).join("\n") + "\n");
   links("sql-basics", at(-20, 20, 0), [
-    [T("SQLite tutorial", "Tutorial de SQLite"), "https://www.sqlitetutorial.net/", T("short pages, one topic each", "páginas curtas, um assunto cada")],
-    ["SQL Fiddle", "https://sqlfiddle.com/", T("try queries in the browser", "testar consultas no navegador")],
-    [T("PostgreSQL docs: SELECT", "Documentação do PostgreSQL: SELECT"), "https://www.postgresql.org/docs/current/sql-select.html", ""],
+    [T("SQLite tutorial", "Tutorial de SQLite"), "https://www.sqlitetutorial.net/", T("short pages, one topic each", "páginas curtas, um assunto cada"), "tutorial"],
+    ["SQL Fiddle", "https://sqlfiddle.com/", T("try queries in the browser", "testar consultas no navegador"), "other"],
+    [T("PostgreSQL docs: SELECT", "Documentação do PostgreSQL: SELECT"), "https://www.postgresql.org/docs/current/sql-select.html", "", "docs"],
+    [T("SQL JOIN videos", "Vídeos sobre SQL JOIN"), "https://www.youtube.com/results?search_query=sql+join", T("a YouTube search", "uma busca no YouTube"), "video"],
+    [T("Database normalization", "Normalização de banco de dados"), "https://en.wikipedia.org/wiki/Database_normalization", "", "article"],
   ]);
   studyFile("sample-git/subject.md", at(-30, 19, 0), at(-30, 19, 0),
     { type: "subject", title: "Git", group: T("Tools", "Ferramentas") }, "");
@@ -558,13 +560,60 @@ function samples(lang = "en", demo = false) {
     T("# JDBC queries\n\nOpen a `Connection`, prepare the SQL, run it, read the `ResultSet`. The SQL itself is in [[JOIN]] and [[SELECT and WHERE]].\n\n```java\ntry (var ps = conn.prepareStatement(\"SELECT name FROM customers WHERE city = ?\")) {\n  ps.setString(1, \"Recife\");\n  var rs = ps.executeQuery();\n}\n```\n\nWhy use PreparedStatement instead of joining strings? :: It stops SQL injection and lets the database reuse the plan\nWhat does try-with-resources do with the statement? :: Closes it at the end, even after an error\n",
       "# Consultas com JDBC\n\nAbra uma `Connection`, prepare o SQL, execute, leia o `ResultSet`. O SQL em si está em [[JOIN]] e [[SELECT e WHERE]].\n\n```java\ntry (var ps = conn.prepareStatement(\"SELECT nome FROM clientes WHERE cidade = ?\")) {\n  ps.setString(1, \"Recife\");\n  var rs = ps.executeQuery();\n}\n```\n\nPor que usar PreparedStatement em vez de juntar strings? :: Evita SQL injection e deixa o banco reaproveitar o plano\nO que o try-with-resources faz com o statement? :: Fecha no final, mesmo depois de um erro\n"));
   links("sample-jdbc", at(-9, 20, 0), [
-    [T("JDBC basics (Oracle)", "JDBC básico (Oracle)"), "https://docs.oracle.com/javase/tutorial/jdbc/basics/", T("the official tutorial", "o tutorial oficial")],
-    [T("PreparedStatement API", "API do PreparedStatement"), "https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/PreparedStatement.html", ""],
+    [T("JDBC basics (Oracle)", "JDBC básico (Oracle)"), "https://docs.oracle.com/javase/tutorial/jdbc/basics/", T("the official tutorial", "o tutorial oficial"), "tutorial"],
+    [T("PreparedStatement API", "API do PreparedStatement"), "https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/PreparedStatement.html", "", "docs"],
   ]);
   studyFile("sample-jdbc/notes/flashcards.md", at(-3, 21, 25), at(-3, 21, 25),
     { type: "study-note", kind: "cards" },
     T("# Flashcards\n\nWhich interface runs SQL with parameters? :: PreparedStatement\n\nDriverManager ::: gives a Connection from a JDBC URL\n",
       "# Flashcards\n\nQual interface executa SQL com parâmetros? :: PreparedStatement\n\nDriverManager ::: entrega uma Connection a partir de uma URL JDBC\n"));
+
+  // PDFs, a standalone note and workbench projects (fixed names: added even when Study already
+  // has samples).
+  const fixedStudy = (rel, ...rest) => (studyFile(rel, ...rest), fixed.add(`study/${rel}`));
+  const sqlPdf = T("SQL cheat sheet.pdf", "Guia rápido de SQL.pdf");
+  binaries.push([`study/sql-basics/pdfs/${sqlPdf}`, tinyPdf(T("SQL cheat sheet", "Guia rapido de SQL"), T(
+    ["SELECT columns FROM table WHERE condition", "INNER JOIN: rows with a match on both sides", "LEFT JOIN: every row of the left table", "GROUP BY + COUNT, SUM, AVG"],
+    ["SELECT colunas FROM tabela WHERE condicao", "INNER JOIN: linhas com par dos dois lados", "LEFT JOIN: todas as linhas da tabela da esquerda", "GROUP BY + COUNT, SUM, AVG"]))]);
+  fixed.add(binaries.at(-1)[0]);
+  fixedStudy("sql-basics/notes/sample-pdf-note.md", at(-2, 20, 0), at(-2, 20, 15),
+    { type: "study-note", pdf: sqlPdf },
+    T("# SQL cheat sheet\n\nThe order SQL runs a query: FROM → WHERE → GROUP BY → SELECT → ORDER BY.\n\nIn what order does SQL run FROM, WHERE and SELECT? :: FROM, then WHERE, then SELECT\n",
+      "# Guia rápido de SQL\n\nA ordem em que o SQL roda uma consulta: FROM → WHERE → GROUP BY → SELECT → ORDER BY.\n\nEm que ordem o SQL roda FROM, WHERE e SELECT? :: FROM, depois WHERE, depois SELECT\n"));
+  fixedStudy("sql-basics/notes/sample-free-note.md", at(-4, 21, 0), at(-4, 21, 10),
+    { type: "study-note" },
+    T("# Questions to ask\n\n- When is an index worth it?\n- What is the difference between DELETE and TRUNCATE?\n",
+      "# Dúvidas para tirar\n\n- Quando vale a pena criar um índice?\n- Qual a diferença entre DELETE e TRUNCATE?\n"));
+  // Exercises: a list written in the app, a PDF and exercise sites.
+  fixedStudy(`sql-basics/exercises/${T("list-1-select-and-join", "lista-1-select-e-join")}.md`, at(-3, 20, 0), at(-3, 20, 30),
+    { type: "exercise" },
+    T("# List 1 — SELECT and JOIN\n\n1. List the name and city of every customer from Recife.\n   - [x] Done\n2. Show each order with the customer's name.\n   - [ ] Done\n3. Which customers have no orders? (LEFT JOIN + IS NULL)\n   - [ ] Done\n\n## My answers\n\n```sql\nSELECT name, city FROM customers WHERE city = 'Recife';\n```\n",
+      "# Lista 1 — SELECT e JOIN\n\n1. Liste nome e cidade de todos os clientes de Recife.\n   - [x] Feito\n2. Mostre cada pedido com o nome do cliente.\n   - [ ] Feito\n3. Quais clientes não têm pedidos? (LEFT JOIN + IS NULL)\n   - [ ] Feito\n\n## Minhas respostas\n\n```sql\nSELECT nome, cidade FROM clientes WHERE cidade = 'Recife';\n```\n"));
+  binaries.push([`study/sql-basics/exercises/${T("Practice test.pdf", "Simulado.pdf")}`, tinyPdf(T("SQL practice test", "Simulado de SQL"), T(
+    ["1. Count the customers per city.", "2. List the movies never rented.", "3. Total paid by each customer in 2026."],
+    ["1. Conte os clientes por cidade.", "2. Liste os filmes nunca alugados.", "3. Total pago por cliente em 2026."]))]);
+  fixed.add(binaries.at(-1)[0]);
+  fixedStudy("sql-basics/exercises/links.md", at(-3, 20, 40), at(-3, 20, 40), { type: "links" },
+    `- [SQLZoo](https://sqlzoo.net/) #tutorial — ${T("interactive exercises, step by step", "exercícios interativos, passo a passo")}\n- [HackerRank SQL](https://www.hackerrank.com/domains/sql) #other — ${T("problems by level", "problemas por nível")}\n`);
+
+  const wb = T("video-rental-database", "banco-da-locadora");
+  fixedStudy(`sql-basics/workbench/${wb}/project.md`, at(-9, 20, 0), at(-1, 22, 0),
+    { type: "workbench", title: T("Video rental database", "Banco de dados de uma locadora"),
+      description: T("Model and build the database of a small video rental shop: customers, movies, copies and rentals. The point is to practise JOIN, GROUP BY and normal forms on something real, from the ER model to the queries the shop needs.",
+        "Modelar e criar o banco de uma pequena locadora: clientes, filmes, cópias e locações. A ideia é praticar JOIN, GROUP BY e formas normais em algo real, do modelo ER até as consultas que a locadora precisa."),
+      status: "active", started: day(-9), drawio: "https://app.diagrams.net/", github: "https://github.com/" },
+    T("## Goal\n\nUse JOIN and GROUP BY without looking at the handout.\n\n## Requirements\n\n- [x] Customers, movies, copies, rentals\n- [ ] Late fee per day\n- [ ] Report: most rented movies of the month\n\n## Steps\n\n- [x] ER model on draw.io\n- [x] CREATE TABLE script\n- [ ] Sample data\n- [ ] The report queries\n\n## Decisions\n\nA movie has many copies; a rental points to a copy, not to the movie.\n\n## Problems and solutions\n\nLEFT JOIN with a WHERE on the right table dropped the customers with no rentals: the condition had to go in the ON.\n\n## What I learned\n\n",
+      "## Objetivo\n\nUsar JOIN e GROUP BY sem olhar a apostila.\n\n## Requisitos\n\n- [x] Clientes, filmes, cópias, locações\n- [ ] Multa por dia de atraso\n- [ ] Relatório: filmes mais alugados do mês\n\n## Passos\n\n- [x] Modelo ER no draw.io\n- [x] Script CREATE TABLE\n- [ ] Dados de exemplo\n- [ ] As consultas do relatório\n\n## Decisões\n\nUm filme tem várias cópias; a locação aponta para a cópia, não para o filme.\n\n## Problemas e soluções\n\nLEFT JOIN com WHERE na tabela da direita sumia com os clientes sem locação: a condição tinha que ir no ON.\n\n## O que aprendi\n\n"));
+  fixedStudy(`sql-basics/workbench/${wb}/links.md`, at(-9, 20, 5), at(-9, 20, 5), { type: "links" },
+    `- [${T("Normal forms, explained", "Formas normais, explicadas")}](https://en.wikipedia.org/wiki/Database_normalization) — ${T("1NF to 3NF", "1FN a 3FN")}\n`);
+  binaries.push([`study/sql-basics/workbench/${wb}/files/${T("create-tables.sql", "criar-tabelas.sql")}`, Buffer.from(T(
+    "CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE movies (id INTEGER PRIMARY KEY, title TEXT NOT NULL);\nCREATE TABLE copies (id INTEGER PRIMARY KEY, movie_id INTEGER REFERENCES movies(id));\nCREATE TABLE rentals (id INTEGER PRIMARY KEY, copy_id INTEGER REFERENCES copies(id), customer_id INTEGER REFERENCES customers(id), rented DATE, returned DATE);\n",
+    "CREATE TABLE clientes (id INTEGER PRIMARY KEY, nome TEXT NOT NULL);\nCREATE TABLE filmes (id INTEGER PRIMARY KEY, titulo TEXT NOT NULL);\nCREATE TABLE copias (id INTEGER PRIMARY KEY, filme_id INTEGER REFERENCES filmes(id));\nCREATE TABLE locacoes (id INTEGER PRIMARY KEY, copia_id INTEGER REFERENCES copias(id), cliente_id INTEGER REFERENCES clientes(id), retirada DATE, devolucao DATE);\n"))]);
+  fixed.add(binaries.at(-1)[0]);
+  fixedStudy(`sql-basics/workbench/${T("library-queries", "consultas-da-biblioteca")}/project.md`, at(-2, 21, 0), at(-2, 21, 0),
+    { type: "workbench", title: T("Library queries", "Consultas da biblioteca"),
+      description: T("Ten report queries for a library database, each one harder than the last.", "Dez consultas de relatório para o banco de uma biblioteca, cada uma mais difícil que a anterior."),
+      status: "planning", started: day(-2) }, "");
 
   // School: a course, 5 semesters, the 3rd now. One retake class falls on today's weekday, so
   // "Classes today" shows something whatever day the samples are added.

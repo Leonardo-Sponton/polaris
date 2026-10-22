@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, FileText, Layers, BookOpen, Link2, NotebookText } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Hammer, Layers, BookOpen, Link2, NotebookText, FileType2 } from "lucide-react";
 import { cardCount, childrenOf, dueCards, LINKS_FILE, rootsOf, type Subject } from "../../data/study";
 import { useHold } from "../useHold";
 import { relativeDay } from "./SubjectPage";
@@ -6,7 +6,7 @@ import { usePref } from "./prefs";
 import { t } from "../../i18n";
 
 // Personal study as a file tree (like Obsidian's): groups, then subjects with their sub-subjects,
-// and inside each subject its materials and notes. Subjects come last studied first; a branch
+// and inside each subject its materials, PDFs, notes and workbench projects. Subjects come last studied first; a branch
 // opened stays open on this device.
 
 interface Props {
@@ -60,6 +60,15 @@ export function SubjectTree(props: Props) {
                 onOpen={() => props.onOpen(m.path)}
               />
             ))}
+            {s.pdfs.length > 0 && (
+              <TreeLeaf
+                depth={depth + 1}
+                icon={<FileType2 size={15} />}
+                title={t.study.pdfsCount(s.pdfs.length)}
+                active={false}
+                onOpen={() => props.onOpen(s.pdfs[0].path)}
+              />
+            )}
             {notes.map(n => (
               <TreeLeaf
                 key={n.path}
@@ -88,6 +97,16 @@ export function SubjectTree(props: Props) {
                 onOpen={() => props.onOpen(`${s.dir}/${LINKS_FILE}`)}
               />
             )}
+            {s.workbench.map(w => (
+              <TreeLeaf
+                key={w.path}
+                depth={depth + 1}
+                icon={<Hammer size={15} />}
+                title={w.title}
+                active={props.active === w.path}
+                onOpen={() => props.onOpen(w.path)}
+              />
+            ))}
             {s.hasSummary && (
               <TreeLeaf
                 depth={depth + 1}

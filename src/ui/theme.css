@@ -3806,3 +3806,239 @@ ul.tree {
 .print-doc .missing { color: var(--muted); font-style: italic; }
 .print-doc.justify p,
 .print-doc.justify li { text-align: justify; hyphens: auto; }
+
+/* Study: a subject's notes in a box of their own (scrolls inside, so the workbench below stays
+   close), each tagged standalone / material / PDF. At its end the scroll goes on with the page
+   (no overscroll-behavior: contain). */
+.study-notes-box {
+  max-height: min(440px, 55vh);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+.note-tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 0 7px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.5;
+  vertical-align: 1px;
+  --tag: var(--muted);
+  color: var(--tag);
+  background: color-mix(in srgb, var(--tag) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tag) 45%, transparent);
+}
+.note-tag.free {
+  --tag: var(--h3);
+}
+.note-tag.material {
+  --tag: var(--cyan);
+}
+.note-tag.pdf {
+  --tag: var(--h1);
+}
+
+/* Study: workbench (ui/study/Workbench). */
+.workbench h2 svg,
+.wb-kicker svg,
+.wb-url .fl svg,
+.wb-meta svg {
+  vertical-align: -2px;
+}
+.wb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+.wb-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .wb-card:hover {
+    border-color: var(--accent);
+  }
+}
+.wb-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.wb-desc {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.wb-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.wb-status {
+  flex: 0 0 auto;
+  padding: 0 7px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  line-height: 1.6;
+  white-space: nowrap;
+  --tag: var(--muted);
+  color: var(--tag);
+  border: 1px solid color-mix(in srgb, var(--tag) 50%, transparent);
+}
+.wb-status.active {
+  --tag: var(--accent);
+}
+.wb-status.planning {
+  --tag: var(--h3);
+}
+.wb-status.done {
+  --tag: var(--ok);
+}
+.wb-desc-input {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wb-desc-input textarea {
+  field-sizing: content;
+  resize: none;
+  min-height: 5.5em;
+}
+.wb-count {
+  align-self: flex-end;
+}
+.wb-count.low {
+  color: var(--err);
+}
+.wb-statuses {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.wb-statuses button {
+  padding: 0 6px;
+}
+@media (max-width: 520px) {
+  .wb-statuses {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.wb-urls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.wb-url {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wb-url .field {
+  flex: 1;
+  min-width: 0;
+}
+.wb-url .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Study: link kinds (data/study LINK_KIND_COLORS sets --tag inline). */
+.link-kind {
+  margin-right: 0;
+}
+.link-kinds {
+  flex-wrap: wrap;
+  padding: 0;
+}
+.link-kind-chip {
+  min-height: 30px;
+  color: var(--tag);
+  border-color: color-mix(in srgb, var(--tag) 40%, transparent);
+}
+.link-kind-chip.active {
+  color: var(--tag);
+  border-color: var(--tag);
+  background: color-mix(in srgb, var(--tag) 18%, transparent);
+}
+
+/* Study: the "References" section of a subject page (.md, PDF, exercises, links). */
+.study-refs-head {
+  margin-bottom: -4px;
+}
+.study-refs-head h2 svg,
+.exercise-group h3 svg {
+  vertical-align: -2px;
+}
+.material-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.material-tabs button {
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.exercise-group h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.ex-tag {
+  --tag: var(--muted);
+}
+.ex-tag.md {
+  --tag: var(--cyan);
+}
+.ex-tag.pdf {
+  --tag: var(--h1);
+}
+
+/* Workbench: guides for the project notes. */
+.guide-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.guide-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.guide-card .wb-card-head {
+  align-items: baseline;
+}
+.guide-sections {
+  font-size: 0.8rem;
+}
+.guide-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
