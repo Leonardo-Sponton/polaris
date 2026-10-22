@@ -86,7 +86,6 @@ export function SettingsView() {
 
         <RemindersCard />
         <WidgetsCard />
-        <AiCard />
 
         <section className="card stack">
           <h2>{t.settings.dataFolder}</h2>
@@ -233,42 +232,6 @@ function WidgetsCard() {
           </button>
         </div>
       ))}
-    </section>
-  );
-}
-
-/** PC: the GGUF model file used to make flashcards (electron/ai.cjs). */
-function AiCard() {
-  const { platform, toast } = useApp();
-  const ai = platform.ai;
-  const [model, setModel] = useState<{ model: string | null; exists: boolean } | null>(null);
-  useEffect(() => {
-    void ai?.get().then(setModel);
-  }, [ai]);
-  if (!ai) return null;
-  const fail = (e: unknown) => toast({ text: e instanceof Error ? e.message : String(e), error: true });
-  const choose = () => ai.chooseModel().then(() => ai.get().then(setModel), fail);
-  const remove = () => ai.clearModel().then(() => ai.get().then(setModel), fail);
-  return (
-    <section className="card stack">
-      <h2>{t.ai.settings}</h2>
-      <p className="muted" style={{ margin: 0 }}>
-        {t.ai.settingsHint}
-      </p>
-      <p className={`mono${model?.model && !model.exists ? " err" : ""}`} style={{ wordBreak: "break-all", margin: 0 }}>
-        {model?.model ?? t.ai.noModelSet}
-      </p>
-      {!model?.model && <p className="muted small" style={{ margin: 0 }}>{t.ai.modelHint}</p>}
-      <div className="row">
-        <button className="btn" onClick={choose}>
-          <FolderOpen size={18} /> {model?.model ? t.ai.change : t.ai.chooseModel}
-        </button>
-        {model?.model && (
-          <button className="btn ghost" onClick={remove}>
-            {t.ai.remove}
-          </button>
-        )}
-      </div>
     </section>
   );
 }

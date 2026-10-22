@@ -1,5 +1,5 @@
 import { parse, type Data } from "./frontmatter";
-import { safeFileName } from "./school";
+import { safeFileName } from "./files";
 import type { Storage } from "../storage/types";
 
 // Templates, like Obsidian's core Templates plugin: Markdown files in templates/ inserted at the

@@ -28,18 +28,6 @@ contextBridge.exposeInMainWorld("polaris", {
     ipcRenderer.on("reminder:open", listener);
     return () => ipcRenderer.removeListener("reminder:open", listener);
   },
-  ai: {
-    get: call("ai:get"),
-    chooseModel: call("ai:chooseModel"),
-    clearModel: call("ai:clearModel"),
-    cards: call("ai:cards"),
-    cancel: call("ai:cancel"),
-    onProgress: cb => {
-      const listener = (_e, p) => cb(p);
-      ipcRenderer.on("ai:progress", listener);
-      return () => ipcRenderer.removeListener("ai:progress", listener);
-    },
-  },
   sync: {
     devices: call("sync:devices"),
     pcName: call("sync:pcName"),

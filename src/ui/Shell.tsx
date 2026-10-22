@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { BookOpen, ChevronRight, CheckSquare, Feather, FilePlus, FileText, FolderKanban, GraduationCap, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
+import { BookOpen, ChevronRight, CheckSquare, Feather, FilePlus, FileText, FolderKanban, Inbox, Lightbulb, Menu, Moon, NotebookPen, Scale, Search, Settings as SettingsIcon, Sun, Trash2, Usb } from "lucide-react";
 import { isoDate } from "../data/dates";
 import { createFullNote } from "../data/fullnotes";
 import { dayOfPath, MOODS, type Entry } from "../data/journal";
@@ -12,9 +12,6 @@ import { BooksView, useBooks } from "./books/BooksView";
 import { QuoteReview, useQuotes } from "./books/QuoteReview";
 import { IdeasView, useIdeas } from "./ideas/IdeasView";
 import { InboxView, useInbox } from "./InboxView";
-import { StudyCard } from "./study/CardReview";
-import { StudyView, useCourses, useStudy, type StudyRequest } from "./study/StudyView";
-import { ClassesToday } from "./study/School";
 import { NotesView, useFullNotes } from "./notes/NotesView";
 import { ProjectsView, useProjects } from "./projects/ProjectsView";
 import { CloseDay } from "./journal/CloseDay";
@@ -41,7 +38,7 @@ import { flushAll } from "../data/pending";
 import { isDay } from "../data/widgets";
 import { t } from "../i18n";
 
-export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "study" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
+export type Area = "today" | "ideas" | "notes" | "projects" | "books" | "todo" | "journal" | "review" | "thoughts" | "inbox" | "search" | "trash" | "sync" | "settings" | "more";
 
 const AREAS: { id: Area; icon: ReactNode }[] = [
   { id: "today", icon: <Sun size={20} /> },
@@ -49,7 +46,6 @@ const AREAS: { id: Area; icon: ReactNode }[] = [
   { id: "notes", icon: <FileText size={20} /> },
   { id: "projects", icon: <FolderKanban size={20} /> },
   { id: "books", icon: <BookOpen size={20} /> },
-  { id: "study", icon: <GraduationCap size={20} /> },
   { id: "todo", icon: <CheckSquare size={20} /> },
   { id: "journal", icon: <NotebookPen size={20} /> },
   { id: "review", icon: <Scale size={20} /> },
@@ -83,7 +79,7 @@ function More({ go }: { go: (a: Area) => void }) {
 }
 
 // Hold More (right-click on PC) for these without leaving the current page.
-const QUICK: Area[] = ["notes", "study", "projects", "journal", "review", "thoughts", "inbox"];
+const QUICK: Area[] = ["notes", "projects", "journal", "review", "thoughts", "inbox"];
 
 interface PopItem {
   id: string;
@@ -219,7 +215,7 @@ export interface OpenRequest {
   key: number;
 }
 
-const OPEN_AREAS: Area[] = ["today", "todo", "inbox", "notes", "ideas", "projects", "books", "study", "journal", "review", "thoughts"];
+const OPEN_AREAS: Area[] = ["today", "todo", "inbox", "notes", "ideas", "projects", "books", "journal", "review", "thoughts"];
 
 export function Shell(props: { captureKey?: number; startArea?: Area; openRequest?: OpenRequest }) {
   const { captureKey = 0, startArea = "today", openRequest } = props;
@@ -233,13 +229,6 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
   const projects = useProjects();
   const books = useBooks();
   const quotes = useQuotes(books);
-  const study = useStudy();
-  const courses = useCourses();
-  const [studyRequest, setStudyRequest] = useState<StudyRequest | undefined>();
-  const openStudy = (r: Omit<StudyRequest, "key">) => {
-    setStudyRequest({ ...r, key: Date.now() });
-    setArea("study");
-  };
   const thoughts = useThoughts();
   const journal = useJournal();
   const [journalTarget, setJournalTarget] = useState<{ day: string; key: number } | undefined>();
@@ -279,7 +268,6 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
     setThoughtTarget(undefined);
     setJournalTarget(undefined);
     setReviewTarget(undefined);
-    setStudyRequest(a === "study" ? { key: Date.now() } : undefined);
     setArea(a);
   };
 
@@ -347,8 +335,7 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
       if (arg === "todo") setView("today");
     } else if (kind === "open") {
       const [a, ...p] = arg.split(":");
-      if (a === "study" && p.length) openStudy({ path: p.join(":") });
-      else if (OPEN_AREAS.includes(a as Area) && p.length) openIn(a as Area, p.join(":"));
+      if (OPEN_AREAS.includes(a as Area) && p.length) openIn(a as Area, p.join(":"));
     } else if (kind === "thought" && arg) openThought({ id: arg });
     else if (kind === "journal" && isDay(arg)) openJournal(arg);
     else if (kind === "review" && isDay(arg)) openReview(arg);
@@ -392,12 +379,6 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
                     }
                   />
                 )}
-                <ClassesToday subjects={study} courses={courses} onOpen={s => openStudy({ path: s.path })} />
-                <StudyCard
-                  subjects={study}
-                  onReview={() => openStudy({ review: true })}
-                  onContinue={(path, chapter) => openStudy({ path, chapter })}
-                />
                 <QuoteReview
                   quotes={quotes}
                   onOpen={q => {
@@ -438,9 +419,6 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
     case "books":
       page = <BooksView books={books} quotes={quotes} openPath={target} />;
       break;
-    case "study":
-      page = <StudyView subjects={study} request={studyRequest} />;
-      break;
     case "journal":
       page = <JournalView entries={journal} openDay={journalTarget} onReview={openReview} />;
       break;
@@ -476,10 +454,6 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
             const day = (d.area === "journal" || d.area === "review") && dayOfPath(d.path);
             if (day) {
               (d.area === "journal" ? openJournal : openReview)(day);
-              return true;
-            }
-            if (d.area === "study") {
-              openStudy({ path: d.path });
               return true;
             }
             if (!["todo", "inbox", "ideas", "notes", "books", "projects"].includes(d.area)) return false;
@@ -523,12 +497,8 @@ export function Shell(props: { captureKey?: number; startArea?: Area; openReques
 
   // [[Links]] in every editor, Ctrl+O to open a note by title, Ctrl+P for commands (Obsidian-like).
   const [switcher, setSwitcher] = useState<"open" | "commands" | null>(null);
-  const linkLists = { notes: fullNotes, ideas, projects, books, study };
-  const openPlace = (p: LinkPlace) =>
-    void flushAll().then(() => {
-      if (p.area === "study") openStudy({ path: p.path });
-      else openIn(p.area as Area, p.path);
-    });
+  const linkLists = { notes: fullNotes, ideas, projects, books };
+  const openPlace = (p: LinkPlace) => void flushAll().then(() => openIn(p.area as Area, p.path));
   const newTitled = async (title: string) => {
     try {
       await flushAll();

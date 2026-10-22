@@ -6,7 +6,6 @@ const fsp = require("fs/promises");
 const path = require("path");
 const os = require("os");
 const adb = require("./adb.cjs");
-const ai = require("./ai.cjs");
 
 const configFile = () => path.join(app.getPath("userData"), "config.json");
 
@@ -81,36 +80,6 @@ const handlers = {
     await fsp.writeFile(r.filePath, Buffer.from(data));
     return r.filePath;
   },
-  // Local AI (electron/ai.cjs). The model file lives outside the data folder (it is big and
-  // not synced); its path is kept in config.json.
-  "ai:get": () => {
-    const model = readConfig().aiModel || null;
-    return { model, exists: !!model && fs.existsSync(model) };
-  },
-  "ai:chooseModel": async e => {
-    const r = await dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender), {
-      properties: ["openFile"],
-      filters: [{ name: "GGUF", extensions: ["gguf"] }],
-    });
-    if (r.canceled || !r.filePaths[0]) return null;
-    await ai.unload();
-    writeConfig({ ...readConfig(), aiModel: r.filePaths[0] });
-    return r.filePaths[0];
-  },
-  "ai:clearModel": async () => {
-    await ai.unload();
-    const { aiModel, ...rest } = readConfig();
-    writeConfig(rest);
-  },
-  "ai:cards": async (e, opts) => {
-    const modelPath = readConfig().aiModel;
-    if (!modelPath || !fs.existsSync(modelPath)) throw new Error("no-model");
-    const count = Math.max(1, Math.min(40, Number(opts?.count) || 10));
-    return ai.makeCards({ modelPath, text: String(opts?.text ?? ""), count, lang: opts?.lang }, (done, total) => {
-      if (!e.sender.isDestroyed()) e.sender.send("ai:progress", { done, total });
-    });
-  },
-  "ai:cancel": () => ai.cancel(),
   "fs:list": async (_e, dir) => {
     const abs = dir ? resolve(dir) : resolve("");
     let names;

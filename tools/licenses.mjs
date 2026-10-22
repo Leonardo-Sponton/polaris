@@ -10,7 +10,7 @@ const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 
 // What Vite bundles into dist/ (build tools, types and the Electron/Capacitor shells left out).
 const TOOLS = /^(@capacitor\/cli|@types\/|@vitejs\/|electron|electron-builder|typescript|vite|vitest)$/;
-const start = [...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.devDependencies ?? {})].filter(n => !TOOLS.test(n) && n !== "node-llama-cpp");
+const start = [...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.devDependencies ?? {})].filter(n => !TOOLS.test(n));
 const seen = new Map();
 
 function find(name, from) {

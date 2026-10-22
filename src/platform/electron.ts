@@ -1,6 +1,6 @@
 import type { Reminder } from "../data/reminders";
 import type { FileInfo, Storage } from "../storage/types";
-import type { AiBridge, Device, Platform, SyncBridge } from "./types";
+import type { Device, Platform, SyncBridge } from "./types";
 
 // Functions exposed by electron/preload.cjs.
 interface PolarisBridge {
@@ -23,7 +23,6 @@ interface PolarisBridge {
   setReminders(list: Reminder[]): Promise<void>;
   setLabels(labels: Record<string, string>): Promise<void>;
   onReminderOpen(cb: (path: string) => void): () => void;
-  ai: AiBridge;
   sync: {
     devices(): Promise<{ adb: boolean; list: Device[] }>;
     pcName(): Promise<string>;
@@ -98,7 +97,6 @@ export function electronPlatform(): Platform {
     setZoom: async z => b.setZoom(z),
     onZoomKey: cb => b.onZoomKey(cb),
     openFile: path => b.openFile(path),
-    ai: b.ai,
     onFileChanged: cb => b.onFileChanged(cb),
     onClosing: flush => b.onClosing(flush),
     closeWindow: () => b.closeWindow(),

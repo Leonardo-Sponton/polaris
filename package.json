@@ -18,8 +18,7 @@
     "@capacitor/android": "^8.5.3",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
-    "@capacitor/local-notifications": "^8.3.1",
-    "node-llama-cpp": "3.22.1"
+    "@capacitor/local-notifications": "^8.3.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.3",
@@ -72,9 +71,6 @@
       "resources/icon.png",
       "resources/tray.png",
       "package.json",
-      "!node_modules/@node-llama-cpp/linux-x64-cuda*/**",
-      "!node_modules/@node-llama-cpp/linux-arm*/**",
-      "!node_modules/node-llama-cpp/llama/gitRelease.bundle",
       "!node_modules/@capacitor/**"
     ],
     "linux": {
@@ -96,11 +92,7 @@
     "appImage": {
       "artifactName": "Polaris-${version}-${arch}.AppImage"
     },
-    "artifactName": "polaris-${version}-${arch}.${ext}",
-    "asarUnpack": [
-      "node_modules/node-llama-cpp/**",
-      "node_modules/@node-llama-cpp/**"
-    ]
+    "artifactName": "polaris-${version}-${arch}.${ext}"
   },
   "desktopName": "polaris.desktop"
 }

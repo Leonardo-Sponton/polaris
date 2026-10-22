@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-// Small per-device view choices in Study (open section, chosen course, open tree branches).
+// Small per-device view choices (a list's order, chosen filters).
 // A convenience: storage may fail, and the view then simply starts from the defaults.
 
 function read<T>(key: string, fallback: T): T {

@@ -1,5 +1,4 @@
-import { addFile, safeFileName } from "./school";
-import { walkFiles, isHidden } from "./files";
+import { addFile, safeFileName, walkFiles, isHidden } from "./files";
 import { baseName, parentOf, type Storage } from "../storage/types";
 
 // Pictures and files kept beside the notes, as Obsidian does: pasted or dropped into a note they

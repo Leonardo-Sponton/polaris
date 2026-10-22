@@ -9,7 +9,7 @@ import { Dialog } from "../Dialog";
 import { NoteEditor } from "../NoteEditor";
 import { useApp } from "../context";
 import { useHold } from "../useHold";
-import { usePref } from "../study/prefs";
+import { usePref } from "../prefs";
 import { dateFmt, t } from "../../i18n";
 
 // Notes: longer writing that stays as written (data/fullnotes). Pinned notes first, then in the
@@ -61,7 +61,7 @@ function Backlinks(props: { list: FullNote[]; path: string; onOpen(path: string)
   if (!back.length) return null;
   return (
     <div className="backlinks">
-      <span className="muted small">{t.study.linkedFrom}</span>
+      <span className="muted small">{t.notes.linkedFrom}</span>
       {back.map(b => (
         <button key={b.path} className="chip" onClick={() => props.onOpen(b.path)}>
           {b.title || t.common.untitled}
